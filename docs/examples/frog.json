@@ -1,0 +1,113 @@
+{
+  "format": 1,
+  "id": "pond",
+  "name": "Пруд",
+  "author": "you",
+  "license": "MIT",
+  "description": "An example character pack: a frog (docs/characters.md).",
+  "characters": [
+    {
+      "id": "frog",
+      "name": "Лягушка",
+      "group": "Пруд",
+      "coats": [
+        {
+          "id": "green",
+          "name": "Зелёная",
+          "colors": {
+            "skin": "#6dbb4a",
+            "dark": "#4a8a32",
+            "belly": "#e6efc0"
+          }
+        },
+        {
+          "id": "blue",
+          "name": "Голубая",
+          "colors": {
+            "skin": "#4aa8c8",
+            "dark": "#2f7a96",
+            "belly": "#d8eef4"
+          }
+        }
+      ],
+      "legend": {
+        "g": "$skin",
+        "d": "$dark",
+        "w": "$belly",
+        "E": "@eye",
+        "m": "$dark"
+      },
+      "body": {
+        "hands": "$skin",
+        "shoes": "$dark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "............",
+          ".gww....wwg.",
+          ".gwEg..gEwg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          ".gmmmmmmmmg.",
+          ".gggggggggg.",
+          "..wwwwwwww..",
+          "...wwwwww..."
+        ],
+        "back": [
+          "............",
+          "............",
+          ".ggg....ggg.",
+          ".gggg..gggg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          ".gdggggggdg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          "..gggggggg..",
+          "...gggggg..."
+        ],
+        "side": [
+          "............",
+          "............",
+          "......ggg...",
+          ".....gwwg...",
+          "...gggwEgg..",
+          "..ggggggggg.",
+          "..ggggggggg.",
+          "..gggggggggg",
+          "..ggggmmmmmm",
+          "..gggggggggg",
+          "...wwwwwww..",
+          "....wwww...."
+        ],
+        "sleep": [
+          "............",
+          "............",
+          ".ggg....ggg.",
+          ".gggg..gggg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          ".gggggggggg.",
+          ".gmmmmmmmmg.",
+          ".gggggggggg.",
+          "..wwwwwwww..",
+          "...wwwwww..."
+        ]
+      },
+      "mini": [
+        "..........",
+        ".gw....wg.",
+        ".gEg..gEg.",
+        ".gggggggg.",
+        ".gmmmmmmg.",
+        "..wwwwww..",
+        ".........."
+      ]
+    }
+  ]
+}

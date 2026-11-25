@@ -55,6 +55,7 @@ import { assignWorkerDesks, parseWorkerDesks, workerLabels, presentWorkers, WORK
 import type { DeskSeat, PlacedFurniture } from '../engine/world'
 import { applyPalette, DEFAULT_THEME, pickTheme, THEME_STORAGE_KEY, type Theme } from './theme'
 import { builtinVariants, chooseItems, chooseRoom, DECOR_STORAGE_KEY, emptyDecor, itemKey, loadPacks, parseDecor, serializeDecor, variantsFor, type Decor, type SkinPack, type SkinTarget, type SkinVariant } from './skins'
+import type { CharacterSkin } from './characters'
 import { BUBBLE_COLOR, deskChair, drawAnimal, internSlots, mailColor, paintSkinnedItem, paintSkinnedTile, Renderer, STATE_COLOR, type BotLabel, type EnvelopeView, type InternGroup, type LinkView } from './render'
 
 // ── Page ─────────────────────────────────────────────────────────────────────────────────
@@ -193,6 +194,8 @@ let theme: Theme = DEFAULT_THEME
 let themeErrors: string[] = []
 /** Skin packs (office/skins), every look one may pick, and the owner's picks («Оформление»). */
 let packs: SkinPack[] = []
+/** Character skins from the packs (a robot, a fox…), by `<pack>:<id>`. */
+let characters = new Map<string, CharacterSkin>()
 let variants = new Map<string, SkinVariant>(builtinVariants().map((v) => [v.id, v]))
 let decor: Decor = emptyDecor()
 let decorating = false
@@ -354,11 +357,12 @@ async function loadOffice(): Promise<void> {
     // Another office tab pinned someone or a bot took a place: read it again.
     if (change.key === PINS_KEY || change.key === BOT_SEATS_KEY) void loadSeating().then(apply)
   })
-  renderer.setLooks((key) => lookOf(looks.get(key), key))
+  renderer.setLooks((key) => lookOf(looks.get(key), key, characters))
   await looks.load()
   // Themes and «Оформление» looks both come from the skin packs.
   const loaded = await loadPacks((file) => loadJson(`skins/${file}`))
   packs = loaded.packs
+  characters = new Map(packs.flatMap((pack) => pack.characters).map((c) => [c.id, c]))
   themes = packs.flatMap((pack) => (pack.theme ? [pack.theme] : []))
   if (!themes.length) themes = [DEFAULT_THEME]
   themeErrors = loaded.errors
@@ -1014,7 +1018,7 @@ function traineeGroups(now: number): InternGroup[] {
     const key = workerKey(w.id)
     const list = fx.internsOf(key).flatMap((id) => {
       const look = fx.internLook(id, now)
-      return look ? [{ id: `${key}|${id}`, color: look.color, alpha: look.alpha, dy: look.dy, shirt: lookOf(looks.get(key), key).shirt }] : []
+      return look ? [{ id: `${key}|${id}`, color: look.color, alpha: look.alpha, dy: look.dy, shirt: lookOf(looks.get(key), key, characters).shirt, parent: key }] : []
     })
     if (list.length) out.push({ key, seat: { x: desk.seat.x, y: desk.seat.y + 1 }, list })
   }
@@ -1028,7 +1032,7 @@ function shortName(name: string): string {
 
 /** A parent bot's mark on its workers' desks: the colour of its outfit. */
 function parentColor(key: string): string {
-  return lookOf(looks.get(key), key).shirt
+  return lookOf(looks.get(key), key, characters).shirt
 }
 
 /** On hover or selection of a worker: a solid line from its desk to its parent's desk. */
@@ -1298,6 +1302,13 @@ function updatePanel(): void {
   if (selected === 'overflow' || selected?.startsWith('w:')) {
     panelBox.style.display = 'block'
     controls.style.right = '362px'
+    if (editingLook && editingLook === selected) {
+      hint.style.display = 'none'
+      const worker = workers.find((w) => workerKey(w.id) === selected)
+      panelBox.innerHTML = renderAppearanceEditor(worker ? shortName(worker.name) : selected.slice(2), looks.get(selected), lookSaved, { characters: [...characters.values()], worker: true })
+      paintPreview(selected)
+      return
+    }
     hint.style.display = 'none'
     if (selected === 'overflow') {
       panelBox.innerHTML = renderOverflow(workerOverflow.map((id) => workerView(id)).filter((v): v is NonNullable<typeof v> => v !== null))
@@ -1322,7 +1333,7 @@ function updatePanel(): void {
   if (editingLook === bot.key) {
     // Typing the plate: do not rebuild the form under the cursor.
     if (panelBox.contains(document.activeElement) && document.activeElement?.tagName === 'INPUT') return
-    panelBox.innerHTML = renderAppearanceEditor(bot.name, looks.get(bot.key), lookSaved)
+    panelBox.innerHTML = renderAppearanceEditor(bot.name, looks.get(bot.key), lookSaved, { characters: [...characters.values()], worker: false })
     paintPreview(bot.key)
     return
   }
@@ -1358,7 +1369,7 @@ function paintPreview(key: string): void {
   c.imageSmoothingEnabled = false
   c.fillStyle = P.wood
   c.fillRect(0, 0, canvas.width, canvas.height)
-  const look = lookOf(looks.get(key), key)
+  const look = lookOf(looks.get(key), key, characters)
   const at = (ox: number, oy: number) => (x: number, y: number, w: number, h: number, color: string) => {
     c.fillStyle = color
     c.fillRect(ox + x, oy + y, w, h)
@@ -1434,8 +1445,10 @@ panelBox.addEventListener('click', async (event) => {
     const button = (event.target as HTMLElement).closest('[data-act]')!
     const field = button.getAttribute('data-field') as keyof Appearance
     const raw = button.getAttribute('data-value') ?? ''
-    const value = field === 'accessory' ? raw : Number(raw)
-    await saveLook(editingLook, { ...looks.get(editingLook), [field]: value } as Appearance)
+    const value = field === 'accessory' || field === 'character' || field === 'coat' ? raw : Number(raw)
+    // Another character starts in its own first coat.
+    const coat = field === 'character' ? { coat: '' } : {}
+    await saveLook(editingLook, { ...looks.get(editingLook), [field]: value, ...coat } as Appearance)
     updatePanel()
   } else if (action === 'reset' && editingLook) {
     lookSaved = await looks.reset(editingLook)
@@ -1709,7 +1722,8 @@ const endDrag = (event: PointerEvent) => {
     if (pet) {
       editingLook = null
       decorTarget = { kind: 'animal', id: pet }
-    } else if (who && !who.startsWith('w:')) {
+    } else if (who) {
+      // Bots and employees alike; trainees wear their employee's look.
       selected = who
       editingLook = who
     } else {

@@ -45,7 +45,7 @@ test('a stored look is checked field by field; anything wrong falls back to the 
 })
 
 test('a look survives storage and back', () => {
-  const look = { hairStyle: 3, hair: 2, skin: 1, outfit: 4, accessory: 'headphones' as const, plate: 'Главный по коду' }
+  const look = { hairStyle: 3, hair: 2, skin: 1, outfit: 4, accessory: 'headphones' as const, plate: 'Главный по коду', character: 'robots:retro', coat: 'red' }
   const stored = JSON.parse(JSON.stringify(serializeAppearance(look)))
   assert.equal(stored.v, 1)
   assert.deepEqual(parseAppearance(stored, 'cto'), look)

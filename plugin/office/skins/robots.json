@@ -1,0 +1,280 @@
+{
+  "format": 1,
+  "id": "robots",
+  "name": "Роботы",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "description": "Ретро-робот с антенной и гладкий андроид, по три окраса.",
+  "characters": [
+    {
+      "id": "retro-robot",
+      "name": "Ретро-робот",
+      "group": "Роботы",
+      "coats": [
+        {
+          "id": "tin",
+          "name": "Жестяной",
+          "colors": {
+            "body": "#8f98a6",
+            "bodyDark": "#6b7380",
+            "metal": "#c3c9d2",
+            "metalHi": "#e9ecf0",
+            "metalDark": "#58606c",
+            "led": "#7fe3ff"
+          }
+        },
+        {
+          "id": "red",
+          "name": "Красный",
+          "colors": {
+            "body": "#c8483f",
+            "bodyDark": "#93302a",
+            "metal": "#d0d4da",
+            "metalHi": "#f2f3f5",
+            "metalDark": "#5d626c",
+            "led": "#ffd54a"
+          }
+        },
+        {
+          "id": "teal",
+          "name": "Бирюзовый",
+          "colors": {
+            "body": "#3f9e95",
+            "bodyDark": "#2b7370",
+            "metal": "#c9d3d6",
+            "metalHi": "#eef3f4",
+            "metalDark": "#4d5d62",
+            "led": "#ff9a4a"
+          }
+        }
+      ],
+      "legend": {
+        "m": "$metal",
+        "h": "$metalHi",
+        "d": "$metalDark",
+        "l": "$led",
+        "b": "$led",
+        "k": "@ink",
+        "r": "#e0503c"
+      },
+      "body": {
+        "hands": "$metal",
+        "shirt": "$body",
+        "shade": "$bodyDark",
+        "pants": "$metalDark",
+        "shoes": "$metalDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          ".....bb.....",
+          ".....dd.....",
+          ".....dd.....",
+          ".dddddddddd.",
+          ".dhhhhhhhhd.",
+          ".dmmmmmmmmd.",
+          "ddmllmmllmdd",
+          "ddmllmmllmdd",
+          ".dmmmmmmmmd.",
+          ".dmkmkkmkmd.",
+          ".dddddddddd."
+        ],
+        "back": [
+          "............",
+          ".....bb.....",
+          ".....dd.....",
+          ".....dd.....",
+          ".dddddddddd.",
+          ".dhhhhhhhhd.",
+          ".dmmmmmmmmd.",
+          "ddmkkkkkkmdd",
+          "ddmmmmmmmmdd",
+          ".dmkkkkkkmd.",
+          ".dmmmmmmmmd.",
+          ".dddddddddd."
+        ],
+        "side": [
+          "............",
+          "......b.....",
+          "......d.....",
+          "......d.....",
+          "..ddddddddd.",
+          "..dhhhhhhhd.",
+          "..dmmmmmmmd.",
+          "..dmmdmmmlld",
+          "..dmdkdmmlld",
+          "..dmmdmmmmmd",
+          "..dmmmmmkmkd",
+          "..ddddddddd."
+        ],
+        "sleep": [
+          "............",
+          ".....bb.....",
+          ".....dd.....",
+          ".....dd.....",
+          ".dddddddddd.",
+          ".dhhhhhhhhd.",
+          ".dmmmmmmmmd.",
+          "ddmmmmmmmmdd",
+          "dddddmmddddd",
+          ".dmmmmmmmmd.",
+          ".dmkmkkmkmd.",
+          ".dddddddddd."
+        ]
+      },
+      "mini": [
+        "....bb....",
+        "....dd....",
+        ".dddddddd.",
+        ".dhhhhhhd.",
+        "ddmlmmlmdd",
+        ".dmmkkmmd.",
+        ".dddddddd."
+      ],
+      "chest": {
+        "x": 5,
+        "y": 13,
+        "rows": [
+          "dddddd",
+          "dldrdd",
+          "dddddd"
+        ]
+      }
+    },
+    {
+      "id": "android",
+      "name": "Андроид",
+      "group": "Роботы",
+      "coats": [
+        {
+          "id": "white",
+          "name": "Белый",
+          "colors": {
+            "body": "#e3e7ee",
+            "bodyDark": "#b7bdc8",
+            "metal": "#eef1f5",
+            "metalHi": "#ffffff",
+            "metalDark": "#9aa1ad",
+            "visor": "#27303d",
+            "led": "#5ef0ff"
+          }
+        },
+        {
+          "id": "black",
+          "name": "Чёрный",
+          "colors": {
+            "body": "#3a3f4a",
+            "bodyDark": "#262a32",
+            "metal": "#4a505c",
+            "metalHi": "#7a8394",
+            "metalDark": "#22262e",
+            "visor": "#0e1116",
+            "led": "#ff4f6d"
+          }
+        },
+        {
+          "id": "chrome",
+          "name": "Хром",
+          "colors": {
+            "body": "#a9b2bf",
+            "bodyDark": "#7d8796",
+            "metal": "#c3ccd8",
+            "metalHi": "#f2f6fa",
+            "metalDark": "#6c7684",
+            "visor": "#2a2f3a",
+            "led": "#9dff6e"
+          }
+        }
+      ],
+      "legend": {
+        "m": "$metal",
+        "h": "$metalHi",
+        "d": "$metalDark",
+        "v": "$visor",
+        "l": "$led"
+      },
+      "body": {
+        "hands": "$metal",
+        "shirt": "$body",
+        "shade": "$bodyDark",
+        "pants": "$bodyDark",
+        "shoes": "$metalDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "............",
+          "...mmmmmm...",
+          "..mhhmmhhm..",
+          ".mmhmmmmhmm.",
+          ".mmmmmmmmmm.",
+          ".vvvvvvvvvv.",
+          ".vllllllllv.",
+          ".vvvvvvvvvv.",
+          ".mmmmmmmmmm.",
+          "..mmmmmmmm..",
+          "...dddddd..."
+        ],
+        "back": [
+          "............",
+          "............",
+          "...mmmmmm...",
+          "..mmhhhhmm..",
+          ".mmmhmmhmmm.",
+          ".mmmmmmmmmm.",
+          ".mmmmmmmmmm.",
+          ".dmmmmmmmmd.",
+          ".mmmmmmmmmm.",
+          ".mmmmmmmmmm.",
+          "..mmmmmmmm..",
+          "...dddddd..."
+        ],
+        "side": [
+          "............",
+          "............",
+          ".....mmmm...",
+          "...mmmhhmm..",
+          "..mmmmmhmmm.",
+          "..mmmmmmmmm.",
+          "..mmmmvvvvvv",
+          "..mdmmvlllll",
+          "..mmmmvvvvvv",
+          "..mmmmmmmmm.",
+          "...mmmmmmm..",
+          "....ddd....."
+        ],
+        "sleep": [
+          "............",
+          "............",
+          "...mmmmmm...",
+          "..mhhmmhhm..",
+          ".mmhmmmmhmm.",
+          ".mmmmmmmmmm.",
+          ".vvvvvvvvvv.",
+          ".vvvvvvvvvv.",
+          ".vvvvvvvvvv.",
+          ".mmmmmmmmmm.",
+          "..mmmmmmmm..",
+          "...dddddd..."
+        ]
+      },
+      "mini": [
+        "..........",
+        "..mmmmmm..",
+        ".mmhmmhmm.",
+        ".vvvvvvvv.",
+        ".vllllllv.",
+        ".mmmmmmmm.",
+        "..mmmmmm.."
+      ],
+      "chest": {
+        "x": 7,
+        "y": 14,
+        "rows": [
+          "ll",
+          "ll"
+        ]
+      }
+    }
+  ]
+}

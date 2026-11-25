@@ -26,6 +26,10 @@ export type Appearance = {
   accessory: Accessory
   /** Text on the bot's desk plate (display only), at most 16 characters. */
   plate: string
+  /** A character skin from a pack (`<pack>:<id>`, editor/characters.ts) or '' for a person. */
+  character: string
+  /** The character's coat id; '' is its first coat. */
+  coat: string
 }
 
 export function hashText(text: string): number {
@@ -43,7 +47,9 @@ export function defaultAppearance(key: string): Appearance {
     hair: (h >>> 9) % HAIRS.length,
     hairStyle: (h >>> 13) % 3,
     accessory: 'none',
-    plate: ''
+    plate: '',
+    character: '',
+    coat: ''
   }
 }
 
@@ -56,6 +62,9 @@ export function cleanPlate(text: unknown): string {
   if (typeof text !== 'string') return ''
   return [...text.replace(/[\u0000-\u001f\u007f]/g, '').trim()].slice(0, PLATE_MAX).join('')
 }
+
+const CHARACTER = /^[a-z0-9][a-z0-9-]*:[a-z0-9][a-z0-9-]*$/
+const COAT = /^[a-z0-9][a-z0-9-]*$/
 
 const index = (value: unknown, size: number): number | null =>
   typeof value === 'number' && Number.isInteger(value) && value >= 0 && value < size ? value : null
@@ -71,12 +80,17 @@ export function parseAppearance(raw: unknown, key: string): Appearance {
     skin: index(r.skin, SKINS.length) ?? base.skin,
     outfit: index(r.outfit, SHIRTS.length) ?? base.outfit,
     accessory: (ACCESSORIES as readonly unknown[]).includes(r.accessory) ? (r.accessory as Accessory) : base.accessory,
-    plate: r.plate === undefined ? base.plate : cleanPlate(r.plate)
+    plate: r.plate === undefined ? base.plate : cleanPlate(r.plate),
+    // A character whose pack is gone draws as a person (lookOf); the choice itself is kept.
+    character: typeof r.character === 'string' && (r.character === '' || CHARACTER.test(r.character)) ? r.character : base.character,
+    coat: typeof r.coat === 'string' && (r.coat === '' || COAT.test(r.coat)) ? r.coat : base.coat
   }
 }
 
-export function serializeAppearance(a: Appearance): { v: 1; hairStyle: number; hair: number; skin: number; outfit: number; accessory: Accessory; plate: string } {
-  return { v: 1, hairStyle: a.hairStyle, hair: a.hair, skin: a.skin, outfit: a.outfit, accessory: a.accessory, plate: cleanPlate(a.plate) }
+export type StoredAppearance = { v: 1; hairStyle: number; hair: number; skin: number; outfit: number; accessory: Accessory; plate: string; character: string; coat: string }
+
+export function serializeAppearance(a: Appearance): StoredAppearance {
+  return { v: 1, hairStyle: a.hairStyle, hair: a.hair, skin: a.skin, outfit: a.outfit, accessory: a.accessory, plate: cleanPlate(a.plate), character: a.character, coat: a.coat }
 }
 
 export type KeyValueStore = {

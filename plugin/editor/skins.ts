@@ -1,7 +1,7 @@
 // Skin packs: data, not code. A pack is one JSON file in office/skins/ (listed in index.json): a
-// manifest, an optional theme (palette, floors, furniture choices: «Дневной офис», «Тёмный лофт»)
-// and variants the owner can pick in «Оформление» for a room's floor or walls or for one piece of
-// furniture. A variant is either a recolour of a built-in picture (palette overrides, optionally on
+// manifest, an optional theme (palette, floors, furniture choices: «Дневной офис», «Тёмный лофт»),
+// characters for people (editor/characters.ts) and variants the owner can pick in «Оформление»
+// for a room's floor or walls or for one piece of furniture. A variant is either a recolour of a built-in picture (palette overrides, optionally on
 // another built-in variant) or a sprite: rows of characters with a legend of colours. A bad pack
 // or a bad variant is reported line by line and skipped; the office never breaks on it.
 import { FLOORS, FURNITURE, WALLS, isFurnitureType, type FloorKind, type FurnitureType, type WallStyle } from '../engine/catalog'
@@ -9,6 +9,7 @@ import type { PlacedFurniture } from '../engine/world'
 import { BASE_PALETTE, P, type PaletteKey } from './palette'
 import { parseTheme, type Theme } from './theme'
 import type { Paint } from './art'
+import { parseCharacters, type CharacterSkin } from './characters'
 
 export const SKIN_FORMAT = 1
 export const DECOR_STORAGE_KEY = 'decor'
@@ -30,7 +31,7 @@ export type SkinVariant = {
   sprite?: Sprite
 }
 
-export type SkinPack = { id: string; name: string; author: string; license: string; theme: Theme | null; variants: SkinVariant[] }
+export type SkinPack = { id: string; name: string; author: string; license: string; theme: Theme | null; variants: SkinVariant[]; characters: CharacterSkin[] }
 
 const COLOR = /^#[0-9a-f]{6}$/i
 const ID = /^[a-z0-9][a-z0-9-]*$/
@@ -214,7 +215,10 @@ export function parsePack(raw: unknown, file: string): { pack: SkinPack | null; 
     seen.add(vid)
     variants.push({ id: `${id}:${vid}`, name: vname, target, pack: id, ...(base !== undefined ? { base } : {}), ...(palette ? { palette } : {}), ...(sprite ? { sprite } : {}) })
   })
-  return { pack: { id, name, author, license, theme, variants }, errors }
+  // Characters for people: a robot, a fox, a knight (editor/characters.ts, docs/characters.md).
+  const parsed = parseCharacters(raw.characters, id, file)
+  errors.push(...parsed.errors)
+  return { pack: { id, name, author, license, theme, variants, characters: parsed.characters }, errors }
 }
 
 /** office/skins/index.json and every pack it lists; bad files are skipped with their errors. */

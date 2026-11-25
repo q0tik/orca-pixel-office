@@ -1,0 +1,1110 @@
+{
+  "format": 1,
+  "id": "furries",
+  "name": "Фурри",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "description": "Кошка, лиса, олень, волк, енот, кролик, медведь и панда: уши, морды, хвосты, окрасы.",
+  "characters": [
+    {
+      "id": "cat",
+      "name": "Кошка",
+      "group": "Фурри",
+      "coats": [
+        {
+          "id": "ginger",
+          "name": "Рыжая",
+          "colors": {
+            "fur": "#e0893a",
+            "furDark": "#a95b22",
+            "belly": "#f7e6cc",
+            "eye": "#2b2622"
+          }
+        },
+        {
+          "id": "grey",
+          "name": "Серая",
+          "colors": {
+            "fur": "#9d9fab",
+            "furDark": "#676977",
+            "belly": "#e9e9ef",
+            "eye": "#2b2622"
+          }
+        },
+        {
+          "id": "black",
+          "name": "Чёрная",
+          "colors": {
+            "fur": "#3b3742",
+            "furDark": "#232027",
+            "belly": "#d9d3cc",
+            "eye": "#c8e05a"
+          }
+        }
+      ],
+      "legend": {
+        "f": "$fur",
+        "d": "$furDark",
+        "w": "$belly",
+        "p": "#e89aa8",
+        "n": "#d0667a",
+        "e": "$eye",
+        "k": "@ink"
+      },
+      "body": {
+        "hands": "$fur",
+        "shoes": "$furDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "..d......d..",
+          "..dd....dd..",
+          "..dpd..dpd..",
+          "..ffffffff..",
+          "..ffffffff..",
+          "..ffffffff..",
+          "..ffeffeff..",
+          "..ffeffeff..",
+          "..fwwnnwwf..",
+          ".kfwwwwwwfk.",
+          "...fwwwwf..."
+        ],
+        "back": [
+          "............",
+          "..d......d..",
+          "..dd....dd..",
+          "..ddd..ddd..",
+          "..ffffffff..",
+          "..fffddfff..",
+          "..ffffffff..",
+          "..fffddfff..",
+          "..ffffffff..",
+          "..ffffffff..",
+          "..ffffffff..",
+          "...ffffff..."
+        ],
+        "side": [
+          "............",
+          ".....d......",
+          ".....dd.....",
+          ".....dpd....",
+          "...ffffff...",
+          "...dffffff..",
+          "...fffffff..",
+          "...dffffef..",
+          "...fffffeww.",
+          "...ffffwwwn.",
+          "...fffwwwwk.",
+          "....ffwww..."
+        ],
+        "sleep": [
+          "............",
+          "..d......d..",
+          "..dd....dd..",
+          "..dpd..dpd..",
+          "..ffffffff..",
+          "..ffffffff..",
+          "..ffffffff..",
+          "..ffffffff..",
+          "..feeffeef..",
+          "..fwwnnwwf..",
+          ".kfwwwwwwfk.",
+          "...fwwwwf..."
+        ]
+      },
+      "mini": [
+        "..d....d..",
+        "..ddffdd..",
+        "..ffffff..",
+        "..feffef..",
+        "..fwnnwf..",
+        "..fwwwwf..",
+        "...ffff..."
+      ],
+      "tail": {
+        "side": {
+          "x": 1,
+          "y": 10,
+          "rows": [
+            "dd...",
+            "fd...",
+            "f....",
+            "f....",
+            "ff...",
+            ".f...",
+            ".ff..",
+            "..fff"
+          ]
+        },
+        "back": {
+          "x": 2,
+          "y": 17,
+          "rows": [
+            "...ff",
+            "..ff.",
+            ".ff..",
+            ".f...",
+            "f....",
+            "f....",
+            "fd...",
+            ".d..."
+          ]
+        },
+        "front": {
+          "x": 12,
+          "y": 15,
+          "rows": [
+            ".d",
+            ".f",
+            "f.",
+            "f.",
+            "f."
+          ]
+        }
+      }
+    },
+    {
+      "id": "fox",
+      "name": "Лиса",
+      "group": "Фурри",
+      "coats": [
+        {
+          "id": "red",
+          "name": "Рыжая",
+          "colors": {
+            "fur": "#e0702a",
+            "furDark": "#a84e1c",
+            "belly": "#f6efe4"
+          }
+        },
+        {
+          "id": "arctic",
+          "name": "Песец",
+          "colors": {
+            "fur": "#e9edf2",
+            "furDark": "#b9c0cc",
+            "belly": "#ffffff"
+          }
+        },
+        {
+          "id": "silver",
+          "name": "Чернобурка",
+          "colors": {
+            "fur": "#4a4650",
+            "furDark": "#2c2930",
+            "belly": "#d8d8de"
+          }
+        }
+      ],
+      "legend": {
+        "f": "$fur",
+        "d": "$furDark",
+        "w": "$belly",
+        "k": "@ink",
+        "e": "@eye"
+      },
+      "body": {
+        "hands": "$fur",
+        "shoes": "$furDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          ".k........k.",
+          ".kd......dk.",
+          ".dwd....dwd.",
+          "..ffffffff..",
+          "..ffffffff..",
+          ".ffffffffff.",
+          ".wffeffeffw.",
+          ".wwfeffefww.",
+          "..wwwwwwww..",
+          "...wwkkww...",
+          "....wwww...."
+        ],
+        "back": [
+          "............",
+          ".k........k.",
+          ".kd......dk.",
+          ".ddd....ddd.",
+          "..ffffffff..",
+          "..ffffffff..",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          "..ffffffff..",
+          "..ffffffff..",
+          "...ffffff..."
+        ],
+        "side": [
+          "............",
+          "....k.......",
+          "....kd......",
+          "....dwd.....",
+          "...ffffff...",
+          "...fffffff..",
+          "...ffffffff.",
+          "...ffffeff..",
+          "...fffffwwww",
+          "...wwwwwwwwk",
+          "....wwwww...",
+          "....www....."
+        ],
+        "sleep": [
+          "............",
+          ".k........k.",
+          ".kd......dk.",
+          ".dwd....dwd.",
+          "..ffffffff..",
+          "..ffffffff..",
+          ".ffffffffff.",
+          ".wffffffffw.",
+          ".wweeffeeww.",
+          "..wwwwwwww..",
+          "...wwkkww...",
+          "....wwww...."
+        ]
+      },
+      "mini": [
+        ".k......k.",
+        ".df....fd.",
+        "..ffffff..",
+        ".wfeffefw.",
+        "..wwkkww..",
+        "...wwww...",
+        ".........."
+      ],
+      "tail": {
+        "side": {
+          "x": 0,
+          "y": 9,
+          "rows": [
+            ".ww..",
+            "wwf..",
+            "wff..",
+            "fff..",
+            "fff..",
+            "ffff.",
+            ".fff.",
+            "..fff",
+            "...ff"
+          ]
+        },
+        "back": {
+          "x": 1,
+          "y": 16,
+          "rows": [
+            "....ff",
+            "...fff",
+            "..fff.",
+            ".fff..",
+            "ffff..",
+            "fff...",
+            "fff...",
+            "ww....",
+            "w....."
+          ]
+        },
+        "front": {
+          "x": 12,
+          "y": 13,
+          "rows": [
+            ".w",
+            "wf",
+            "ff",
+            "ff",
+            "f.",
+            "f.",
+            "f."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deer",
+      "name": "Олень",
+      "group": "Фурри",
+      "coats": [
+        {
+          "id": "brown",
+          "name": "Благородный",
+          "colors": {
+            "fur": "#a86b3c",
+            "furDark": "#7a4a26",
+            "belly": "#f1dfc0",
+            "antler": "#e8d5a8"
+          }
+        },
+        {
+          "id": "red",
+          "name": "Пятнистый",
+          "colors": {
+            "fur": "#b5643a",
+            "furDark": "#874424",
+            "belly": "#f4e6cc",
+            "antler": "#ead8b0"
+          }
+        },
+        {
+          "id": "reindeer",
+          "name": "Северный",
+          "colors": {
+            "fur": "#9a8a7a",
+            "furDark": "#6b5e52",
+            "belly": "#f2efe8",
+            "antler": "#cbb79a"
+          }
+        }
+      ],
+      "legend": {
+        "f": "$fur",
+        "d": "$furDark",
+        "w": "$belly",
+        "a": "$antler",
+        "k": "@ink",
+        "e": "@eye"
+      },
+      "body": {
+        "hands": "$fur",
+        "shoes": "$furDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "a..a....a..a",
+          ".a.a....a.a.",
+          "..aa....aa..",
+          "..ffffffff..",
+          "ddffffffffdd",
+          ".dffffffffd.",
+          "..ffeffeff..",
+          "..ffeffeff..",
+          "...fwwwwf...",
+          "...wwkkww...",
+          "....wwww...."
+        ],
+        "back": [
+          "............",
+          "a..a....a..a",
+          ".a.a....a.a.",
+          "..aa....aa..",
+          "..ffffffff..",
+          "ddffffffffdd",
+          ".dffffffffd.",
+          "..ffffffff..",
+          "..fffddfff..",
+          "..ffffffff..",
+          "..ffffffff..",
+          "...ffffff..."
+        ],
+        "side": [
+          "............",
+          ".....a.a....",
+          ".....aa.....",
+          "......a.....",
+          "...ffffff...",
+          ".ddffffff...",
+          "...fffffff..",
+          "...ffffeff..",
+          "...ffffffwww",
+          "...fffffwwwk",
+          "....fffwww..",
+          "....fff....."
+        ],
+        "sleep": [
+          "............",
+          "a..a....a..a",
+          ".a.a....a.a.",
+          "..aa....aa..",
+          "..ffffffff..",
+          "ddffffffffdd",
+          ".dffffffffd.",
+          "..ffffffff..",
+          "..feeffeef..",
+          "...fwwwwf...",
+          "...wwkkww...",
+          "....wwww...."
+        ]
+      },
+      "mini": [
+        ".a.a..a.a.",
+        "..affffa..",
+        "ddffffffdd",
+        "..feffef..",
+        "..fwkkwf..",
+        "...wwww...",
+        ".........."
+      ],
+      "tail": {
+        "side": {
+          "x": 3,
+          "y": 15,
+          "rows": [
+            "ww",
+            ".w"
+          ]
+        },
+        "back": {
+          "x": 7,
+          "y": 17,
+          "rows": [
+            "ww",
+            "ww"
+          ]
+        }
+      }
+    },
+    {
+      "id": "wolf",
+      "name": "Волк",
+      "group": "Фурри",
+      "coats": [
+        {
+          "id": "grey",
+          "name": "Серый",
+          "colors": {
+            "fur": "#8d8f98",
+            "furDark": "#5b5d68",
+            "belly": "#e4e4ea",
+            "eye": "#e2b43a"
+          }
+        },
+        {
+          "id": "black",
+          "name": "Чёрный",
+          "colors": {
+            "fur": "#3c3a40",
+            "furDark": "#242226",
+            "belly": "#8a8890",
+            "eye": "#e2b43a"
+          }
+        },
+        {
+          "id": "arctic",
+          "name": "Полярный",
+          "colors": {
+            "fur": "#e4e6ee",
+            "furDark": "#b7bac6",
+            "belly": "#ffffff",
+            "eye": "#3f86c8"
+          }
+        }
+      ],
+      "legend": {
+        "f": "$fur",
+        "d": "$furDark",
+        "w": "$belly",
+        "k": "@ink",
+        "e": "$eye"
+      },
+      "body": {
+        "hands": "$fur",
+        "shoes": "$furDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          ".d........d.",
+          ".dd......dd.",
+          ".dfd....dfd.",
+          "..ffddddff..",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          "..ffeffeff..",
+          ".wffeffeffw.",
+          "..wwwkkwww..",
+          "...wwwwww...",
+          "...wwwwww..."
+        ],
+        "back": [
+          "............",
+          ".d........d.",
+          ".dd......dd.",
+          ".ddd....ddd.",
+          "..ffddddff..",
+          ".fffddddfff.",
+          ".ffffddffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          "..ffffffff..",
+          "..ffffffff..",
+          "...ffffff..."
+        ],
+        "side": [
+          "............",
+          ".....d......",
+          ".....dd.....",
+          "....ddfd....",
+          "...fffffd...",
+          "...ffffffd..",
+          "...ffffffff.",
+          "...fffffeff.",
+          "..wffffffwww",
+          "..wwffffwwwk",
+          "..wwwfwww...",
+          "...www......"
+        ],
+        "sleep": [
+          "............",
+          ".d........d.",
+          ".dd......dd.",
+          ".dfd....dfd.",
+          "..ffddddff..",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          "..ffffffff..",
+          ".wfeeffeefw.",
+          "..wwwkkwww..",
+          "...wwwwww...",
+          "...wwwwww..."
+        ]
+      },
+      "mini": [
+        ".d......d.",
+        ".ddf..fdd.",
+        "..ffddff..",
+        ".ffeffeff.",
+        "..wwkkww..",
+        "...wwww...",
+        ".........."
+      ],
+      "tail": {
+        "side": {
+          "x": 0,
+          "y": 10,
+          "rows": [
+            "dd...",
+            "dff..",
+            "fff..",
+            "fff..",
+            "ffff.",
+            ".fff.",
+            "..fff",
+            "...ff"
+          ]
+        },
+        "back": {
+          "x": 1,
+          "y": 16,
+          "rows": [
+            "....ff",
+            "...fff",
+            "..fff.",
+            ".fff..",
+            "fff...",
+            "fff...",
+            "dd....",
+            "d....."
+          ]
+        },
+        "front": {
+          "x": 12,
+          "y": 14,
+          "rows": [
+            ".d",
+            "df",
+            "ff",
+            "f.",
+            "f.",
+            "f."
+          ]
+        }
+      }
+    },
+    {
+      "id": "raccoon",
+      "name": "Енот",
+      "group": "Фурри",
+      "coats": [
+        {
+          "id": "classic",
+          "name": "Полосатый",
+          "colors": {
+            "fur": "#8e8a86",
+            "furDark": "#5a5653",
+            "belly": "#f0ece6",
+            "mask": "#2a2729"
+          }
+        },
+        {
+          "id": "rusty",
+          "name": "Рыжеватый",
+          "colors": {
+            "fur": "#9b8068",
+            "furDark": "#6a523f",
+            "belly": "#f2e6d6",
+            "mask": "#2e2420"
+          }
+        }
+      ],
+      "legend": {
+        "f": "$fur",
+        "d": "$furDark",
+        "w": "$belly",
+        "k": "$mask",
+        "e": "#f4f0e6",
+        "n": "@ink"
+      },
+      "body": {
+        "hands": "$fur",
+        "shoes": "$furDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "............",
+          ".ww......ww.",
+          ".wdf....fdw.",
+          "..ffffffff..",
+          "..wwffffww..",
+          ".kkkkffkkkk.",
+          ".kkkeffekkk.",
+          ".kkkkffkkkk.",
+          "..wwwwwwww..",
+          "...wwnnww...",
+          "....wwww...."
+        ],
+        "back": [
+          "............",
+          "............",
+          ".ww......ww.",
+          ".wdd....ddw.",
+          "..ffffffff..",
+          "..ffffffff..",
+          ".ffffffffff.",
+          ".ffffddffff.",
+          ".ffffffffff.",
+          "..ffffffff..",
+          "..ffffffff..",
+          "...ffffff..."
+        ],
+        "side": [
+          "............",
+          "............",
+          ".....ww.....",
+          ".....wdf....",
+          "...ffffff...",
+          "...fffwwf...",
+          "...ffkkkkk..",
+          "...fkkkekk..",
+          "...fkkkkkwww",
+          "...ffffwwwwn",
+          "....fffwww..",
+          "....ffww...."
+        ],
+        "sleep": [
+          "............",
+          "............",
+          ".ww......ww.",
+          ".wdf....fdw.",
+          "..ffffffff..",
+          "..wwffffww..",
+          ".kkkkffkkkk.",
+          ".kkkkffkkkk.",
+          ".kkkkffkkkk.",
+          "..wwwwwwww..",
+          "...wwnnww...",
+          "....wwww...."
+        ]
+      },
+      "mini": [
+        "..........",
+        ".ww....ww.",
+        "..ffffff..",
+        ".kkekkekk.",
+        "..wwnnww..",
+        "...wwww...",
+        ".........."
+      ],
+      "tail": {
+        "side": {
+          "x": 0,
+          "y": 10,
+          "rows": [
+            "kk...",
+            "ff...",
+            "kkf..",
+            "fff..",
+            ".kkk.",
+            ".fff.",
+            "..kkf",
+            "...ff"
+          ]
+        },
+        "back": {
+          "x": 1,
+          "y": 16,
+          "rows": [
+            "....ff",
+            "...kkk",
+            "..fff.",
+            ".kkk..",
+            "fff...",
+            "kkk...",
+            "ff....",
+            "k....."
+          ]
+        },
+        "front": {
+          "x": 12,
+          "y": 14,
+          "rows": [
+            ".k",
+            "kf",
+            "ff",
+            "k.",
+            "f.",
+            "k."
+          ]
+        }
+      }
+    },
+    {
+      "id": "rabbit",
+      "name": "Кролик",
+      "group": "Фурри",
+      "coats": [
+        {
+          "id": "white",
+          "name": "Белый",
+          "colors": {
+            "fur": "#f2f0f4",
+            "furDark": "#c9c6d0",
+            "belly": "#ffffff"
+          }
+        },
+        {
+          "id": "chocolate",
+          "name": "Шоколадный",
+          "colors": {
+            "fur": "#6e4a34",
+            "furDark": "#4a301f",
+            "belly": "#ecd8c0"
+          }
+        },
+        {
+          "id": "grey",
+          "name": "Серый",
+          "colors": {
+            "fur": "#a9a7ad",
+            "furDark": "#77757c",
+            "belly": "#ecebef"
+          }
+        }
+      ],
+      "legend": {
+        "f": "$fur",
+        "d": "$furDark",
+        "w": "$belly",
+        "p": "#f0a5b4",
+        "n": "#e07a90",
+        "e": "@eye"
+      },
+      "body": {
+        "hands": "$fur",
+        "shoes": "$furDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "..ff....ff..",
+          "..fp....pf..",
+          "..fp....pf..",
+          "..ffffffff..",
+          "..ffffffff..",
+          ".ffffffffff.",
+          ".fffeffefff.",
+          ".fffeffefff.",
+          ".pfwwnnwwfp.",
+          "..fwwwwwwf..",
+          "...ffffff..."
+        ],
+        "back": [
+          "............",
+          "..ff....ff..",
+          "..ff....ff..",
+          "..fd....df..",
+          "..ffffffff..",
+          "..ffffffff..",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          "..ffffffff..",
+          "...ffffff..."
+        ],
+        "side": [
+          "............",
+          "..ffff......",
+          ".fppff......",
+          "...fffff....",
+          "...ffffff...",
+          "...fffffff..",
+          "...fffffff..",
+          "...ffffefff.",
+          "...ffffefww.",
+          "...pfffwwwn.",
+          "....fffwww..",
+          "....fff....."
+        ],
+        "sleep": [
+          "............",
+          "..ff....ff..",
+          "..fp....pf..",
+          "..fp....pf..",
+          "..ffffffff..",
+          "..ffffffff..",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffeeffeeff.",
+          ".pfwwnnwwfp.",
+          "..fwwwwwwf..",
+          "...ffffff..."
+        ]
+      },
+      "mini": [
+        "..f....f..",
+        "..fp..pf..",
+        "..ffffff..",
+        "..feffef..",
+        "..fwnnwf..",
+        "...ffff...",
+        ".........."
+      ],
+      "tail": {
+        "side": {
+          "x": 3,
+          "y": 16,
+          "rows": [
+            ".w",
+            "ww"
+          ]
+        },
+        "back": {
+          "x": 7,
+          "y": 17,
+          "rows": [
+            "ww",
+            "ww"
+          ]
+        }
+      }
+    },
+    {
+      "id": "bear",
+      "name": "Медведь",
+      "group": "Фурри",
+      "coats": [
+        {
+          "id": "brown",
+          "name": "Бурый",
+          "colors": {
+            "fur": "#7b5134",
+            "furDark": "#55361f",
+            "belly": "#c49a6c"
+          }
+        },
+        {
+          "id": "polar",
+          "name": "Белый",
+          "colors": {
+            "fur": "#f1efe8",
+            "furDark": "#cfcabc",
+            "belly": "#ffffff"
+          }
+        },
+        {
+          "id": "black",
+          "name": "Гималайский",
+          "colors": {
+            "fur": "#2f2b2a",
+            "furDark": "#1d1a19",
+            "belly": "#a88a6a"
+          }
+        }
+      ],
+      "legend": {
+        "f": "$fur",
+        "d": "$furDark",
+        "w": "$belly",
+        "k": "@ink",
+        "e": "@eye"
+      },
+      "body": {
+        "hands": "$fur",
+        "shoes": "$furDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "............",
+          ".dd......dd.",
+          ".dwd....dwd.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".fffeffefff.",
+          ".fffeffefff.",
+          ".ffwwwwwwff.",
+          ".ffwwkkwwff.",
+          "..fwwwwwwf.."
+        ],
+        "back": [
+          "............",
+          "............",
+          ".dd......dd.",
+          ".ddd....ddd.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          "..ffffffff.."
+        ],
+        "side": [
+          "............",
+          "............",
+          ".....dd.....",
+          ".....dwd....",
+          "...ffffff...",
+          "..fffffff...",
+          "..ffffffff..",
+          "..fffffefff.",
+          "..ffffffwwww",
+          "..ffffffwwwk",
+          "..fffffwww..",
+          "...fffff...."
+        ],
+        "sleep": [
+          "............",
+          "............",
+          ".dd......dd.",
+          ".dwd....dwd.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffeeffeeff.",
+          ".ffwwwwwwff.",
+          ".ffwwkkwwff.",
+          "..fwwwwwwf.."
+        ]
+      },
+      "mini": [
+        "..........",
+        ".dd....dd.",
+        ".ffffffff.",
+        ".ffeffeff.",
+        ".fwwkkwwf.",
+        "..fwwwwf..",
+        ".........."
+      ],
+      "tail": {
+        "back": {
+          "x": 7,
+          "y": 17,
+          "rows": [
+            "ff",
+            "ff"
+          ]
+        }
+      }
+    },
+    {
+      "id": "panda",
+      "name": "Панда",
+      "group": "Фурри",
+      "coats": [
+        {
+          "id": "classic",
+          "name": "Бамбуковая",
+          "colors": {
+            "fur": "#f3f2ee",
+            "patch": "#26242a"
+          }
+        }
+      ],
+      "legend": {
+        "f": "$fur",
+        "k": "$patch",
+        "w": "$fur",
+        "e": "#f4f4f8",
+        "n": "@ink"
+      },
+      "body": {
+        "hands": "$patch",
+        "shoes": "$patch"
+      },
+      "head": {
+        "front": [
+          "............",
+          "............",
+          ".kk......kk.",
+          ".kkk....kkk.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffkkffkkff.",
+          ".ffkeffekff.",
+          ".ffkkffkkff.",
+          ".ffwwwwwwff.",
+          ".fffwnnwfff.",
+          "..ffffffff.."
+        ],
+        "back": [
+          "............",
+          "............",
+          ".kk......kk.",
+          ".kkk....kkk.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          "..ffffffff.."
+        ],
+        "side": [
+          "............",
+          "............",
+          ".....kk.....",
+          ".....kkk....",
+          "...ffffff...",
+          "..fffffff...",
+          "..fffffkkf..",
+          "..ffffkkekf.",
+          "..ffffffkkff",
+          "..ffffffffwn",
+          "..fffffffw..",
+          "...fffff...."
+        ],
+        "sleep": [
+          "............",
+          "............",
+          ".kk......kk.",
+          ".kkk....kkk.",
+          ".ffffffffff.",
+          ".ffffffffff.",
+          ".ffkkffkkff.",
+          ".ffkkffkkff.",
+          ".ffkkffkkff.",
+          ".ffwwwwwwff.",
+          ".fffwnnwfff.",
+          "..ffffffff.."
+        ]
+      },
+      "mini": [
+        "..........",
+        ".kk....kk.",
+        ".ffffffff.",
+        ".fkeffekf.",
+        ".ffwnnwff.",
+        "..ffffff..",
+        ".........."
+      ]
+    }
+  ]
+}

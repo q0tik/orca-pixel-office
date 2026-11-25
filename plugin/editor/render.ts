@@ -45,6 +45,7 @@ import {
   INTERN_H,
   INTERN_W,
   lookFor,
+  lookId,
   type Look,
   type CharPose,
   type Paint
@@ -99,7 +100,16 @@ export type InternGroup = {
   key: string
   seat: { x: number; y: number }
   /** `alpha` < 1: a finished worker (pale) or one popping in / fading out; `dy` lifts it while it pops in. */
-  list: readonly { id: string; color: string; alpha: number; dy: number; /** The parent's shirt: whose they are. */ shirt?: string }[]
+  list: readonly {
+    id: string
+    color: string
+    alpha: number
+    dy: number
+    /** The parent's shirt: whose they are. */
+    shirt?: string
+    /** The parent's key: a trainee wears its employee's character (a small fox by a fox). */
+    parent?: string
+  }[]
 }
 
 /** Mail colour by Orca message type. */
@@ -186,7 +196,7 @@ type Drawable =
   | { kind: 'furniture'; item: PlacedFurniture; baseline: number; box: Box }
   | { kind: 'chair'; deskId: string; facing: 'up' | 'down'; x: number; y: number; baseline: number; box: Box }
   | { kind: 'actor'; actor: ActorView; baseline: number; box: Box }
-  | { kind: 'intern'; id: string; color: string; alpha: number; x: number; y: number; baseline: number; box: Box; shirt?: string }
+  | { kind: 'intern'; id: string; color: string; alpha: number; x: number; y: number; baseline: number; box: Box; shirt?: string; parent?: string }
   | { kind: 'animal'; view: AnimalView; x: number; y: number; baseline: number; box: Box }
 
 type Box = { x: number; y: number; w: number; h: number }
@@ -383,7 +393,7 @@ export class Renderer {
       slots.forEach((slot, i) => {
         const box = { x: slot.x, y: slot.y, w: INTERN_W, h: INTERN_H }
         const it = group.list[i]
-        if (intersects(box, rect)) list.push({ kind: 'intern', id: it.id, color: it.color, alpha: it.alpha, x: slot.x, y: slot.y + it.dy, baseline: (group.seat.y + 2) * T - 0.25, box, shirt: it.shirt })
+        if (intersects(box, rect)) list.push({ kind: 'intern', id: it.id, color: it.color, alpha: it.alpha, x: slot.x, y: slot.y + it.dy, baseline: (group.seat.y + 2) * T - 0.25, box, shirt: it.shirt, parent: it.parent })
       })
       if (more > 0 && slots.length) {
         const last = slots[slots.length - 1]
@@ -407,8 +417,10 @@ export class Renderer {
         blit(this.chairSprite(d.deskId, d.facing, !!desk?.occupied), d.x, d.y)
       } else if (d.kind === 'intern') {
         ctx.globalAlpha = d.alpha
-        const look = d.shirt ? { ...lookFor(d.id), shirt: d.shirt } : lookFor(d.id)
-        blit(this.sprite(`i|${d.id}|${d.color}|${d.shirt ?? ''}`, INTERN_W, INTERN_H, (p) => drawIntern(p, look, d.color)), d.x, d.y)
+        const own = lookFor(d.id)
+        const parent = d.parent ? this.looks(d.parent) : null
+        const look = parent?.dressed ? { ...parent, hairStyle: own.hairStyle } : d.shirt ? { ...own, shirt: d.shirt } : own
+        blit(this.sprite(`i|${d.id}|${d.color}|${lookId(look)}`, INTERN_W, INTERN_H, (p) => drawIntern(p, look, d.color)), d.x, d.y)
         ctx.globalAlpha = 1
       } else {
         const a = d.actor
@@ -800,7 +812,7 @@ export class Renderer {
 
   private characterSprite(key: string, pose: CharPose, facing: ActorView['facing'], frame: number): Canvas {
     const look = this.looks(key)
-    const id = `${look.skin}${look.hair}${look.hairStyle}${look.shirt}${look.pants}${look.accessory}`
+    const id = lookId(look)
     return this.sprite(`a|${key}|${id}|${pose}|${facing}|${frame}`, CHAR_W, CHAR_H, (p) => drawCharacter(p, look, pose, facing, frame))
   }
 

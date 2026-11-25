@@ -5,6 +5,8 @@ A skin pack changes how the office looks without touching code. It is one JSON f
 - be a **theme**: palette colours, which floor to draw for which, rug and plant variants (selectable with «Тема: …»);
 - add **looks** («variants») the owner can pick in «Оформление» for a room's **floor** or **walls**, or for any kind of
   **furniture** (desk, chair, sofa, rug, server rack, aquarium, plant…).
+- add **characters** for people — a robot, a fox, a knight — that the owner puts on a bot or an employee in
+  «Внешность» (`characters`, see [characters.md](characters.md)).
 
 A look is either a **recolour** of a built-in picture (your colours for some palette entries) or a **sprite** (your own
 pixels, written as rows of characters).

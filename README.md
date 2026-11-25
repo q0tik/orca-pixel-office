@@ -36,6 +36,9 @@ The interface is in Russian (the office was built for a Russian-speaking team); 
 - **«Жизнь» (life)**: idle bots wander the shared rooms — coffee machine, cooler, aquarium, bookshelf, window, sofa —
   and chat in little icon clouds when two of them hang out; bots waiting for you pace the reception holding up a
   sign. Real events always win: a new status sends the bot straight to its real place. Pure animation, zero tokens.
+- **Characters**: dress any bot or employee as a robot, a fox, a deer, a knight, an astronaut… — 17 characters, most
+  with 2–4 coats, in every pose the people have; an employee's trainees wear its character too. Characters are
+  **data** in skin packs. See [Characters](#characters).
 - **«Оформление» (decor)**: click a room to change its floor and walls, click a thing to change its look, click a
   person to change their appearance. Looks come from **skin packs** — JSON files anyone can write.
 - **Themes as skin packs**: «Дневной офис» (day office) and «Тёмный лофт» (dark loft), plus day and night from your
@@ -103,6 +106,25 @@ No network, no hooks, no writes to Orca.
   the colours.
 - **Shift+D** shows a debug line (frames, timers, seats).
 
+## Characters
+
+![All the characters: facing us, walking, and as a trainee](docs/screenshots/characters.png)
+
+Open a bot's panel → **Внешность** (or click a person in «Оформление»; employees have the same button in their panel)
+and pick a **Персонаж** and its **Окрас**. The choice is kept in the plugin storage and survives restarts.
+
+| Pack | Characters and coats |
+|---|---|
+| Роботы (`robots.json`) | Ретро-робот with an antenna (жестяной, красный, бирюзовый) · Андроид (белый, чёрный, хром) |
+| Фурри (`furries.json`) | Кошка (рыжая, серая, чёрная) · Лиса (рыжая, песец, чернобурка) · Олень (благородный, пятнистый, северный) · Волк (серый, чёрный, полярный) · Енот (полосатый, рыжеватый) · Кролик (белый, шоколадный, серый) · Медведь (бурый, белый, гималайский) · Панда |
+| Костюмы (`costumes.json`) | Астронавт (белый, оранжевый) · Рыцарь (стальной, золотой, чёрный) · Ниндзя (чёрный, ночной, алый) · Скелет (костяной, древний) · Пришелец (зелёный, серый, фиолетовый) · Пират (красный, синий, чёрный камзол) · Человек в капюшоне (серый, лесной, багровый, чёрный) |
+
+Every character walks, types, waits with the sign, reads letters and does every rest pose: the office draws the poses,
+a character only brings its heads (front, back, side, asleep), a small head for trainees, a tail or a backpack, a chest
+and the colours of its body. Ears, antlers and plumes stay inside the figure, so the status sign and the name badge
+above it stay readable. Furries wear the shirt you pick; a pirate keeps your skin and hair colour. Make your own:
+**[docs/characters.md](docs/characters.md)**, example `docs/examples/frog.json`.
+
 ## Add an animal
 
 One JSON file in `plugin/office/animals/` plus its name in `index.json`: sprites as rows of characters, coats, speed,
@@ -111,7 +133,8 @@ rooms and routines. See **[docs/animals.md](docs/animals.md)** and the example `
 ## Make your own skins
 
 A skin pack is one JSON file in `plugin/office/skins/` plus its name in `index.json`: a theme (palette, floors), and/or
-looks for floors, walls and furniture — recolours of the built-in pictures or your own pixel sprites. No code. See
+looks for floors, walls and furniture — recolours of the built-in pictures or your own pixel sprites — and/or
+characters for people ([docs/characters.md](docs/characters.md)). No code. See
 **[docs/skin-packs.md](docs/skin-packs.md)** and the example `docs/examples/neon.json`.
 
 ## Develop

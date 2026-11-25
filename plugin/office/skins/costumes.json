@@ -1,0 +1,864 @@
+{
+  "format": 1,
+  "id": "costumes",
+  "name": "Костюмы",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "description": "Астронавт, рыцарь, ниндзя, скелет, пришелец, пират и человек в капюшоне.",
+  "characters": [
+    {
+      "id": "astronaut",
+      "name": "Астронавт",
+      "group": "Костюмы",
+      "coats": [
+        {
+          "id": "white",
+          "name": "Белый скафандр",
+          "colors": {
+            "suit": "#eef0f4",
+            "suitDark": "#b9bec9",
+            "visor": "#d9a63a",
+            "visorHi": "#fff1c2",
+            "metalDark": "#6b7280"
+          }
+        },
+        {
+          "id": "orange",
+          "name": "Оранжевый скафандр",
+          "colors": {
+            "suit": "#f08a3a",
+            "suitDark": "#b9612a",
+            "visor": "#2b3550",
+            "visorHi": "#9bb7ff",
+            "metalDark": "#5b6270"
+          }
+        }
+      ],
+      "legend": {
+        "w": "$suit",
+        "s": "$suitDark",
+        "v": "$visor",
+        "h": "$visorHi",
+        "d": "$metalDark",
+        "l": "#6fd36f",
+        "r": "#e05050"
+      },
+      "body": {
+        "hands": "$suit",
+        "shirt": "$suit",
+        "shade": "$suitDark",
+        "pants": "$suit",
+        "shoes": "$metalDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "...wwwwww...",
+          "..wwwwwwww..",
+          ".wwwwwwwwww.",
+          ".wvvvvvvvvw.",
+          ".wvhvvvvhvw.",
+          ".wvvvvvvvvw.",
+          ".wvvvvvvvvw.",
+          ".wwvvvvvvww.",
+          ".wwwwwwwwww.",
+          "..swwwwwws..",
+          ".dddddddddd."
+        ],
+        "back": [
+          "............",
+          "...wwwwww...",
+          "..wwwwwwww..",
+          ".wwwwwwwwww.",
+          ".wwwwwwwwww.",
+          ".wwwwwwwwww.",
+          ".swwwwwwwws.",
+          ".swwwwwwwws.",
+          ".swwwwwwwws.",
+          ".wwwwwwwwww.",
+          "..swwwwwws..",
+          ".dddddddddd."
+        ],
+        "side": [
+          "............",
+          "....wwwww...",
+          "...wwwwwww..",
+          "..wwwwwwwww.",
+          "..wwwwwvvvv.",
+          "..wwwwvvhvvw",
+          "..swwwvvvvvw",
+          "..swwwvvvvvw",
+          "..swwwwvvvw.",
+          "..wwwwwwwww.",
+          "...swwwwww..",
+          "...ddddddd.."
+        ],
+        "sleep": [
+          "............",
+          "...wwwwww...",
+          "..wwwwwwww..",
+          ".wwwwwwwwww.",
+          ".wvvvvvvvvw.",
+          ".wvhvvvvhvw.",
+          ".wvvvvvvvvw.",
+          ".wvvvvvvvvw.",
+          ".wwvvvvvvww.",
+          ".wwwwwwwwww.",
+          "..swwwwwws..",
+          ".dddddddddd."
+        ]
+      },
+      "mini": [
+        "..wwwwww..",
+        ".wwwwwwww.",
+        ".wvvvvvvw.",
+        ".wvhvvhvw.",
+        ".wwvvvvww.",
+        ".wwwwwwww.",
+        ".dddddddd."
+      ],
+      "tail": {
+        "back": {
+          "x": 4,
+          "y": 12,
+          "rows": [
+            "dddddddd",
+            "dssssssd",
+            "dswwwwsd",
+            "dswwwwsd",
+            "dssssssd",
+            "dddddddd"
+          ]
+        },
+        "side": {
+          "x": 2,
+          "y": 12,
+          "rows": [
+            "dd",
+            "sd",
+            "sd",
+            "sd",
+            "dd"
+          ]
+        }
+      },
+      "chest": {
+        "x": 6,
+        "y": 13,
+        "rows": [
+          "dddd",
+          "dlrd",
+          "dddd"
+        ]
+      }
+    },
+    {
+      "id": "knight",
+      "name": "Рыцарь",
+      "group": "Костюмы",
+      "coats": [
+        {
+          "id": "steel",
+          "name": "Стальной",
+          "colors": {
+            "metal": "#b6bcc6",
+            "metalHi": "#e6e9ee",
+            "metalDark": "#6d737d",
+            "plume": "#c83c3c",
+            "tabard": "#3a5fb0",
+            "tabardDark": "#2a4682",
+            "emblem": "#f0d060"
+          }
+        },
+        {
+          "id": "gold",
+          "name": "Золотой",
+          "colors": {
+            "metal": "#d8b44a",
+            "metalHi": "#f6e39a",
+            "metalDark": "#8f6f22",
+            "plume": "#ffffff",
+            "tabard": "#8a2c2c",
+            "tabardDark": "#651f1f",
+            "emblem": "#f6e39a"
+          }
+        },
+        {
+          "id": "black",
+          "name": "Чёрный",
+          "colors": {
+            "metal": "#4a4e57",
+            "metalHi": "#7b818c",
+            "metalDark": "#2a2d33",
+            "plume": "#8e4fc0",
+            "tabard": "#1f1f24",
+            "tabardDark": "#121215",
+            "emblem": "#b8b8c0"
+          }
+        }
+      ],
+      "legend": {
+        "m": "$metal",
+        "h": "$metalHi",
+        "d": "$metalDark",
+        "p": "$plume",
+        "k": "@ink",
+        "e": "$emblem"
+      },
+      "body": {
+        "hands": "$metal",
+        "shirt": "$tabard",
+        "shade": "$tabardDark",
+        "pants": "$metalDark",
+        "shoes": "$metalDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "....pppp....",
+          ".....pp.....",
+          "..mmmmmmmm..",
+          ".mhmmmmmmhm.",
+          ".mmmmmmmmmm.",
+          ".mmmmmmmmmm.",
+          ".kkkkkkkkkk.",
+          ".mmmmmmmmmm.",
+          ".mmkmkkmkmm.",
+          ".mmmmmmmmmm.",
+          "..dddddddd.."
+        ],
+        "back": [
+          "............",
+          "....pppp....",
+          "...pppppp...",
+          "..mmmmmmmm..",
+          ".mmmhmmhmmm.",
+          ".mmmmmmmmmm.",
+          ".mmmmmmmmmm.",
+          ".mmmmmmmmmm.",
+          ".dmmmmmmmmd.",
+          ".mmmmmmmmmm.",
+          ".mmmmmmmmmm.",
+          "..dddddddd.."
+        ],
+        "side": [
+          "............",
+          "...ppp......",
+          "..pp.pp.....",
+          "....mmmmm...",
+          "...mmmhmmm..",
+          "..mmmmmmmmm.",
+          "..mmmmmmmmm.",
+          "..mmmmkkkkkk",
+          "..mmmmmmmmm.",
+          "..mmmmmkmkm.",
+          "..mmmmmmmmm.",
+          "...ddddddd.."
+        ],
+        "sleep": [
+          "............",
+          "....pppp....",
+          ".....pp.....",
+          "..mmmmmmmm..",
+          ".mhmmmmmmhm.",
+          ".mmmmmmmmmm.",
+          ".mmmmmmmmmm.",
+          ".kkkkkkkkkk.",
+          ".mmmmmmmmmm.",
+          ".mmkmkkmkmm.",
+          ".mmmmmmmmmm.",
+          "..dddddddd.."
+        ]
+      },
+      "mini": [
+        "...pppp...",
+        "..mmmmmm..",
+        ".mhmmmmhm.",
+        ".kkkkkkkk.",
+        ".mmmmmmmm.",
+        ".mmkmmkmm.",
+        "..dddddd.."
+      ],
+      "chest": {
+        "x": 6,
+        "y": 13,
+        "rows": [
+          ".ee.",
+          "eeee",
+          ".ee.",
+          ".ee."
+        ]
+      }
+    },
+    {
+      "id": "ninja",
+      "name": "Ниндзя",
+      "group": "Костюмы",
+      "coats": [
+        {
+          "id": "black",
+          "name": "Чёрный",
+          "colors": {
+            "cloth": "#2b2a33",
+            "clothDark": "#1a1920",
+            "band": "#c83c3c"
+          }
+        },
+        {
+          "id": "navy",
+          "name": "Ночной",
+          "colors": {
+            "cloth": "#26304a",
+            "clothDark": "#171d2e",
+            "band": "#e0b040"
+          }
+        },
+        {
+          "id": "red",
+          "name": "Алый",
+          "colors": {
+            "cloth": "#7a2230",
+            "clothDark": "#4e1520",
+            "band": "#e8e8e8"
+          }
+        }
+      ],
+      "legend": {
+        "c": "$cloth",
+        "d": "$clothDark",
+        "b": "$band",
+        "s": "%skin",
+        "e": "@eye"
+      },
+      "body": {
+        "hands": "$clothDark",
+        "shirt": "$cloth",
+        "shade": "$clothDark",
+        "pants": "$cloth",
+        "shoes": "$clothDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "............",
+          "..cccccccc..",
+          ".cccccccccc.",
+          ".cccccccccc.",
+          ".bbbbbbbbbb.",
+          ".cccccccccc.",
+          ".cssseesssc.",
+          ".cssssssssc.",
+          ".cccccccccc.",
+          ".cccccccccc.",
+          "..cccccccc.."
+        ],
+        "back": [
+          "............",
+          "............",
+          "..cccccccc..",
+          ".cccccccccc.",
+          ".cccccccccc.",
+          ".bbbbbbbbbb.",
+          ".cccbbbbccc.",
+          ".ccccbbcccc.",
+          ".cccdccdccc.",
+          ".cccccccccc.",
+          ".cccccccccc.",
+          "..cccccccc.."
+        ],
+        "side": [
+          "............",
+          "............",
+          "....ccccc...",
+          "...ccccccc..",
+          "..ccccccccc.",
+          "bbbbbbbbbbb.",
+          ".bbcccccccc.",
+          "..bcccsssec.",
+          "...ccccssss.",
+          "..cccccccccc",
+          "..ccccccccc.",
+          "...cccccc..."
+        ],
+        "sleep": [
+          "............",
+          "............",
+          "..cccccccc..",
+          ".cccccccccc.",
+          ".cccccccccc.",
+          ".bbbbbbbbbb.",
+          ".cccccccccc.",
+          ".csseeeessc.",
+          ".cssssssssc.",
+          ".cccccccccc.",
+          ".cccccccccc.",
+          "..cccccccc.."
+        ]
+      },
+      "mini": [
+        "..........",
+        "..cccccc..",
+        ".cccccccc.",
+        ".bbbbbbbb.",
+        ".csseessc.",
+        ".cccccccc.",
+        "..cccccc.."
+      ]
+    },
+    {
+      "id": "skeleton",
+      "name": "Скелет",
+      "group": "Костюмы",
+      "coats": [
+        {
+          "id": "bone",
+          "name": "Костяной",
+          "colors": {
+            "bone": "#efe9d8",
+            "boneDark": "#b9b29a"
+          }
+        },
+        {
+          "id": "old",
+          "name": "Древний",
+          "colors": {
+            "bone": "#d8cfae",
+            "boneDark": "#a39874"
+          }
+        }
+      ],
+      "legend": {
+        "b": "$bone",
+        "d": "$boneDark",
+        "k": "@ink"
+      },
+      "body": {
+        "hands": "$bone",
+        "shoes": "$boneDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "............",
+          "...bbbbbb...",
+          "..bbbbbbbb..",
+          ".bbbbbbbbbb.",
+          ".bbbbbbbbbb.",
+          ".bbkkbbkkbb.",
+          ".bbkkbbkkbb.",
+          ".dbbbbbbbbd.",
+          "..bbbkkbbb..",
+          "..bkbkkbkb..",
+          "...bbbbbb..."
+        ],
+        "back": [
+          "............",
+          "............",
+          "...bbbbbb...",
+          "..bbbbbbbb..",
+          ".bbbbbbbbbb.",
+          ".bbbbbbbbbb.",
+          ".bbbbbbbbbb.",
+          ".dbbbbbbbbd.",
+          ".dbbbbbbbbd.",
+          "..bbbbbbbb..",
+          "..dbbbbbbd..",
+          "...bbbbbb..."
+        ],
+        "side": [
+          "............",
+          "............",
+          "....bbbbb...",
+          "...bbbbbbb..",
+          "..bbbbbbbbb.",
+          "..bbbbbbbbb.",
+          "..dbbbbbkkb.",
+          "..dbbbbbkkb.",
+          "..dbbbbbbbbb",
+          "...bbbbbbbk.",
+          "....bbbkbkb.",
+          ".....bbbbb.."
+        ],
+        "sleep": [
+          "............",
+          "............",
+          "...bbbbbb...",
+          "..bbbbbbbb..",
+          ".bbbbbbbbbb.",
+          ".bbbbbbbbbb.",
+          ".bbkkbbkkbb.",
+          ".bbkkbbkkbb.",
+          ".dbbbbbbbbd.",
+          "..bbbkkbbb..",
+          "..bkbkkbkb..",
+          "...bbbbbb..."
+        ]
+      },
+      "mini": [
+        "..........",
+        "..bbbbbb..",
+        ".bbbbbbbb.",
+        ".bkkbbkkb.",
+        ".bbbkkbbb.",
+        "..bkbbkb..",
+        "...bbbb..."
+      ],
+      "chest": {
+        "x": 5,
+        "y": 13,
+        "rows": [
+          ".bbbb.",
+          "b.bb.b",
+          ".bbbb.",
+          "b.bb.b"
+        ]
+      }
+    },
+    {
+      "id": "alien",
+      "name": "Пришелец",
+      "group": "Костюмы",
+      "coats": [
+        {
+          "id": "green",
+          "name": "Зелёный",
+          "colors": {
+            "skin": "#7cc95a",
+            "skinDark": "#4f9a3a"
+          }
+        },
+        {
+          "id": "grey",
+          "name": "Серый",
+          "colors": {
+            "skin": "#b4b8c2",
+            "skinDark": "#858a96"
+          }
+        },
+        {
+          "id": "purple",
+          "name": "Фиолетовый",
+          "colors": {
+            "skin": "#a47ad6",
+            "skinDark": "#7552a8"
+          }
+        }
+      ],
+      "legend": {
+        "s": "$skin",
+        "d": "$skinDark",
+        "k": "#141418",
+        "h": "#ffffff",
+        "m": "$skinDark"
+      },
+      "body": {
+        "hands": "$skin"
+      },
+      "head": {
+        "front": [
+          "............",
+          "...ssssss...",
+          ".ssssssssss.",
+          "ssssssssssss",
+          "ssssssssssss",
+          ".ssssssssss.",
+          ".skhksskhks.",
+          ".kkksssskkk.",
+          "..ssssssss..",
+          "...ssssss...",
+          "....smms....",
+          "....ssss...."
+        ],
+        "back": [
+          "............",
+          "...ssssss...",
+          ".ssssssssss.",
+          "ssssssssssss",
+          "ssssssssssss",
+          "dssssssssssd",
+          ".ssssssssss.",
+          ".dssssssssd.",
+          "..ssssssss..",
+          "...ssssss...",
+          "....ssss....",
+          "....ssss...."
+        ],
+        "side": [
+          "............",
+          "...ssss.....",
+          "..ssssssss..",
+          ".ssssssssss.",
+          ".ssssssssss.",
+          ".dsssssssss.",
+          "..ssssskkhs.",
+          "..dssssskks.",
+          "...sssssss..",
+          "....ssssss..",
+          ".....sssm...",
+          ".....sss...."
+        ],
+        "sleep": [
+          "............",
+          "...ssssss...",
+          ".ssssssssss.",
+          "ssssssssssss",
+          "ssssssssssss",
+          ".ssssssssss.",
+          ".ssssssssss.",
+          ".kkkksskkkk.",
+          "..ssssssss..",
+          "...ssssss...",
+          "....smms....",
+          "....ssss...."
+        ]
+      },
+      "mini": [
+        "..ssssss..",
+        ".ssssssss.",
+        "ssssssssss",
+        ".kkhsshkk.",
+        "..ssssss..",
+        "...smms...",
+        "....ss...."
+      ]
+    },
+    {
+      "id": "pirate",
+      "name": "Пират",
+      "group": "Костюмы",
+      "coats": [
+        {
+          "id": "red",
+          "name": "Красный камзол",
+          "colors": {
+            "hat": "#2a2530",
+            "trim": "#e0b040",
+            "coat": "#a8323a",
+            "coatDark": "#7a2229",
+            "boots": "#3a2a20"
+          }
+        },
+        {
+          "id": "blue",
+          "name": "Синий камзол",
+          "colors": {
+            "hat": "#2a2530",
+            "trim": "#e0b040",
+            "coat": "#2f4f8f",
+            "coatDark": "#213866",
+            "boots": "#3a2a20"
+          }
+        },
+        {
+          "id": "black",
+          "name": "Чёрный камзол",
+          "colors": {
+            "hat": "#5a3a24",
+            "trim": "#e0b040",
+            "coat": "#2f2b33",
+            "coatDark": "#1d1a20",
+            "boots": "#2a1d16"
+          }
+        }
+      ],
+      "legend": {
+        "t": "$hat",
+        "y": "$trim",
+        "s": "%skin",
+        "h": "%hair",
+        "k": "@ink",
+        "e": "@eye",
+        "w": "#f4f0e6"
+      },
+      "body": {
+        "hands": "%skin",
+        "shirt": "$coat",
+        "shade": "$coatDark",
+        "shoes": "$boots"
+      },
+      "head": {
+        "front": [
+          "............",
+          "...tttttt...",
+          "..twwttwwt..",
+          ".tyyyyyyyyt.",
+          "tttttttttttt",
+          ".hssssssssh.",
+          ".hsssssskkh.",
+          ".hssesskkkh.",
+          ".hssesskkkh.",
+          ".hsssssssh..",
+          "..hhhhhhhh..",
+          "...hhhhhh..."
+        ],
+        "back": [
+          "............",
+          "...tttttt...",
+          "..tttttttt..",
+          ".tyyyyyyyyt.",
+          "tttttttttttt",
+          ".hhhhhhhhhh.",
+          ".hhhhhkhhhh.",
+          ".hhhhhkhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh.",
+          "..hhhhhhhh..",
+          "...hhhhhh..."
+        ],
+        "side": [
+          "............",
+          "....tttttt..",
+          "...twwtttt..",
+          "..yyyyyyyyy.",
+          "ttttttttttt.",
+          "..hhssssss..",
+          "..hhssssskk.",
+          "..hhsssskkks",
+          "..hhssssssss",
+          "..hhhssshhh.",
+          "...hhhhhhh..",
+          "....hhhh...."
+        ],
+        "sleep": [
+          "............",
+          "...tttttt...",
+          "..twwttwwt..",
+          ".tyyyyyyyyt.",
+          "tttttttttttt",
+          ".hssssssssh.",
+          ".hsssssskkh.",
+          ".hssssskkkh.",
+          ".hseesskkkh.",
+          ".hsssssssh..",
+          "..hhhhhhhh..",
+          "...hhhhhh..."
+        ]
+      },
+      "mini": [
+        "..tttttt..",
+        ".tyyyyyyt.",
+        "tttttttttt",
+        ".hsessskh.",
+        ".hssssssh.",
+        "..hhhhhh..",
+        "...hhhh..."
+      ]
+    },
+    {
+      "id": "hooded",
+      "name": "Человек в капюшоне",
+      "group": "Костюмы",
+      "coats": [
+        {
+          "id": "grey",
+          "name": "Серый",
+          "colors": {
+            "hood": "#6e7280",
+            "hoodDark": "#4a4e5a"
+          }
+        },
+        {
+          "id": "green",
+          "name": "Лесной",
+          "colors": {
+            "hood": "#4d6b3c",
+            "hoodDark": "#34492a"
+          }
+        },
+        {
+          "id": "crimson",
+          "name": "Багровый",
+          "colors": {
+            "hood": "#7a2834",
+            "hoodDark": "#521a23"
+          }
+        },
+        {
+          "id": "black",
+          "name": "Чёрный",
+          "colors": {
+            "hood": "#2f2f38",
+            "hoodDark": "#1b1b20"
+          }
+        }
+      ],
+      "legend": {
+        "h": "$hood",
+        "d": "$hoodDark",
+        "s": "%skin",
+        "e": "@eye"
+      },
+      "body": {
+        "shirt": "$hood",
+        "shade": "$hoodDark"
+      },
+      "head": {
+        "front": [
+          "............",
+          "...hhhhhh...",
+          "..hhhhhhhh..",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhddddddhh.",
+          ".hdssssssdh.",
+          ".hdsessesdh.",
+          ".hdsessesdh.",
+          ".hhsssssshh.",
+          ".hhhsssshhh.",
+          ".hhhhhhhhhh."
+        ],
+        "back": [
+          "............",
+          "...hhhhhh...",
+          "..hhhhhhhh..",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhhhddhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh."
+        ],
+        "side": [
+          "............",
+          "....hhhh....",
+          "...hhhhhh...",
+          "..hhhhhhhh..",
+          ".hhhhhhhhhd.",
+          ".hhhhhhhddd.",
+          "..hhhhhdsss.",
+          "..hhhhhdsses",
+          "..hhhhhdsss.",
+          "..hhhhhhsss.",
+          "..hhhhhhhss.",
+          "..hhhhhhhh.."
+        ],
+        "sleep": [
+          "............",
+          "...hhhhhh...",
+          "..hhhhhhhh..",
+          ".hhhhhhhhhh.",
+          ".hhhhhhhhhh.",
+          ".hhddddddhh.",
+          ".hdssssssdh.",
+          ".hdssssssdh.",
+          ".hdeesseedh.",
+          ".hhsssssshh.",
+          ".hhhsssshhh.",
+          ".hhhhhhhhhh."
+        ]
+      },
+      "mini": [
+        "..hhhhhh..",
+        ".hhhhhhhh.",
+        ".hddddddh.",
+        ".hdseesdh.",
+        ".hdssssdh.",
+        ".hhhsshhh.",
+        ".hhhhhhhh."
+      ]
+    }
+  ]
+}

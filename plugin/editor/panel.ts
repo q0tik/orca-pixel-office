@@ -6,6 +6,7 @@ import type { ChatAnswer, Extras, InternState } from '../src/extras'
 import { ruleFor } from '../engine/locations'
 import { formatDuration } from './format'
 import { ACCESSORIES, ACCESSORY_LABELS, HAIR_STYLES, PLATE_MAX, type Appearance } from './appearance'
+import { ownerColorsUsed, type CharacterSkin } from './characters'
 import { HAIRS, P, SHIRTS, SKINS } from './palette'
 import { STATE_COLOR } from './render'
 
@@ -204,8 +205,39 @@ const swatch = (color: string, selected: boolean) =>
   `width:22px;height:22px;border-radius:4px;border:2px solid ${selected ? P.tagText : '#00000055'};background:${color};cursor:pointer;padding:0`
 
 /** The «Внешность» editor: a preview, presets from the office palette, a plate, «Сбросить». */
-export function renderAppearanceEditor(name: string, look: Appearance, saved: boolean | null): string {
+export function renderAppearanceEditor(name: string, look: Appearance, saved: boolean | null, opts: { characters: readonly CharacterSkin[]; worker: boolean } = { characters: [], worker: false }): string {
   const h = escapeHtml
+  const skin = look.character ? opts.characters.find((c) => c.id === look.character) : undefined
+  // A character keeps only some of the person's colours (a fox has no hair; a pirate keeps the skin).
+  const used = skin ? ownerColorsUsed(skin) : null
+  const shows = (c: 'skin' | 'hair' | 'shirt') => !used || used.has(c)
+  const groups = new Map<string, CharacterSkin[]>()
+  for (const c of opts.characters) groups.set(c.group, [...(groups.get(c.group) ?? []), c])
+  const characterChip = (id: string, label: string) =>
+    `<button data-act="set" data-field="character" data-value="${h(id)}" style="${chip(look.character === id || (!skin && id === '' && !look.character))}">${h(label)}</button>`
+  const characterSection = opts.characters.length
+    ? section(
+        'Персонаж',
+        `<div style="display:flex;flex-wrap:wrap;gap:4px">${characterChip('', 'Человек')}</div>` +
+          [...groups]
+            .map(([group, list]) => `<div style="margin-top:6px;font-size:11px;${muted}">${h(group)}</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px">${list.map((c) => characterChip(c.id, c.name)).join('')}</div>`)
+            .join('') +
+          (look.character && !skin ? `<div style="margin-top:6px;font-size:11px;color:${P.waiting}">Пакет с этим персонажем не найден: сейчас рисуется человек.</div>` : '')
+      )
+    : ''
+  const coatSection =
+    skin && skin.coats.length > 1
+      ? section(
+          'Окрас',
+          `<div style="display:flex;flex-wrap:wrap;gap:4px">${skin.coats
+            .map((c, i) => {
+              const color = Object.values(c.colors)[0] ?? '#888888'
+              const selected = look.coat === c.id || (i === 0 && !skin.coats.some((x) => x.id === look.coat))
+              return `<button data-act="set" data-field="coat" data-value="${h(c.id)}" title="${h(c.name)}" style="${swatch(color, selected)}"></button>`
+            })
+            .join('')}<span style="align-self:center;margin-left:6px;${muted}">${h((skin.coats.find((c) => c.id === look.coat) ?? skin.coats[0]).name)}</span></div>`
+        )
+      : ''
   const choices = (field: string, items: readonly string[], value: number | string, labels?: (item: string, i: number) => string) =>
     items
       .map((item, i) => {
@@ -221,19 +253,21 @@ export function renderAppearanceEditor(name: string, look: Appearance, saved: bo
       <div style="flex:1;font-weight:bold">Внешность: ${h(name)}</div>
     </div>
     <canvas data-preview width="96" height="52" style="display:block;margin:12px auto;width:192px;height:104px;image-rendering:pixelated;background:#00000033;border-radius:6px"></canvas>
-    ${section('Причёска', `<div style="display:flex;flex-wrap:wrap;gap:4px">${choices('hairStyle', HAIR_STYLES, look.hairStyle)}</div>`)}
-    ${section('Цвет волос', `<div style="display:flex;flex-wrap:wrap;gap:4px">${swatches('hair', HAIRS, look.hair)}</div>`)}
-    ${section('Кожа', `<div style="display:flex;flex-wrap:wrap;gap:4px">${swatches('skin', SKINS, look.skin)}</div>`)}
-    ${section('Одежда', `<div style="display:flex;flex-wrap:wrap;gap:4px">${swatches('outfit', SHIRTS.map(([c]) => c), look.outfit)}</div>`)}
+    ${characterSection}
+    ${coatSection}
+    ${skin ? '' : section('Причёска', `<div style="display:flex;flex-wrap:wrap;gap:4px">${choices('hairStyle', HAIR_STYLES, look.hairStyle)}</div>`)}
+    ${shows('hair') ? section('Цвет волос', `<div style="display:flex;flex-wrap:wrap;gap:4px">${swatches('hair', HAIRS, look.hair)}</div>`) : ''}
+    ${shows('skin') ? section(skin ? 'Кожа (руки и лицо)' : 'Кожа', `<div style="display:flex;flex-wrap:wrap;gap:4px">${swatches('skin', SKINS, look.skin)}</div>`) : ''}
+    ${shows('shirt') ? section('Одежда', `<div style="display:flex;flex-wrap:wrap;gap:4px">${swatches('outfit', SHIRTS.map(([c]) => c), look.outfit)}</div>`) : ''}
     ${section('Аксессуар', `<div style="display:flex;flex-wrap:wrap;gap:4px">${choices('accessory', ACCESSORIES, look.accessory, (a) => ACCESSORY_LABELS[a as keyof typeof ACCESSORY_LABELS])}</div>`)}
-    ${section(`Табличка на столе (до ${PLATE_MAX} символов)`, `<input data-field="plate" maxlength="${PLATE_MAX}" value="${h(look.plate)}" placeholder="пусто — без таблички" style="width:100%;box-sizing:border-box;height:28px;border-radius:4px;border:1px solid #ffffff33;background:#00000044;color:${P.tagText};font:inherit;padding:0 8px">`)}
+    ${opts.worker ? '' : section(`Табличка на столе (до ${PLATE_MAX} символов)`, `<input data-field="plate" maxlength="${PLATE_MAX}" value="${h(look.plate)}" placeholder="пусто — без таблички" style="width:100%;box-sizing:border-box;height:28px;border-radius:4px;border:1px solid #ffffff33;background:#00000044;color:${P.tagText};font:inherit;padding:0 8px">`)}
     <div style="display:flex;gap:6px;margin-top:14px">
       <button data-act="reset" style="${buttonStyle};flex:1">Сбросить</button>
     </div>
     <div style="margin-top:8px;font-size:11px;${muted}">${
       saved === false
         ? `<span style="color:${P.waiting}">Хранилище плагина недоступно: изменения видны до перезапуска.</span>`
-        : 'Цвета — из палитры офиса. Хранится в хранилище плагина (orca.storage), меняется сразу.'
+        : `Цвета — из палитры офиса, персонажи — из пакетов скинов (office/skins).${opts.worker ? ' Стажёры сотрудника — в том же образе.' : ''} Хранится в хранилище плагина (orca.storage), меняется сразу.`
     }</div>`
 }
 
@@ -269,7 +303,10 @@ export function renderWorkerPanel(w: WorkerPanel): string {
       <div><span style="color:${w.color}">●</span> ${h(w.state)}${w.since ? ` · ${h(w.since)}` : ''}</div>
       ${w.seated ? '' : `<div style="${muted}">без стола: в «Командах и отделах» не хватило мест</div>`}
     </div>
-    <button data-act="openWorker" data-id="${h(w.id)}" style="${buttonStyle};margin-top:10px;width:100%">Открыть в Orca</button>
+    <div style="display:flex;gap:6px;margin-top:10px">
+      <button data-act="openWorker" data-id="${h(w.id)}" style="${buttonStyle};flex:1">Открыть в Orca</button>
+      <button data-act="appearance" style="${buttonStyle}">Внешность</button>
+    </div>
     <div style="font-size:11px;${muted};margin-top:4px">Открывает воркспейс сотрудника.</div>`
 }
 

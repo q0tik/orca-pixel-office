@@ -5,6 +5,7 @@
 import type { FloorKind, FurnitureType, WallStyle } from '../engine/catalog'
 import type { Facing, PlacedFurniture } from '../engine/world'
 import { defaultAppearance, pantsFor, type Accessory, type Appearance } from './appearance'
+import { coatOf, paintPart, type CharacterSkin, type Dressed, type OwnerColors } from './characters'
 import { HAIRS, P, SHIRTS, SKINS } from './palette'
 
 export type Paint = (x: number, y: number, w: number, h: number, color: string) => void
@@ -951,12 +952,80 @@ function rug(p: Paint, W: number, H: number, variant?: string): void {
 
 // ── People ───────────────────────────────────────────────────────────────────────────────
 
-export type Look = { skin: string; hair: string; hairStyle: number; shirt: string; shade: string; pants: string; accessory: Accessory }
+/**
+ * How a figure is drawn. `skin` is the colour of the hands (and of a person's face), `shoe` of the
+ * shoes (the palette's by default). A character (`dressed`) brings its own head, tail and chest;
+ * `owner` keeps the colours chosen in «Внешность» for the parts of it that borrow them («%skin»…).
+ */
+export type Look = {
+  skin: string
+  hair: string
+  hairStyle: number
+  shirt: string
+  shade: string
+  pants: string
+  accessory: Accessory
+  shoe?: string
+  dressed?: Dressed
+  owner?: OwnerColors
+}
 
-/** The colours and shapes of an appearance (editor/appearance.ts), from the palette presets. */
-export function lookOf(a: Appearance, key: string): Look {
+/**
+ * The colours and shapes of an appearance (editor/appearance.ts), from the palette presets; with a
+ * character from the skin packs, its body colours and parts. A character that is gone (its pack was
+ * removed) leaves a person.
+ */
+export function lookOf(a: Appearance, key: string, characters?: ReadonlyMap<string, CharacterSkin>): Look {
   const [shirt, shade] = SHIRTS[a.outfit] ?? SHIRTS[0]
-  return { shirt, shade, skin: SKINS[a.skin] ?? SKINS[0], hair: HAIRS[a.hair] ?? HAIRS[0], hairStyle: a.hairStyle, pants: pantsFor(key), accessory: a.accessory }
+  const person: Look = { shirt, shade, skin: SKINS[a.skin] ?? SKINS[0], hair: HAIRS[a.hair] ?? HAIRS[0], hairStyle: a.hairStyle, pants: pantsFor(key), accessory: a.accessory }
+  const skin = a.character ? characters?.get(a.character) : undefined
+  if (!skin) return person
+  const dressed: Dressed = { skin, coat: coatOf(skin, a.coat) }
+  const owner: OwnerColors = { skin: person.skin, hair: person.hair, shirt: person.shirt, shade: person.shade, pants: person.pants }
+  const body = (part: keyof CharacterSkin['body'], fallback: string) => {
+    const value = skin.body[part]
+    if (!value) return fallback
+    if (value.startsWith('$')) return dressed.coat.colors[value.slice(1)] ?? fallback
+    if (value.startsWith('%')) return owner[value.slice(1) as keyof OwnerColors] ?? fallback
+    if (value.startsWith('@')) return (P[value.slice(1) as keyof typeof P] as string | undefined) ?? fallback
+    return value
+  }
+  return {
+    ...person,
+    skin: body('hands', person.skin),
+    shirt: body('shirt', person.shirt),
+    shade: body('shade', person.shade),
+    pants: body('pants', person.pants),
+    ...(skin.body.shoes ? { shoe: body('shoes', P.shoe) } : {}),
+    dressed,
+    owner
+  }
+}
+
+/** A stable short name of everything a look draws with (for the sprite caches). */
+export function lookId(look: Look): string {
+  const d = look.dressed ? `${look.dressed.skin.id}/${look.dressed.coat.id}/${look.owner?.skin}${look.owner?.hair}` : ''
+  return `${look.skin}${look.hair}${look.hairStyle}${look.shirt}${look.shade}${look.pants}${look.accessory}${look.shoe ?? ''}${d}`
+}
+
+function shoeOf(look: Look): string {
+  return look.shoe ?? P.shoe
+}
+
+/** A character's part over the figure (a head view, a tail, the chest); nothing for a person. */
+function part(p: Paint, look: Look, which: 'front' | 'back' | 'side' | 'sleep' | 'chest' | 'mini' | `tail-${'front' | 'back' | 'side'}`, dx = 0, dy = 0): boolean {
+  const d = look.dressed
+  if (!d || !look.owner) return false
+  const skin = d.skin
+  const piece =
+    which === 'chest' ? skin.chest : which === 'mini' ? skin.mini : which.startsWith('tail-') ? skin.tail[which.slice(5) as 'front' | 'back' | 'side'] : which === 'sleep' ? skin.head.sleep ?? skin.head.front : skin.head[which as 'front' | 'back' | 'side']
+  if (!piece) return false
+  // Moved parts (the head leaning back in the chair) are cut at the figure's sides.
+  const clipped: Paint = (x, y, w, h, c) => {
+    if (x >= 0 && x < CHAR_W) p(x, y, w, h, c)
+  }
+  paintPart(clipped, piece, d, look.owner, dx, dy)
+  return true
 }
 
 /** A bot's default look from its key, so it stays the same everywhere and every time. */
@@ -1043,6 +1112,8 @@ export function drawCharacter(p: Paint, look: Look, pose: CharPose, facing: Faci
   const walkFrame = pose === 'walk' ? frame % 4 : 0
   const bob = walkFrame % 2 === 1 ? -1 : 0
   const q: Paint = (x, y, w, h, c) => p(x, y + bob, w, h, c)
+  // Facing us the tail is behind the legs; from behind it is in front of everything.
+  if (facing === 'down') part(q, look, 'tail-front')
   legsFront(p, look, walkFrame)
   torso(q, look, facing === 'down')
   head(q, look, facing === 'down' ? 'front' : 'back')
@@ -1062,11 +1133,22 @@ export function drawCharacter(p: Paint, look: Look, pose: CharPose, facing: Faci
     arm(q, look, 'left', swing)
     arm(q, look, 'right', -swing)
   }
+  if (facing === 'up') part(q, look, 'tail-back')
   // At the kitchen they already hold the office mug.
   accessory(q, look, facing === 'down' ? 'front' : 'back', !(pose === 'stand' && facing === 'down'))
 }
 
-function head(p: Paint, look: Look, view: 'front' | 'back'): void {
+function head(p: Paint, look: Look, view: 'front' | 'back' | 'sleep'): void {
+  if (part(p, look, view)) return
+  if (view === 'sleep') {
+    head(p, look, 'front')
+    // Eyes closed: two short lines instead of dots.
+    p(5, 8, 2, 1, P.eye)
+    p(9, 8, 2, 1, P.eye)
+    p(6, 7, 1, 1, look.skin)
+    p(9, 7, 1, 1, look.skin)
+    return
+  }
   p(4, 4, 8, 8, look.skin)
   p(4, 11, 8, 1, look.skin)
   if (look.hairStyle === 4) {
@@ -1116,6 +1198,7 @@ function torso(p: Paint, look: Look, front: boolean): void {
   p(4, 12, 1, 7, look.shade)
   p(4, 18, 8, 1, look.shade)
   if (front) p(7, 12, 2, 2, look.shade)
+  if (front) part(p, look, 'chest')
 }
 
 function arm(p: Paint, look: Look, which: 'left' | 'right', swing: number): void {
@@ -1130,50 +1213,58 @@ function legsFront(p: Paint, look: Look, frame: number): void {
   p(5, 19, 6, 2, look.pants)
   p(5, 21, 3, 3 - leftUp, look.pants)
   p(8, 21, 3, 3 - rightUp, look.pants)
-  p(4, 24 - leftUp, 4, 2, P.shoe)
-  p(8, 24 - rightUp, 4, 2, P.shoe)
+  p(4, 24 - leftUp, 4, 2, shoeOf(look))
+  p(8, 24 - rightUp, 4, 2, shoeOf(look))
 }
 
 function side(p: Paint, look: Look, frame: number): void {
   const step = frame % 4
   const bob = step % 2 === 1 ? -1 : 0
   const q: Paint = (x, y, w, h, c) => p(x, y + bob, w, h, c)
+  part(q, look, 'tail-side')
   // Legs: apart on steps 1 and 3, together on 0 and 2.
   if (step % 2 === 1) {
     p(5, 19, 6, 2, look.pants)
     p(4, 21, 3, 3, look.pants)
     p(9, 21, 3, 3, look.pants)
-    p(3, 24, 4, 2, P.shoe)
-    p(9, 24, 5, 2, P.shoe)
+    p(3, 24, 4, 2, shoeOf(look))
+    p(9, 24, 5, 2, shoeOf(look))
   } else {
     p(6, 19, 5, 5, look.pants)
-    p(6, 24, 6, 2, P.shoe)
+    p(6, 24, 6, 2, shoeOf(look))
   }
   q(5, 12, 6, 7, look.shirt)
   q(5, 18, 6, 1, look.shade)
   const swing = step === 1 ? 2 : step === 3 ? -2 : 0
   q(7 + swing, 13, 2, 5, look.shade)
   q(7 + swing, 18, 2, 1, look.skin)
-  q(5, 4, 7, 8, look.skin)
-  q(12, 7, 1, 2, look.skin)
-  q(5, 2, 7, 3, look.hair)
-  q(4, 3, 3, 6, look.hair)
-  if (look.hairStyle === 1) q(4, 5, 3, 7, look.hair)
-  if (look.hairStyle === 2) q(6, 1, 2, 1, look.hair)
-  q(10, 7, 1, 2, P.eye)
+  sideHead(q, look)
   accessory(q, look, 'side')
+}
+
+/** The head in profile, facing right; `dx` moves it (leaning back in the chair). */
+function sideHead(p: Paint, look: Look, dx = 0): void {
+  if (part(p, look, 'side', dx)) return
+  p(5 + dx, 4, 7, 8, look.skin)
+  p(12 + dx, 7, 1, 2, look.skin)
+  p(5 + dx, 2, 7, 3, look.hair)
+  p(4 + dx, 3, 3, 6, look.hair)
+  if (look.hairStyle === 1) p(4 + dx, 5, 3, 7, look.hair)
+  if (look.hairStyle === 2) p(6 + dx, 1, 2, 1, look.hair)
+  p(10 + dx, 7, 1, 2, P.eye)
 }
 
 // ── Resting in one's own office ──────────────────────────────────────────────────────────
 
 /** Sitting on the office chair facing us, legs bent; `dx` sways the upper body. */
 function seated(p: Paint, look: Look, dx = 0, hands = true): void {
+  part(p, look, 'tail-front', dx)
   // Legs: thighs towards us, shins down, shoes on the floor.
   p(5, 19, 6, 2, look.pants)
   p(5, 21, 2, 3, look.pants)
   p(9, 21, 2, 3, look.pants)
-  p(4, 24, 3, 2, P.shoe)
-  p(9, 24, 3, 2, P.shoe)
+  p(4, 24, 3, 2, shoeOf(look))
+  p(9, 24, 3, 2, shoeOf(look))
   const q: Paint = (x, y, w, h, c) => p(x + dx, y + 1, w, h, c)
   torso(q, look, true)
   if (hands) {
@@ -1208,22 +1299,26 @@ function chairRock(p: Paint, look: Look, frame: number): void {
 function chairFeet(p: Paint, look: Look, frame: number): void {
   p(2, 13, 6, 7, look.shirt)
   p(2, 19, 6, 1, look.shade)
-  p(2, 4, 7, 8, look.skin)
-  p(2, 2, 7, 3, look.hair)
-  p(1, 3, 2, 6, look.hair)
-  if (look.hairStyle === 1) p(1, 5, 2, 7, look.hair)
-  p(7, 7, 1, 2, P.eye)
+  if (look.dressed) sideHead(p, look, -3)
+  else {
+    p(2, 4, 7, 8, look.skin)
+    p(2, 2, 7, 3, look.hair)
+    p(1, 3, 2, 6, look.hair)
+    if (look.hairStyle === 1) p(1, 5, 2, 7, look.hair)
+    p(7, 7, 1, 2, P.eye)
+  }
   p(0, 6, 2, 4, look.shade)
   p(8, 11, 2, 2, look.shade)
   // Legs out over the desk, shoes up.
   p(7, 18, 7, 2, look.pants)
   p(12, 16, 2, 3, look.pants)
-  p(13, 14 - (frame % 2), 3, 3, P.shoe)
+  p(13, 14 - (frame % 2), 3, 3, shoeOf(look))
   p(3, 20, 4, 3, look.pants)
 }
 
 /** A letter just came: holding it open in both hands. */
 function readLetter(p: Paint, look: Look, frame: number): void {
+  part(p, look, 'tail-front')
   legsFront(p, look, 0)
   torso(p, look, true)
   head(p, look, 'front')
@@ -1239,6 +1334,7 @@ function readLetter(p: Paint, look: Look, frame: number): void {
 /** Kicking a ball up from foot to foot. */
 function kickBall(p: Paint, look: Look, frame: number): void {
   const f = frame % 4
+  part(p, look, 'tail-front')
   legsFront(p, look, f === 1 ? 1 : f === 3 ? 3 : 0)
   torso(p, look, true)
   head(p, look, 'front')
@@ -1271,6 +1367,7 @@ function sitBack(p: Paint, look: Look, frame: number): void {
   p(2, 13 - lift, 2, 5, look.shade)
   p(12, 12 + lift, 2, 5, look.shirt)
   head(p, look, 'back')
+  part(p, look, 'tail-back')
   accessory(p, look, 'back')
 }
 
@@ -1291,8 +1388,8 @@ function sofaSit(p: Paint, look: Look): void {
   p(4, 19, 8, 2, look.pants)
   p(5, 21, 2, 3, look.pants)
   p(9, 21, 2, 3, look.pants)
-  p(4, 24, 3, 2, P.shoe)
-  p(9, 24, 3, 2, P.shoe)
+  p(4, 24, 3, 2, shoeOf(look))
+  p(9, 24, 3, 2, shoeOf(look))
   p(4, 13, 8, 6, look.shirt)
   p(4, 13, 1, 6, look.shade)
   // Elbows out, hands behind the head.
@@ -1301,12 +1398,7 @@ function sofaSit(p: Paint, look: Look): void {
   p(12, 6, 3, 2, look.shirt)
   p(12, 8, 2, 5, look.shirt)
   const q: Paint = (x, y, w, h, c) => p(x, y + 1, w, h, c)
-  head(q, look, 'front')
-  // Eyes closed: two short lines instead of dots.
-  q(5, 8, 2, 1, P.eye)
-  q(9, 8, 2, 1, P.eye)
-  q(6, 7, 1, 1, look.skin)
-  q(9, 7, 1, 1, look.skin)
+  head(q, look, 'sleep')
   accessory(q, look, 'front', false)
 }
 
@@ -1342,18 +1434,20 @@ export const INTERN_H = 16
 export function drawIntern(p: Paint, look: Look, stateColor: string): void {
   // Legs and shoes.
   p(3, 12, 4, 2, look.pants)
-  p(3, 14, 2, 2, P.shoe)
-  p(5, 14, 2, 2, P.shoe)
+  p(3, 14, 2, 2, shoeOf(look))
+  p(5, 14, 2, 2, shoeOf(look))
   // Body and arms forward to the laptop.
   p(2, 7, 6, 5, look.shirt)
   p(2, 7, 1, 5, look.shade)
   p(7, 9, 2, 1, look.skin)
-  // Head.
-  p(2, 1, 6, 6, look.skin)
-  p(2, 0, 6, 2, look.hair)
-  p(1, 1, 1, 3, look.hair)
-  p(4, 3, 1, 1, P.eye)
-  p(6, 3, 1, 1, P.eye)
+  // Head: a person's, or the character's small one.
+  if (!part(p, look, 'mini')) {
+    p(2, 1, 6, 6, look.skin)
+    p(2, 0, 6, 2, look.hair)
+    p(1, 1, 1, 3, look.hair)
+    p(4, 3, 1, 1, P.eye)
+    p(6, 3, 1, 1, P.eye)
+  }
   // The laptop on the knees.
   p(6, 9, 4, 3, P.metal)
   p(6, 9, 4, 1, P.metalHi)
