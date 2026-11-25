@@ -36,7 +36,7 @@ import {
 } from '../engine/seating'
 import { ANIMALS_STORAGE_KEY, loadSpecies, parseAnimalChoices, Zoo, type AnimalChoices, type Species } from '../engine/animals'
 import { chatClouds, CHAT_TURN_MS, Life } from '../engine/life'
-import { mailPoint, Reading, READ_MS } from '../engine/reading'
+import { mailPoint, ownerPoint, Reading, READ_MS } from '../engine/reading'
 import { origin, visibleRect } from '../engine/camera'
 import { parseMap, type World } from '../engine/world'
 import { FURNITURE } from '../engine/catalog'
@@ -50,7 +50,7 @@ import { buildPanel, buttonStyle as buttonCss, internColor, renderAnimalPanel, r
 import { AppearanceStore, cleanPlate, type Appearance, type KeyValueStore } from './appearance'
 import { CHAIR_POSES, drawCharacter, lookOf } from './art'
 import { Daylight } from './daylight'
-import { hitPoint, hitSegment, LEGEND_TYPES, mailTooltip, typeName } from './mailview'
+import { endRef, hitPoint, hitSegment, LEGEND_TYPES, mailTooltip, typeName } from './mailview'
 import { assignWorkerDesks, parseWorkerDesks, workerLabels, presentWorkers, WORKER_DESKS_KEY, WORKER_LINGER_MS, WORKER_ROOM, workerKey, workerTarget, type WorkerInfo } from '../engine/workers'
 import type { DeskSeat, PlacedFurniture } from '../engine/world'
 import { applyPalette, DEFAULT_THEME, pickTheme, THEME_STORAGE_KEY, type Theme } from './theme'
@@ -1055,11 +1055,7 @@ function unknownAtEntrance(): boolean {
 
 // ── Mail: envelopes, lines, journal ──────────────────────────────────────────────────────
 
-function refOf(party: Party): EndRef {
-  if (party.kind === 'bot') return `bot:${party.key}`
-  if (party.kind === 'intern') return `intern:${party.key}:${party.workerId}`
-  return 'outside'
-}
+const refOf = endRef
 
 /** Where a figure is now (tiles, fractional while it walks), or null. */
 function actorAt(key: string): { x: number; y: number } | null {
@@ -1078,6 +1074,7 @@ function pointOf(ref: EndRef): { x: number; y: number } {
     if (worker) return { x: worker.x * 16 + 16, y: worker.y * 16 }
   }
   if (kind === 'bot' || kind === 'intern') return mailPoint(actorAt(key), seatsByKey.get(key) ?? null, entrance, 'bot')
+  if (kind === 'owner' && world) return ownerPoint(world) ?? mailPoint(null, null, entrance, 'outside')
   return mailPoint(null, null, entrance, 'outside')
 }
 
@@ -1105,6 +1102,8 @@ function onMail(fresh: Mail): void {
     seenMail.add(entry.id)
     const from = refOf(entry.from)
     const to = refOf(entry.to)
+    // Orca's own notices (not the owner's doing): a journal line, nothing on the map.
+    if (from === null || to === null) continue
     const animate = entry.at !== null && entry.at >= openedAt - 20_000
     fx.addMail(entry, from, to, pointOf(from), pointOf(to), now, animate)
     if (animate) {
@@ -1129,7 +1128,9 @@ async function loadMail(): Promise<void> {
 }
 
 function partyName(party: Party): string {
-  if (party.kind === 'outside') return 'вход (адрес не опознан)'
+  if (party.kind === 'outside') return 'вход (внешний или неизвестный адрес)'
+  if (party.kind === 'owner') return 'кабинет CEO (овнер)'
+  if (party.kind === 'system') return 'Orca (уведомление)'
   const bot = bots?.find((b) => b.key === party.key)
   const name = bot?.name ?? party.key
   if (party.kind === 'bot') return name
@@ -1187,7 +1188,9 @@ function toggleLegend(): void {
     `<div style="margin-top:6px">✉ конверт летит от отправителя к адресату, цвет — тип письма.</div>` +
     `<div>┄ пунктир — была переписка, гаснет за 10 минут.</div>` +
     `<div>━ сплошная — сотрудник и его бот (при наведении или выборе сотрудника).</div><div>Маленькие фигурки у стола сотрудника — его стажёры (субагенты), пока работают.</div>` +
-    `<div>? у входа (правый конец коридора) — адрес не опознан: Run без писем координатора, чужой компьютер, сама Orca.</div>` +
+    `<div style="margin-top:6px"><b>Кабинет CEO = овнер.</b> Письма от овнера (Orca пишет «Your owner…») летят от стола CEO; кресло пустое.</div>` +
+    `<div><b>Вход = внешний или неизвестный адрес</b> (правый конец коридора, со знаком «?»): чужой компьютер, адрес, который офис не узнал.</div>` +
+    `<div>Служебные уведомления Orca (например, «Your other chat…») — только строкой в журнале, без линии.</div>` +
     `<div style="margin-top:6px;opacity:.7">Наведите на конверт или линию — подсказка «кто → кому · тип · тема».</div>`
 }
 
@@ -1202,8 +1205,9 @@ journalBox.addEventListener('click', (event) => {
   if (target.closest('[data-act="close"]')) return toggleJournal()
   const id = target.closest('[data-id]')?.getAttribute('data-id')
   const entry = mail?.entries.find((e) => e.id === id)
-  if (!entry || !renderer) return
-  const point = pointOf(refOf(entry.from))
+  const ref = entry && (refOf(entry.from) ?? refOf(entry.to))
+  if (!ref || !renderer) return
+  const point = pointOf(ref)
   moveCamera(clampCamera({ ...camera, x: point.x, y: point.y, zoom: Math.max(camera.zoom, 3) }, view, renderer.size))
 })
 
@@ -1214,8 +1218,9 @@ function toggleFollow(): void {
   updateFollowButton()
   if (on) {
     // Start from the latest real event: the newest message's recipient.
-    const latest = mail?.entries.find((e) => e.at !== null)
-    if (latest) follow.event(pointOf(refOf(latest.to)))
+    const latest = mail?.entries.find((e) => e.at !== null && refOf(e.to) !== null)
+    const ref = latest && refOf(latest.to)
+    if (ref) follow.event(pointOf(ref))
     scheduler.wake()
   }
 }

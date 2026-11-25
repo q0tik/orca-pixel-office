@@ -3,7 +3,7 @@
 import { assert, test } from 'orca/testing'
 import type { CliRequest, RunResult } from './cli'
 import { parseWorktreePs } from './extras'
-import { JOURNAL_MAX, learnRuns, MailSource, parseInbox, parseWorkerList, resolve, SUBJECT_MAX, type Directory, type MailClock } from './mail'
+import { JOURNAL_MAX, learnRuns, MailSource, parseChatIds, parseInbox, parseTaskIds, parseWorkerList, placeRow, resolve, SUBJECT_MAX, type Directory, type MailClock } from './mail'
 
 const CTO_CHAT = 'orca_session_id:cto-chat'
 const GRACE_CHAT = 'orca_session_id:grace-chat'
@@ -53,7 +53,7 @@ const BOT_KEYS = new Map([
   ['[assistant] Некто', 'bot-2']
 ])
 
-const dir = (): Directory => ({ botKeys: BOT_KEYS, ps: parseWorktreePs(PS), dispatches: parseWorkerList(WORKERS) })
+const dir = (): Directory => ({ botKeys: BOT_KEYS, ps: parseWorktreePs(PS), dispatches: parseWorkerList(WORKERS), chats: new Map(), runTasks: new Map() })
 
 test('inbox: metadata only — the body and the payload are dropped, heartbeats skipped, subjects clipped', () => {
   const rows = parseInbox(INBOX)
@@ -67,7 +67,7 @@ test('inbox: metadata only — the body and the payload are dropped, heartbeats 
 
 test('worker-list: only the allowed fields', () => {
   const d = parseWorkerList(WORKERS).get('ctx_1')!
-  assert.deepEqual(Object.keys(d).sort(), ['dispatchId', 'liveness', 'outcome', 'state', 'terminal', 'workspace'])
+  assert.deepEqual(Object.keys(d).sort(), ['dispatchId', 'liveness', 'outcome', 'state', 'taskId', 'terminal', 'workspace'])
   assert.equal(d.terminal, WORKER_TERM)
 })
 
@@ -75,7 +75,7 @@ test('addresses: bot chats to desks, workers and dispatches to interns, Runs to 
   const d = dir()
   const rows = parseInbox(INBOX)
   const runs = learnRuns(rows, d.dispatches)
-  assert.equal(runs.get('run_1'), CTO_CHAT, 'learned from «CTO → dispatch:ctx_1» and «worker → run:run_1»')
+  assert.equal(runs.get('run_1')?.coordinator, CTO_CHAT, 'learned from «CTO → dispatch:ctx_1» and «worker → run:run_1»')
   assert.deepEqual(resolve(CTO_CHAT, d, runs), { kind: 'bot', key: 'cto' })
   assert.deepEqual(resolve(GRACE_CHAT, d, runs), { kind: 'bot', key: 'bot-2' })
   assert.deepEqual(resolve(WORKER_TERM, d, runs), { kind: 'intern', key: 'cto', workerId: 'repo::/w/one' })
@@ -84,7 +84,75 @@ test('addresses: bot chats to desks, workers and dispatches to interns, Runs to 
   assert.deepEqual(resolve('run:run_1', d, runs), { kind: 'bot', key: 'cto' })
   assert.deepEqual(resolve('run:run_unknown', d, runs), { kind: 'outside', address: 'run:run_unknown' })
   assert.deepEqual(resolve('dispatch:ctx_2', d, runs), { kind: 'outside', address: 'dispatch:ctx_2' })
-  assert.deepEqual(resolve('orca:items', d, runs), { kind: 'outside', address: 'orca:items' })
+})
+
+// ── One case per kind of address the real inbox had (2026-11-25), with made-up ids and names ──
+
+/** Another bot's structured worker: its terminal is not in `worktree ps`, only in `worker-list`. */
+const SELLER_HOME = 'orca_session_id:seller-home'
+const SELLER_SIDE_CHAT = 'orca_session_id:seller-side-chat'
+const STRUCT = 'structworker_0a1b2c'
+const PS_MORE = {
+  worktrees: [
+    ...PS.worktrees,
+    { worktreeId: 'folder:seller', path: '/h/.orca/bots/seller', bot: '[CSO] Третий', botHome: true, agents: [{ address: SELLER_HOME, agentType: 'claude', state: 'done' }] },
+    { worktreeId: 'repo::/w/sales', path: '/w/sales', bot: '[CSO] Третий', parent: { selector: 'folder:seller' }, agents: [] },
+    { worktreeId: 'repo::/w/two', path: '/w/two', bot: '[CTO] Кто-то', parent: { selector: 'folder:cto' }, agents: [] }
+  ]
+}
+const WORKERS_MORE = {
+  workers: [
+    ...WORKERS.workers,
+    { dispatchId: 'ctx_s1', taskId: 'task_s1', terminal: STRUCT, workspace: 'repo::/w/sales', state: 'succeeded', liveness: 'exited', terminalState: 'released' },
+    { dispatchId: 'ctx_c1', taskId: 'task_c1', terminal: 'structworker_9f8e', workspace: 'repo::/w/two', state: 'succeeded', liveness: 'exited' },
+    { dispatchId: 'ctx_s2', taskId: 'task_s2', terminal: 'term_old', workspace: 'repo::/w/sales', state: 'succeeded', liveness: 'unverifiable' }
+  ]
+}
+const BOT_KEYS_MORE = new Map([...BOT_KEYS, ['[CSO] Третий', 'seller']])
+const dirMore = (): Directory => ({
+  botKeys: BOT_KEYS_MORE,
+  ps: parseWorktreePs(PS_MORE),
+  dispatches: parseWorkerList(WORKERS_MORE),
+  chats: new Map([[SELLER_SIDE_CHAT.slice('orca_session_id:'.length), '[CSO] Третий']]),
+  runTasks: new Map([['run_sales', ['task_s2']]])
+})
+const row = (from: string, to: string, subject = 'Выдуманная тема', type = 'status') => ({ id: 'm', from, to, type, subject })
+
+test('(а) a bot chat that is not its Home (and not in `worktree ps` now) → that bot, via `orca bot chats`', () => {
+  const d = dirMore()
+  assert.deepEqual(resolve(SELLER_SIDE_CHAT, d), { kind: 'bot', key: 'seller' })
+  assert.deepEqual(resolve(SELLER_HOME, d), { kind: 'bot', key: 'seller' })
+  assert.deepEqual(parseChatIds({ chats: [{ id: 'a1', title: SECRET, lastSaid: SECRET, home: true }, { title: 'no id' }] }), ['a1'])
+})
+
+test('(б) Orca\'s item notices: the owner\'s doing → the CEO\'s office; the bot\'s other chat → a notice, no line', () => {
+  const d = dirMore()
+  const owner = placeRow(row('orca:items', CTO_CHAT, 'Your owner updated (item 7 "Выдуманная задача")'), d, new Map())
+  assert.deepEqual(owner.from, { kind: 'owner', address: 'orca:items' })
+  assert.deepEqual(owner.to, { kind: 'bot', key: 'cto' })
+  for (const subject of ['Your other chat marked it Done (item 7 "x")', 'Your other chat commented (item 7 "x")', 'Something new from Orca']) {
+    assert.deepEqual(placeRow(row('orca:items', CTO_CHAT, subject), d, new Map()).from, { kind: 'system', address: 'orca:items' }, subject)
+  }
+  assert.deepEqual(placeRow(row(CTO_CHAT, 'orca:anything'), d, new Map()).to, { kind: 'system', address: 'orca:anything' })
+})
+
+test('(в) a worker or structured worker of any bot → its employee in that bot\'s team, a Run → the bot whose workers took its tasks', () => {
+  const d = dirMore()
+  const rows = [row(STRUCT, 'run:run_mail', 'Готово', 'worker_done'), row(CTO_CHAT, 'run:run_sales', 'Re: вопрос')]
+  const runs = learnRuns(rows, d.dispatches)
+  assert.deepEqual(resolve(STRUCT, d, runs), { kind: 'intern', key: 'seller', workerId: 'repo::/w/sales' })
+  assert.deepEqual(resolve('structworker_9f8e', d, runs), { kind: 'intern', key: 'cto', workerId: 'repo::/w/two' })
+  assert.deepEqual(resolve('term_old', d, runs), { kind: 'intern', key: 'seller', workerId: 'repo::/w/sales' })
+  assert.deepEqual(resolve('run:run_mail', d, runs), { kind: 'bot', key: 'seller' }, 'learned from the worker that reports to it')
+  assert.deepEqual(resolve('run:run_sales', d, runs), { kind: 'bot', key: 'seller' }, 'from `task-list --run`: its task went to a seller worker')
+  assert.deepEqual(parseTaskIds({ tasks: [{ id: 'task_s2', title: SECRET }], runId: 'run_sales' }), ['task_s2'])
+})
+
+test('(г, д) only what is really outside goes to the entrance: another computer, an unknown chat, an unknown Run', () => {
+  const d = dirMore()
+  for (const address of ['orca_session_id:nobody-knows', 'run:run_nobody', 'term_elsewhere', 'ssh:remote/term_x', 'dispatch:ctx_none']) {
+    assert.deepEqual(resolve(address, d), { kind: 'outside', address }, address)
+  }
 })
 
 function fakeClock() {
@@ -128,6 +196,8 @@ function source(inbox: () => unknown, fail = false) {
     if (request.kind === 'inbox') return { ok: true, json: inbox() }
     if (request.kind === 'worktree-ps') return { ok: true, json: PS }
     if (request.kind === 'worker-list') return { ok: true, json: WORKERS }
+    if (request.kind === 'bot-chats') return { ok: true, json: { chats: [] } }
+    if (request.kind === 'run-tasks') return { ok: true, json: { tasks: [] } }
     return { ok: false, error: 'not expected' }
   }
   const mail = new MailSource(run, () => BOT_KEYS, parseWorktreePs, fake.clock, (m) => posted.push(m))
@@ -190,4 +260,36 @@ test('the journal keeps the newest 50', async () => {
   const m = await mail.ask()
   assert.equal(m.entries.length, JOURNAL_MAX)
   assert.equal(m.entries[0].id, 'msg_100')
+})
+
+test('chat ids and Run tasks are read only for unknown addresses, and cached', async () => {
+  const calls: CliRequest[] = []
+  const fake = fakeClock()
+  const inbox = { messages: [message('m3', 'orca:items', SELLER_SIDE_CHAT, 'status', 'Your owner updated (item 1 "x")'), message('m2', SELLER_SIDE_CHAT, 'run:run_sales', 'status'), message('m1', CTO_CHAT, GRACE_CHAT, 'status')] }
+  const run = async (request: CliRequest): Promise<RunResult> => {
+    calls.push(request)
+    if (request.kind === 'inbox') return { ok: true, json: inbox }
+    if (request.kind === 'worktree-ps') return { ok: true, json: PS_MORE }
+    if (request.kind === 'worker-list') return { ok: true, json: WORKERS_MORE }
+    if (request.kind === 'bot-chats') return { ok: true, json: { chats: request.bot === '[CSO] Третий' ? [{ id: 'seller-side-chat', lastSaid: SECRET }] : [] } }
+    if (request.kind === 'run-tasks') return { ok: true, json: { tasks: request.run === 'run_sales' ? [{ id: 'task_s2', title: SECRET }] : [] } }
+    return { ok: false, error: 'not expected' }
+  }
+  const mail = new MailSource(run, () => BOT_KEYS_MORE, parseWorktreePs, fake.clock, () => {})
+  const m = await mail.ask()
+  assert.deepEqual(m.entries.map((e) => [e.from, e.to]), [
+    [{ kind: 'owner', address: 'orca:items' }, { kind: 'bot', key: 'seller' }],
+    [{ kind: 'bot', key: 'seller' }, { kind: 'bot', key: 'seller' }],
+    [{ kind: 'bot', key: 'cto' }, { kind: 'bot', key: 'bot-2' }]
+  ])
+  assert.ok(!JSON.stringify(m).includes('СЕКРЕТНЫЙ'), 'chat texts and task titles are never kept')
+  const count = (kind: string) => calls.filter((c) => c.kind === kind).length
+  assert.equal(count('bot-chats'), 3, 'one per bot of the office')
+  assert.equal(count('run-tasks'), 1)
+  for (let i = 0; i < 4; i += 1) {
+    await fake.advance(16_000)
+    await mail.ask()
+  }
+  assert.equal(count('bot-chats'), 3, 'cached: nothing is unknown any more')
+  assert.equal(count('run-tasks'), 1)
 })

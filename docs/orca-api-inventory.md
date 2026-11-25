@@ -33,6 +33,17 @@
 >   берём из `worktree ps` (`bot`, `parent.selector`).
 > - `outcome: failure` есть только в `agent.status.changed` (`mainAgent.outcome`), в `agents.list` его нет.
 >
+> **Обновление (v7.1, адреса писем).** В белый список добавлена одна read-only форма:
+> `orca orchestration task-list --run <run_…> --json` (берутся только id задач). `orca bot chats` теперь читается и
+> для почты, но берутся только id чатов. Новых прав у плагина нет.
+>
+> - `structworker_…` — терминал структурного воркера: его нет в `worktree ps`, но он есть в `worker-list`
+>   (`terminal` → `workspace`).
+> - `run:…` — у Run бота `coordinator_handle` пустой (`run-list --full`). Чей Run, видно по его задачам:
+>   `task-list --run` → `taskId` в `worker-list` → воркспейс → бот.
+> - `orca:items` — payload пустой. Кто сделал, видно только по теме, которую пишет Orca: «Your owner …» (овнер) или
+>   «Your other chat …» (другой чат того же бота).
+>
 > **Обновление (этап 4).** Добавлено право `storage:own` (внешность ботов, выбранная тема). Заполнение контекста
 > перепроверено: host API по-прежнему 1.10, в типах и в `orca … --help` про контекст ничего нет; у агентов в
 > `worktree ps` есть поля `children` и `subagentObservation`, но нет контекста и токенов. Поэтому в панели строка

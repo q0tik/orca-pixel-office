@@ -4,6 +4,7 @@
 // envelope over its head); then its routine or its work goes on. Decoration of a real event: the
 // letter itself comes from Orca's inbox, its text is never read.
 import type { Target } from './locations'
+import type { World } from './world'
 
 export const READ_MS = 3_000
 
@@ -19,6 +20,19 @@ export function mailPoint(actor: Pt | null, seat: Pt | null, entrance: Pt | null
     if (seat) return { x: seat.x * 16 + 16, y: seat.y * 16 }
   }
   return entrance ? { x: entrance.x * 16 + 8, y: entrance.y * 16 + 8 } : { x: 0, y: 0 }
+}
+
+/**
+ * The owner's end of a mail (the CEO's office): the CEO's desk, its chair left empty (the owner is
+ * never drawn); without a desk, the owner's door; else the middle of the owner's room.
+ */
+export function ownerPoint(world: Pick<World, 'furniture' | 'doors' | 'rooms'>): Pt | null {
+  const desk = world.furniture.find((f) => f.type === 'ceo-desk')
+  if (desk) return { x: (desk.x + 1.5) * 16, y: (desk.y + 1) * 16 }
+  const door = world.doors.find((d) => d.owner)
+  if (door) return { x: door.x * 16 + 8, y: door.y * 16 + 8 }
+  const room = world.rooms.find((r) => r.kind === 'owner')
+  return room ? { x: (room.x + room.w / 2) * 16, y: (room.y + room.h / 2) * 16 } : null
 }
 
 /** Who is reading a letter now, and until when. */

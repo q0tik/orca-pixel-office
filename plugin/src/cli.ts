@@ -1,5 +1,5 @@
-// Read-only access to Orca's own CLI from the trusted worker, decided by the CTO (stages 2 and 3):
-// exactly seven commands, built here and checked again right before they run. No shell (execFile
+// Read-only access to Orca's own CLI from the trusted worker, decided by the CTO (stages 2 and 3,
+// and the mail addresses after them): exactly eight commands, built here and checked again right before they run. No shell (execFile
 // with an argument array), a fixed binary, a timeout and an output cap. Anything else, every
 // writing command included (send, reply, item set, create…), is refused before a process starts.
 import { execFile } from 'node:child_process'
@@ -22,6 +22,8 @@ export type CliRequest =
   | { kind: 'inbox' }
   /** Dispatch → terminal and workspace, to tell whose worker a `dispatch:` address is. */
   | { kind: 'worker-list' }
+  /** A Run's task ids, to tell whose Run mail goes to (only the ids are kept). */
+  | { kind: 'run-tasks'; run: string }
 
 /** How many messages one read asks for (the CLI has no «since» filter). */
 export const INBOX_LIMIT = '50'
@@ -29,6 +31,11 @@ export const INBOX_LIMIT = '50'
 /** A bot name passed as one argument: never something the CLI could read as a flag. */
 export function safeBotName(name: string): boolean {
   return name.length > 0 && name.length <= 200 && !name.startsWith('-') && !/[\0\r\n]/.test(name)
+}
+
+/** A Run id as Orca prints it (`run_…`): never a flag. */
+export function safeRunId(run: string): boolean {
+  return /^run_[A-Za-z0-9]{1,64}$/.test(run)
 }
 
 export function argsFor(request: CliRequest): string[] {
@@ -47,10 +54,12 @@ export function argsFor(request: CliRequest): string[] {
       return ['orchestration', 'inbox', '--json', '--limit', INBOX_LIMIT]
     case 'worker-list':
       return ['orchestration', 'worker-list', '--json']
+    case 'run-tasks':
+      return ['orchestration', 'task-list', '--run', request.run, '--json']
   }
 }
 
-/** The exact argument lists allowed. `<bot>` stands for one safe bot name. Declared after the limits it uses. */
+/** The exact argument lists allowed. `<bot>` stands for one safe bot name, `<run>` for a Run id. Declared after the limits it uses. */
 const ALLOWED: readonly (readonly string[])[] = [
   ['bot', 'list', '--json'],
   ['worktree', 'ps', '--json'],
@@ -58,15 +67,18 @@ const ALLOWED: readonly (readonly string[])[] = [
   ['bot', 'item', 'list', '--bot', '<bot>', '--json'],
   ['bot', 'chats', '--bot', '<bot>', '--json'],
   ['orchestration', 'inbox', '--json', '--limit', INBOX_LIMIT],
-  ['orchestration', 'worker-list', '--json']
+  ['orchestration', 'worker-list', '--json'],
+  ['orchestration', 'task-list', '--run', '<run>', '--json']
 ]
 
-/** Whether an argument list is one of the seven read-only shapes, word for word. */
+/** Whether an argument list is one of the eight read-only shapes, word for word. */
 export function isAllowed(args: readonly string[]): boolean {
   return ALLOWED.some(
     (shape) =>
       shape.length === args.length &&
-      shape.every((word, i) => (word === '<bot>' ? typeof args[i] === 'string' && safeBotName(args[i]) : word === args[i]))
+      shape.every((word, i) =>
+        word === '<bot>' ? typeof args[i] === 'string' && safeBotName(args[i]) : word === '<run>' ? typeof args[i] === 'string' && safeRunId(args[i]) : word === args[i]
+      )
   )
 }
 

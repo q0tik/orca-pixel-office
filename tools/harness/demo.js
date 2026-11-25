@@ -38,7 +38,13 @@ const mail = {
   error: null,
   entries: [
     { id: 'demo-1', at: now - 30_000, type: 'handoff', subject: '(demo)', from: { kind: 'bot', key: 'ada' }, to: { kind: 'bot', key: 'linus' } },
-    { id: 'demo-2', at: now - 90_000, type: 'question', subject: '(demo)', from: { kind: 'bot', key: 'grace' }, to: { kind: 'bot', key: 'ada' } }
+    { id: 'demo-2', at: now - 90_000, type: 'question', subject: '(demo)', from: { kind: 'bot', key: 'grace' }, to: { kind: 'bot', key: 'ada' } },
+    // The owner changed an item: drawn from the CEO's desk.
+    { id: 'demo-3', at: now - 60_000, type: 'status', subject: 'Your owner updated (item 3 "(demo)")', from: { kind: 'owner', address: 'orca:items' }, to: { kind: 'bot', key: 'linus' } },
+    // A bot's other chat touched an item: a journal line only.
+    { id: 'demo-4', at: now - 120_000, type: 'status', subject: 'Your other chat commented (item 2 "(demo)")', from: { kind: 'system', address: 'orca:items' }, to: { kind: 'bot', key: 'grace' } },
+    // Really outside: another computer. The entrance, with a «?».
+    { id: 'demo-5', at: now - 150_000, type: 'status', subject: '(demo)', from: { kind: 'outside', address: 'ssh:remote/term_demo' }, to: { kind: 'bot', key: 'margaret' } }
   ]
 }
 writeFileSync(join(out, 'desks.json'), JSON.stringify({ desks, at: now }))

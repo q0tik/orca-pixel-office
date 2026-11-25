@@ -1,5 +1,5 @@
 import { assert, test } from 'orca/testing'
-import { addressKind, distanceToSegment, hitPoint, hitSegment, LEGEND_TYPES, mailTooltip, typeName } from '../editor/mailview'
+import { addressKind, distanceToSegment, endRef, hitPoint, hitSegment, LEGEND_TYPES, mailTooltip, typeName } from '../editor/mailview'
 import { Cast } from './actors'
 import { realMap } from './fixtures'
 import { planTargets } from './locations'
@@ -85,6 +85,8 @@ test('tooltips and the legend speak Russian and say why an end went to the entra
   assert.match(outside.join('\n'), /адрес не опознан: Run/)
   assert.equal(addressKind('dispatch:ctx_1'), 'сотрудник не из этого офиса')
   assert.equal(addressKind('orca:items'), 'сама Orca')
+  assert.equal(addressKind('structworker_x'), 'терминал не из этого офиса')
+  assert.equal(addressKind('ssh:remote/term_x'), 'другой компьютер')
   assert.equal(distanceToSegment({ x: 5, y: 3 }, { x: 0, y: 0 }, { x: 10, y: 0 }), 3)
   assert.equal(hitSegment([{ a: { x: 0, y: 0 }, b: { x: 10, y: 0 } }], { x: 5, y: 3 }, 4), 0)
   assert.equal(hitSegment([{ a: { x: 0, y: 0 }, b: { x: 10, y: 0 } }], { x: 5, y: 9 }, 4), -1)
@@ -102,4 +104,12 @@ test('desk labels stay different: the shared prefix goes, long names are cut fro
   assert.equal(workerLabels(['x-a-very-long-unique-name', 'x-b']).get('x-a-very-long-unique-name'), '…ique-name', 'still long after the prefix: cut from the start')
   assert.notEqual(long.get('team-alpha-very-long-branch-one'), long.get('team-alpha-very-long-branch-two'))
   assert.equal(workerLabels(['abc', 'abd']).get('abc'), 'abc', 'no separator: nothing dropped')
+})
+
+test('where each end of a letter is drawn: bot, employee, the CEO\'s office for the owner, the entrance; Orca\'s notices nowhere', () => {
+  assert.equal(endRef({ kind: 'bot', key: 'cto' }), 'bot:cto')
+  assert.equal(endRef({ kind: 'intern', key: 'cto', workerId: 'r::/w' }), 'intern:cto:r::/w')
+  assert.equal(endRef({ kind: 'owner', address: 'orca:items' }), 'owner')
+  assert.equal(endRef({ kind: 'outside', address: 'run:run_x' }), 'outside')
+  assert.equal(endRef({ kind: 'system', address: 'orca:items' }), null, 'a journal line only: no envelope, no line')
 })

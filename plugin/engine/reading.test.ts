@@ -4,7 +4,7 @@ import { envelopeAt, Effects } from './fx'
 import { realMap } from './fixtures'
 import { Life, seededRandom } from './life'
 import { planTargets } from './locations'
-import { mailPoint, Reading, READ_MS } from './reading'
+import { mailPoint, ownerPoint, Reading, READ_MS } from './reading'
 import { assignBotSeats } from './seating'
 
 test('a letter flies to where the recipient is now and follows it while it walks; it leaves from the sender, not its desk', () => {
@@ -62,4 +62,16 @@ test('the recipient stops to read, then goes on with its routine or its work', (
   assert.equal(reading.nextAt(), Infinity, 'nobody reads any more')
   assert.deepEqual([after.get('a')!.x, after.get('a')!.y, after.get('a')!.reading], [away.x, away.y, undefined], 'then on to where it was going')
   assert.equal(after.get('b')!.reading, undefined)
+})
+
+test('the owner\'s letters start at the CEO\'s desk (its chair stays empty), else at the owner\'s door', () => {
+  const world: ReturnType<typeof realMap> | null = realMap()
+  const desk = world!.furniture.find((f) => f.type === 'ceo-desk')!
+  const at = ownerPoint(world!)!
+  assert.deepEqual(at, { x: (desk.x + 1.5) * 16, y: (desk.y + 1) * 16 })
+  const room = world!.rooms.find((r) => r.kind === 'owner')!
+  assert.ok(at.x > room.x * 16 && at.x < (room.x + room.w) * 16 && at.y > room.y * 16 && at.y < (room.y + room.h) * 16, 'inside the CEO\'s office')
+  const noDesk = { ...world!, furniture: world!.furniture.filter((f) => f.type !== 'ceo-desk') }
+  const door = world!.doors.find((d) => d.owner)!
+  assert.deepEqual(ownerPoint(noDesk), { x: door.x * 16 + 8, y: door.y * 16 + 8 })
 })

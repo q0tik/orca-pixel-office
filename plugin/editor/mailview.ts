@@ -1,5 +1,7 @@
-// How mail reads on screen: Russian names of Orca message types, what an unknown address is, and
-// what the pointer is over (an envelope, a line), for the tooltip and the legend.
+// How mail reads on screen: Russian names of Orca message types, where each end of a letter is
+// drawn, what an unknown address is, and what the pointer is over (an envelope, a line), for the
+// tooltip and the legend.
+import type { Party } from '../src/mail'
 
 export const TYPE_RU: Record<string, string> = {
   handoff: 'передача',
@@ -14,14 +16,28 @@ export function typeName(type: string): string {
   return TYPE_RU[type] ?? type
 }
 
+/**
+ * Where an end of a letter is drawn: a bot or one of its workers, the CEO's office for the owner,
+ * the entrance for an outside or unknown address. Null for Orca's own notices that are not the
+ * owner's doing: they are a journal line only, with no envelope and no line on the map.
+ */
+export function endRef(party: Party): string | null {
+  if (party.kind === 'bot') return `bot:${party.key}`
+  if (party.kind === 'intern') return `intern:${party.key}:${party.workerId}`
+  if (party.kind === 'owner') return 'owner'
+  if (party.kind === 'system') return null
+  return 'outside'
+}
+
 /** What kind of address the office could not place (for «адрес не опознан: …»). */
 export function addressKind(address: string): string {
-  if (address.startsWith('run:')) return 'Run без координатора в последних письмах'
+  if (address.startsWith('run:')) return 'Run, чьи задачи не взял ни один бот этого офиса'
   if (/^(dispatch:)?ctx_/.test(address)) return 'сотрудник не из этого офиса'
   if (address.startsWith('orca:')) return 'сама Orca'
-  if (address.startsWith('term_')) return 'терминал не из этого офиса'
+  if (/^(term|structworker)_/.test(address)) return 'терминал не из этого офиса'
   if (address.startsWith('orca_session_id:')) return 'чат не из этого офиса'
-  return 'другое'
+  if (/^(ssh|runtime):/.test(address)) return 'другой компьютер'
+  return 'внешний адрес'
 }
 
 type Pt = { x: number; y: number }

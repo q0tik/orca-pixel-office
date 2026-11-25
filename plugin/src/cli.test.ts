@@ -1,7 +1,7 @@
 import { assert, test } from 'orca/testing'
 import { argsFor, FIXED_BINARY, findBinary, isAllowed, OrcaCli, safeBotName, TIMEOUT_MS, type Exec } from './cli'
 
-test('the whitelist builds exactly the seven read-only commands', () => {
+test('the whitelist builds exactly the eight read-only commands', () => {
   assert.deepEqual(argsFor({ kind: 'bot-list' }), ['bot', 'list', '--json'])
   assert.deepEqual(argsFor({ kind: 'worktree-ps' }), ['worktree', 'ps', '--json'])
   assert.deepEqual(argsFor({ kind: 'bot-work', bot: '[CTO] Ада' }), ['bot', 'work', 'list', '--bot', '[CTO] Ада', '--json'])
@@ -9,6 +9,8 @@ test('the whitelist builds exactly the seven read-only commands', () => {
   assert.deepEqual(argsFor({ kind: 'bot-chats', bot: 'x' }), ['bot', 'chats', '--bot', 'x', '--json'])
   assert.deepEqual(argsFor({ kind: 'inbox' }), ['orchestration', 'inbox', '--json', '--limit', '50'])
   assert.deepEqual(argsFor({ kind: 'worker-list' }), ['orchestration', 'worker-list', '--json'])
+  assert.deepEqual(argsFor({ kind: 'run-tasks', run: 'run_a1b2c3' }), ['orchestration', 'task-list', '--run', 'run_a1b2c3', '--json'])
+  assert.ok(isAllowed(argsFor({ kind: 'run-tasks', run: 'run_abc123' })))
   for (const kind of ['bot-list', 'worktree-ps', 'inbox', 'worker-list'] as const) assert.ok(isAllowed(argsFor({ kind })))
   for (const kind of ['bot-work', 'bot-items', 'bot-chats'] as const) assert.ok(isAllowed(argsFor({ kind, bot: '[CSO] Лео' })))
 })
@@ -27,6 +29,11 @@ test('everything else is refused: writes, extra flags, other commands, flag-like
     ['orchestration', 'check', '--json'],
     ['orchestration', 'reply', '--json'],
     ['orchestration', 'task-list', '--json'],
+    ['orchestration', 'task-list', '--run', '--json', '--json'],
+    ['orchestration', 'task-list', '--run', 'run_x', '--json', '--full'],
+    ['orchestration', 'task-list', '--run', 'run_x; rm', '--json'],
+    ['orchestration', 'task-list', '--run', 'task_x', '--json'],
+    ['orchestration', 'task-update', '--run', 'run_x', '--json'],
     ['bot', 'reply', '--json'],
     ['bot', 'create', '--json'],
     ['bot', 'item', 'set', '--bot', 'x', '--json'],

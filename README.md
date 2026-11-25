@@ -33,6 +33,11 @@ The interface is in Russian (the office was built for a Russian-speaking team); 
   rocking in its chair, feet up, watering a plant, looking out of the window, kicking a ball.
 - **Letters to the bot**: an envelope leaves the sender wherever it stands and flies to the recipient wherever it is,
   following it if it walks; the recipient stops to read it, then goes on.
+- **Every letter between real ends**: any chat of a bot is that bot, any worker (structured ones included) is its
+  employee, a Run is the bot whose workers took its tasks. **The CEO's office is you**: what Orca says the owner did
+  (an item you changed) flies from the CEO's desk, the chair left empty. **The entrance** (with a «?») is only for an
+  outside or unknown address. Orca's own notices that are not yours («Your other chat…») are a journal line, no line
+  on the map. [Screenshot](docs/screenshots/mail-owner-day.png).
 - **«Жизнь» (life)**: idle bots wander the shared rooms — coffee machine, cooler, aquarium, bookshelf, window, sofa —
   and chat in little icon clouds when two of them hang out; bots waiting for you pace the reception holding up a
   sign. Real events always win: a new status sends the bot straight to its real place. Pure animation, zero tokens.
@@ -90,7 +95,8 @@ of the tab bar → **Pixel Office**. Any `*.pixel` file opens as an office.
 | `storage:own` | Your choices: looks, theme, pins, seats, life on/off, decor |
 
 The read-only CLI commands are listed in `plugin/src/cli.ts` and checked word for word by tests: bot list, a bot's
-workers and items, `worktree ps`, the current chat of an open panel, and the inbox (metadata only: bodies are dropped).
+workers and items, `worktree ps`, a bot's chats (the current one for an open panel; only the ids, to place mail),
+the inbox (metadata only: bodies are dropped), `worker-list` and a Run's task list (only the ids).
 No network, no hooks, no writes to Orca.
 
 ## Using it
