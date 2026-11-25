@@ -90,8 +90,8 @@ test('an agent event changes the desk and the status bar, with no new reads', as
   })
   const posted = worker.posts.at(-1)
   assert.equal(posted?.event, 'office.desks')
-  const vitek = (posted?.payload as Office).desks.find((desk) => desk.name === 'Лео')
-  assert.deepEqual([vitek?.state, vitek?.since, vitek?.sessions], ['working', 5000, 1])
+  const leo = (posted?.payload as Office).desks.find((desk) => desk.name === 'Лео')
+  assert.deepEqual([leo?.state, leo?.since, leo?.sessions], ['working', 5000, 1])
   assert.equal(h.callsOf('workspace.list').length, listsBefore)
   const bar = h.callsOf('statusBar.update').at(-1) as { text: string; tone: string }
   assert.equal(bar.text, '🟢 2 работают')

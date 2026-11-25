@@ -58,6 +58,15 @@ export function animalBox(v: Pick<AnimalView, 'x' | 'y' | 'dy'>, sp: Pick<Specie
   return { x: Math.round(v.x * T + 8 - sp.w / 2), y: Math.round((v.y + 1) * T - 1 - sp.h + v.dy), w: sp.w, h: sp.h }
 }
 
+/**
+ * Where an animal sorts among furniture and people: on the floor just under a bot on the same row; lifted onto
+ * something (a sofa, a pet bed, a desk) over the thing it sits on; on a shoulder over the bot it rides.
+ */
+export function animalBaseline(v: Pick<AnimalView, 'y' | 'dy'> & { over?: string }, actorBaseline: ReadonlyMap<string, number>): number {
+  if (v.over) return (actorBaseline.get(v.over) ?? 0) + 0.2
+  return (v.y + 1) * T + (v.dy < 0 ? 0.3 : -0.3)
+}
+
 /** One frame of an animal in a coat; the sprites face right and are mirrored to face left. */
 export function drawAnimal(p: Paint, sp: Species, coatId: string, pose: AnimalPose, frame: number, facing: 'left' | 'right'): void {
   const coat = sp.coats.find((c) => c.id === coatId) ?? sp.coats[0]
@@ -360,8 +369,7 @@ export class Renderer {
       if (!sp) continue
       const box = animalBox(view, sp)
       if (!intersects(box, rect)) continue
-      // Under a bot on the same row, over the furniture it sits on, over the bot whose shoulder it rides.
-      const baseline = view.over ? (actorBaseline.get(view.over) ?? 0) + 0.2 : (view.y + 1) * T + (view.dy < -3 ? 0.3 : -0.3)
+      const baseline = animalBaseline(view, actorBaseline)
       list.push({ kind: 'animal', view, x: box.x, y: box.y, baseline, box })
     }
     for (const actor of frame.actors) {

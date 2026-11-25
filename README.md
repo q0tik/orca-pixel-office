@@ -1,5 +1,7 @@
 # Pixel Office for Orca
 
+![Pixel Office: bots chat in the lounge, a letter catches a bot on its way to the CEO's door](docs/media/demo.gif)
+
 A pixel-art office in an Orca editor tab where your Orca bots are the staff. Every bot has an office
 of its own and stands where its **real** status puts it: at its desk while it works, at the CEO's door while it waits
 for you, in the lounge when it is done. Mail between bots flies across the office as envelopes. Nothing in the office
@@ -52,7 +54,8 @@ The interface is in Russian (the office was built for a Russian-speaking team); 
 |---|---|
 | ![Decor mode](docs/screenshots/decor.png) | ![Dark loft at night](docs/screenshots/office-loft-night.png) |
 
-The screenshots use the made-up demo office (`DEMO=1 tools/harness/build.sh`), not real bots.
+The screenshots use the made-up demo office (`DEMO=1 tools/harness/build.sh`), not real bots. The animation and the
+social preview in `docs/media` are recorded from it, the same every time, by `tools/media/make.sh`.
 
 ## Install
 

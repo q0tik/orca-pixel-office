@@ -25,7 +25,7 @@ import {
 } from './art'
 import { formatDuration, working } from './format'
 import { HAIRS, P, PANTS, SHIRTS, SKINS } from './palette'
-import { Renderer, stackTags, type Canvas } from './render'
+import { animalBaseline, Renderer, stackTags, type Canvas } from './render'
 
 const PALETTE = new Set<string>([
   ...Object.values(P).flatMap((v) => (Array.isArray(v) ? v : [v as string])),
@@ -307,4 +307,14 @@ test('name tags of neighbours never cover each other', () => {
   }
   assert.equal(ys[3], 100, 'a lone tag stays put')
   assert.equal(ys[0], 100, 'the first stays put')
+})
+
+test('an animal on a pet bed, sofa or desk is drawn over it; on the floor under a bot of its row; on a shoulder over the bot', () => {
+  const T = 16
+  const furniture = (y: number, h = 1) => (y + h) * T
+  const bots = new Map([['ada', 6 * T]])
+  assert.ok(animalBaseline({ y: 5, dy: -2 }, bots) > furniture(5), 'pet bed (lifted 2 px): over the bed')
+  assert.ok(animalBaseline({ y: 5, dy: -5 }, bots) > furniture(5), 'sofa: over the cushion')
+  assert.ok(animalBaseline({ y: 5, dy: 0 }, bots) < bots.get('ada')!, 'on the floor: under a bot of the same row')
+  assert.ok(animalBaseline({ y: 5, dy: -15, over: 'ada' }, bots) > bots.get('ada')!, 'on a shoulder: over its bot')
 })
