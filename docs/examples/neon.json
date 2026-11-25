@@ -1,0 +1,98 @@
+{
+  "format": 1,
+  "id": "neon",
+  "name": "Неон (пример)",
+  "author": "you",
+  "license": "MIT",
+  "description": "A small example pack: one recoloured sofa, one sprite floor, one wall, one sprite «plant» (a lava lamp).",
+  "variants": [
+    {
+      "id": "grid-floor",
+      "name": "Неоновая сетка",
+      "target": "floor",
+      "sprite": {
+        "w": 16,
+        "h": 16,
+        "legend": {
+          "a": "#1b1530",
+          "g": "#3cf2ff",
+          "p": "#ff4fd8"
+        },
+        "rows": [
+          "gggggggggggggggg",
+          "gaaaaaapaaaaaaap",
+          "gaaaaapaaaaaaapa",
+          "gaaaapaaaaaaapaa",
+          "gaaapaaaaaaapaaa",
+          "gaapaaaaaaapaaaa",
+          "gapaaaaaaapaaaaa",
+          "gpaaaaaaapaaaaaa",
+          "gaaaaaaapaaaaaaa",
+          "gaaaaaapaaaaaaap",
+          "gaaaaapaaaaaaapa",
+          "gaaaapaaaaaaapaa",
+          "gaaapaaaaaaapaaa",
+          "gaapaaaaaaapaaaa",
+          "gapaaaaaaapaaaaa",
+          "gpaaaaaaapaaaaaa"
+        ]
+      }
+    },
+    {
+      "id": "night-wall",
+      "name": "Ночные стены",
+      "target": "wall",
+      "base": "plain",
+      "palette": {
+        "wallFace": "#2a2148",
+        "wallFaceShade": "#231b3d",
+        "wallFaceDark": "#1b1530"
+      }
+    },
+    {
+      "id": "neon-sofa",
+      "name": "Неоновый диван",
+      "target": "sofa",
+      "palette": {
+        "sofa": "#ff4fd8",
+        "sofaHi": "#ff8be6",
+        "sofaLo": "#b8329a",
+        "cushion": "#3cf2ff"
+      }
+    },
+    {
+      "id": "lava-lamp",
+      "name": "Лава-лампа",
+      "target": "plant",
+      "sprite": {
+        "w": 16,
+        "h": 15,
+        "legend": {
+          "a": "@ink",
+          "b": "#ff4fd8",
+          "c": "#ff9f40",
+          "d": "#fff27a",
+          "e": "@metalLo",
+          "f": "#3cf2ff"
+        },
+        "rows": [
+          ".......aa.......",
+          "......abba......",
+          "......abba......",
+          ".....abccba.....",
+          ".....abccba.....",
+          ".....abccba.....",
+          "....abcddcba....",
+          "....abcddcba....",
+          "....abccccba....",
+          ".....abccba.....",
+          "......abba......",
+          ".......ee.......",
+          "......eeee......",
+          ".....eeffee.....",
+          "....eeeeeeee...."
+        ]
+      }
+    }
+  ]
+}

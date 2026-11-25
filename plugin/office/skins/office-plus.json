@@ -1,0 +1,358 @@
+{
+  "format": 1,
+  "id": "office-plus",
+  "name": "Офис+",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "description": "Пример пакета: варианты полов, стен, ковров, стоек, диванов, столов, кресел и спрайт папоротника.",
+  "variants": [
+    {
+      "id": "carpet-purple",
+      "name": "Фиолетовый ковролин",
+      "target": "floor",
+      "base": "carpet-blue",
+      "palette": {
+        "carpetBlue": "#5b4a8f",
+        "carpetBlueAlt": "#524284",
+        "carpetBlueHi": "#6a59a1"
+      }
+    },
+    {
+      "id": "checker",
+      "name": "Шахматная плитка",
+      "target": "floor",
+      "sprite": {
+        "w": 16,
+        "h": 16,
+        "legend": {
+          "a": "#e9e6df",
+          "b": "#2c2a33",
+          "c": "@tileSeam"
+        },
+        "rows": [
+          "aaaaaaacbbbbbbbc",
+          "aaaaaaacbbbbbbbc",
+          "aaaaaaacbbbbbbbc",
+          "aaaaaaacbbbbbbbc",
+          "aaaaaaacbbbbbbbc",
+          "aaaaaaacbbbbbbbc",
+          "aaaaaaacbbbbbbbc",
+          "cccccccccccccccc",
+          "bbbbbbbcaaaaaaac",
+          "bbbbbbbcaaaaaaac",
+          "bbbbbbbcaaaaaaac",
+          "bbbbbbbcaaaaaaac",
+          "bbbbbbbcaaaaaaac",
+          "bbbbbbbcaaaaaaac",
+          "bbbbbbbcaaaaaaac",
+          "cccccccccccccccc"
+        ]
+      }
+    },
+    {
+      "id": "mint-tile",
+      "name": "Мятная плитка",
+      "target": "floor",
+      "base": "tile",
+      "palette": {
+        "tile": "#cfe9df",
+        "tileAlt": "#b7dccd",
+        "tileSeam": "#98c4b2"
+      }
+    },
+    {
+      "id": "mint",
+      "name": "Мятные стены",
+      "target": "wall",
+      "base": "plain",
+      "palette": {
+        "wallFace": "#bfe3d3",
+        "wallFaceShade": "#a9d3c1",
+        "wallFaceDark": "#8fbeaa"
+      }
+    },
+    {
+      "id": "graphite",
+      "name": "Графит",
+      "target": "wall",
+      "base": "plain",
+      "palette": {
+        "wallFace": "#4b4f5c",
+        "wallFaceShade": "#424653",
+        "wallFaceDark": "#363944"
+      }
+    },
+    {
+      "id": "sunny-stripes",
+      "name": "Солнечные полоски",
+      "target": "wall",
+      "base": "stripes",
+      "palette": {
+        "wallStripe": "#fff1b8",
+        "wallStripeAlt": "#f0b84a",
+        "wallStripeDark": "#c98f2e"
+      }
+    },
+    {
+      "id": "green-rug",
+      "name": "Зелёный",
+      "target": "rug",
+      "base": "red",
+      "palette": {
+        "rugRed": "#4f8f5a",
+        "rugCream": "#e8e0b0"
+      }
+    },
+    {
+      "id": "purple-rug",
+      "name": "Фиолетовый",
+      "target": "rug",
+      "base": "blue",
+      "palette": {
+        "rugBlue": "#6c4f9c",
+        "rugCream": "#f0d9a0"
+      }
+    },
+    {
+      "id": "white-rack",
+      "name": "Белая стойка",
+      "target": "server-rack",
+      "palette": {
+        "rack": "#d9dde4",
+        "rackLo": "#aeb4bf",
+        "rackHi": "#f2f4f7",
+        "ledGreen": "#2fbf6a"
+      }
+    },
+    {
+      "id": "retro-rack",
+      "name": "Ретро, янтарные огни",
+      "target": "server-rack",
+      "palette": {
+        "rack": "#5a4632",
+        "rackLo": "#3d2f22",
+        "rackHi": "#7a634a",
+        "ledGreen": "#ffb341",
+        "ledBlue": "#ff7a3a"
+      }
+    },
+    {
+      "id": "green-sofa",
+      "name": "Зелёный",
+      "target": "sofa",
+      "palette": {
+        "sofa": "#4f9a6a",
+        "sofaHi": "#68b483",
+        "sofaLo": "#3c7a53",
+        "cushion": "#f2d488"
+      }
+    },
+    {
+      "id": "coral-sofa",
+      "name": "Коралловый",
+      "target": "sofa",
+      "palette": {
+        "sofa": "#e07a6a",
+        "sofaHi": "#f0968a",
+        "sofaLo": "#b85d50",
+        "cushion": "#fbe6a8"
+      }
+    },
+    {
+      "id": "blue-loveseat",
+      "name": "Синяя кожа",
+      "target": "loveseat",
+      "palette": {
+        "leather": "#35548a",
+        "leatherHi": "#4a6aa3",
+        "leatherLo": "#263e68"
+      }
+    },
+    {
+      "id": "white-desk",
+      "name": "Белый стол",
+      "target": "desk",
+      "palette": {
+        "deskTop": "#eeeae2",
+        "deskTopHi": "#ffffff",
+        "deskFront": "#cfc9bd",
+        "deskDark": "#aaa396",
+        "deskLeg": "#8d877c"
+      }
+    },
+    {
+      "id": "walnut-desk",
+      "name": "Орех",
+      "target": "desk",
+      "palette": {
+        "deskTop": "#6e4a32",
+        "deskTopHi": "#86603f",
+        "deskFront": "#553724",
+        "deskDark": "#3e281a",
+        "deskLeg": "#2a1b12"
+      }
+    },
+    {
+      "id": "red-chair",
+      "name": "Красное",
+      "target": "chair",
+      "palette": {
+        "chair": "#a8403f",
+        "chairHi": "#c35654",
+        "chairLo": "#7c2d2d"
+      }
+    },
+    {
+      "id": "green-chair",
+      "name": "Зелёное",
+      "target": "chair",
+      "palette": {
+        "chair": "#3f7d55",
+        "chairHi": "#52976a",
+        "chairLo": "#2d5c3d"
+      }
+    },
+    {
+      "id": "teal-armchair",
+      "name": "Бирюзовое",
+      "target": "armchair",
+      "palette": {
+        "leather": "#2f8a8a",
+        "leatherHi": "#3fa5a5",
+        "leatherLo": "#226666"
+      }
+    },
+    {
+      "id": "grey-armchair",
+      "name": "Серое",
+      "target": "armchair",
+      "palette": {
+        "leather": "#6b6f7a",
+        "leatherHi": "#858a96",
+        "leatherLo": "#4f525b"
+      }
+    },
+    {
+      "id": "night-aquarium",
+      "name": "Ночной аквариум",
+      "target": "aquarium",
+      "palette": {
+        "aquaWater": "#22406a",
+        "aquaWaterLo": "#1a3154",
+        "sand": "#8a7a5a",
+        "fishOrange": "#7ff0e0",
+        "fishYellow": "#f07fe0"
+      }
+    },
+    {
+      "id": "reef-aquarium",
+      "name": "Риф",
+      "target": "aquarium",
+      "palette": {
+        "aquaWater": "#3fc1c9",
+        "aquaWaterLo": "#2a9aa3",
+        "sand": "#f2d9a0",
+        "fishOrange": "#ff6fa8",
+        "leaf": "#ff8a5c",
+        "leafLo": "#d9673f"
+      }
+    },
+    {
+      "id": "red-coffee",
+      "name": "Красная кофемашина",
+      "target": "coffee-machine",
+      "palette": {
+        "metalLo": "#8a2a2a",
+        "metal": "#b84040"
+      }
+    },
+    {
+      "id": "fern",
+      "name": "Папоротник (спрайт)",
+      "target": "plant",
+      "sprite": {
+        "w": 16,
+        "h": 26,
+        "legend": {
+          "a": "@leaf",
+          "b": "@leafHi",
+          "c": "@leafLo",
+          "d": "@potLo",
+          "e": "@pot"
+        },
+        "rows": [
+          "................",
+          ".......a........",
+          "......aba.......",
+          "..a...aba...a...",
+          ".aba...a...aba..",
+          "..aba..a..aba...",
+          "...ab.aba.ba....",
+          "....a.aba.a.....",
+          "..aa..aba..aa...",
+          ".abba.aba.abba..",
+          "..aab.aba.baa...",
+          "....bbaba bb....",
+          "......aba.......",
+          "...aa.aba.aa....",
+          "..abbaabaabba...",
+          "....bbbabbb.....",
+          "......aba.......",
+          ".......a........",
+          "......ccc.......",
+          ".....ddddd......",
+          "....deeeeed.....",
+          "....eeeeeee.....",
+          "....deeeeed.....",
+          "....deeeeed.....",
+          ".....deeed......",
+          ".....ddddd......"
+        ]
+      }
+    },
+    {
+      "id": "fern-big",
+      "name": "Папоротник (спрайт)",
+      "target": "big-plant",
+      "sprite": {
+        "w": 16,
+        "h": 26,
+        "legend": {
+          "a": "@leaf",
+          "b": "@leafHi",
+          "c": "@leafLo",
+          "d": "@potLo",
+          "e": "@pot"
+        },
+        "rows": [
+          "................",
+          ".......a........",
+          "......aba.......",
+          "..a...aba...a...",
+          ".aba...a...aba..",
+          "..aba..a..aba...",
+          "...ab.aba.ba....",
+          "....a.aba.a.....",
+          "..aa..aba..aa...",
+          ".abba.aba.abba..",
+          "..aab.aba.baa...",
+          "....bbaba bb....",
+          "......aba.......",
+          "...aa.aba.aa....",
+          "..abbaabaabba...",
+          "....bbbabbb.....",
+          "......aba.......",
+          ".......a........",
+          "......ccc.......",
+          ".....ddddd......",
+          "....deeeeed.....",
+          "....eeeeeee.....",
+          "....deeeeed.....",
+          "....deeeeed.....",
+          ".....deeed......",
+          ".....ddddd......"
+        ]
+      }
+    }
+  ]
+}

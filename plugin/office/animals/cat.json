@@ -1,0 +1,284 @@
+{
+  "format": 1,
+  "id": "cat",
+  "name": "Кот",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "moves": "walk",
+  "speed": 1.4,
+  "size": [
+    16,
+    12
+  ],
+  "rooms": [
+    "lounge",
+    "reception",
+    "corridor",
+    "clevel",
+    "team",
+    "owner"
+  ],
+  "coats": [
+    {
+      "id": "ginger",
+      "name": "Рыжий",
+      "colors": {
+        "fur": "#e89a4a",
+        "furLo": "#c2742c",
+        "nose": "#f2a0a8"
+      }
+    },
+    {
+      "id": "grey",
+      "name": "Серый",
+      "colors": {
+        "fur": "#9aa0ad",
+        "furLo": "#6f7583",
+        "nose": "#f2a0a8"
+      }
+    },
+    {
+      "id": "black",
+      "name": "Чёрный",
+      "colors": {
+        "fur": "#2e2b36",
+        "furLo": "#1c1a22",
+        "nose": "#c97a82"
+      }
+    },
+    {
+      "id": "calico",
+      "name": "Трёхцветный",
+      "colors": {
+        "fur": "#f1e6d2",
+        "furLo": "#d0873e",
+        "nose": "#f2a0a8"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "id": "ryzhik",
+      "name": "Рыжик",
+      "coat": "ginger"
+    },
+    {
+      "id": "murka",
+      "name": "Мурка",
+      "coat": "grey"
+    }
+  ],
+  "sprites": {
+    "legend": {
+      "a": "$fur",
+      "b": "$furLo",
+      "n": "$nose",
+      "e": "@eye",
+      "w": "@white"
+    },
+    "walk": [
+      [
+        "................",
+        "..a.............",
+        ".aa.......a..a..",
+        ".a........aaaa..",
+        ".a........aaea..",
+        ".aabbabbaaaaaan.",
+        ".aaaaaaaaaaaaa..",
+        "..aaaaaaaaa.....",
+        "..aaaaaaaaa.....",
+        "....b.b.b.......",
+        "....b.b.b.......",
+        "....b.b.b......."
+      ],
+      [
+        "................",
+        "................",
+        "..a.............",
+        ".aa.......a..a..",
+        ".a........aaaa..",
+        ".a........aaea..",
+        ".aabbabbaaaaaan.",
+        ".aaaaaaaaaaaaa..",
+        "..aaaaaaaaa.....",
+        "..ababaaaba.....",
+        "...b.b...b......",
+        "................"
+      ],
+      [
+        "................",
+        "..a.............",
+        ".aa.......a..a..",
+        ".a........aaaa..",
+        ".a........aaea..",
+        ".aabbabbaaaaaan.",
+        ".aaaaaaaaaaaaa..",
+        "..aaaaaaaaa.....",
+        "..aaaaaaaaa.....",
+        "....b.b.b.......",
+        "....b.b.b.......",
+        "....b.b.b......."
+      ],
+      [
+        "................",
+        "................",
+        "..a.............",
+        ".aa.......a..a..",
+        ".a........aaaa..",
+        ".a........aaea..",
+        ".aabbabbaaaaaan.",
+        ".aaaaaaaaaaaaa..",
+        "..aaaaaaaaa.....",
+        "..abaabaaba.....",
+        "...b..b..b......",
+        "................"
+      ]
+    ],
+    "sleep": [
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "..........b..b..",
+        "..........aaaa..",
+        "...aaaabbaaaaa..",
+        "..aabbaaaaaeen..",
+        "..aaaaaaaaaaaa..",
+        "..aaaaaaaaaaaa..",
+        "..bbbbbbbbbaaa..",
+        "................"
+      ],
+      [
+        "................",
+        ".............ww.",
+        "..............w.",
+        ".............ww.",
+        "................",
+        "..........b..b..",
+        "..........aaaa..",
+        "...aaaabbaaaaa..",
+        "..aabbaaaaaeen..",
+        "..aaaaaaaaaaaa..",
+        "..bbbbbbbbbaaa..",
+        "................"
+      ]
+    ],
+    "sit": [
+      [
+        "......a...a.....",
+        "......aaaaa.....",
+        "......aaaaa.....",
+        "......aeaea.....",
+        "......aanaa.....",
+        ".....aaaaaa.....",
+        ".....abaaaa.....",
+        "....aabaaaaa..a.",
+        "....aabaaaaa..a.",
+        "....aabaaaaaaaa.",
+        "....aaaaaaaaaaa.",
+        ".....bb..bb....."
+      ],
+      [
+        "......a...a.....",
+        "......aaaaa.....",
+        "......aaaaa.....",
+        "......aeaea.....",
+        "......aanaa.....",
+        ".....aaaaaa.....",
+        ".....abaaaa.....",
+        "....aabaaaaa..a.",
+        "....aabaaaaa..a.",
+        "....aabaaaaaaaa.",
+        "....aaaaaaaaaaa.",
+        ".....bb..bb....."
+      ],
+      [
+        "......a...a.....",
+        "......aaaaa.....",
+        "......aaaaa.....",
+        "......ababa.....",
+        "......aanaa.....",
+        ".....aaaaaa.....",
+        ".....abaaaa.....",
+        "....aabaaaaa..a.",
+        "....aabaaaaa..a.",
+        "....aabaaaaaaaa.",
+        "....aaaaaaaaaaa.",
+        ".....bb..bb....."
+      ]
+    ]
+  },
+  "routines": [
+    {
+      "id": "nap-sofa",
+      "at": "sofa",
+      "pose": "sleep",
+      "stay": [
+        40,
+        120
+      ],
+      "weight": 3
+    },
+    {
+      "id": "nap-bed",
+      "at": "bed",
+      "pose": "sleep",
+      "stay": [
+        40,
+        120
+      ],
+      "weight": 2
+    },
+    {
+      "id": "nap-desk",
+      "at": "desk",
+      "pose": "sleep",
+      "stay": [
+        30,
+        90
+      ],
+      "weight": 2
+    },
+    {
+      "id": "sill",
+      "at": "window",
+      "pose": "sleep",
+      "stay": [
+        30,
+        90
+      ],
+      "weight": 2
+    },
+    {
+      "id": "rub",
+      "at": "bot",
+      "pose": "sit",
+      "stay": [
+        8,
+        20
+      ],
+      "weight": 2
+    },
+    {
+      "id": "fish",
+      "at": "aquarium",
+      "pose": "sit",
+      "stay": [
+        15,
+        40
+      ],
+      "weight": 2
+    },
+    {
+      "id": "stroll",
+      "at": "anywhere",
+      "pose": "sit",
+      "stay": [
+        4,
+        12
+      ],
+      "weight": 3
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+# Orca plugin typings and caches (made by `orca plugin types`).
+plugin/.orca/
+.orca/
+node_modules/
+# Local runs, backups and reports that must never be published.
+scratchpad/
+probe/
+REPORT.md
+*storage*.json
+*.bak
+.DS_Store

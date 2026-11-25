@@ -1,0 +1,211 @@
+{
+  "format": 1,
+  "id": "parrot",
+  "name": "Попугай",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "moves": "fly",
+  "speed": 3.5,
+  "size": [
+    12,
+    12
+  ],
+  "rooms": [
+    "lounge",
+    "reception",
+    "corridor",
+    "clevel"
+  ],
+  "coats": [
+    {
+      "id": "green",
+      "name": "Зелёный",
+      "colors": {
+        "body": "#4cb84a",
+        "wing": "#2f7f8f",
+        "belly": "#e7d84a"
+      }
+    },
+    {
+      "id": "blue",
+      "name": "Сине-жёлтый",
+      "colors": {
+        "body": "#3a7fd9",
+        "wing": "#24508f",
+        "belly": "#f2c94a"
+      }
+    },
+    {
+      "id": "red",
+      "name": "Ара",
+      "colors": {
+        "body": "#d9443a",
+        "wing": "#3a6fd9",
+        "belly": "#f2b84a"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "id": "kesha",
+      "name": "Кеша",
+      "coat": "green"
+    }
+  ],
+  "sprites": {
+    "legend": {
+      "a": "$body",
+      "w": "$wing",
+      "l": "$belly",
+      "y": "@gold",
+      "e": "@eye",
+      "f": "@ink"
+    },
+    "fly": [
+      [
+        "....ww......",
+        "...wwww.....",
+        "...wwww.....",
+        "...wwww.aaa.",
+        "...wwww.aeay",
+        "...aaaaaaaay",
+        "wwwaaaaaa...",
+        "...alllla...",
+        "............",
+        "............",
+        "............",
+        "............"
+      ],
+      [
+        "............",
+        "............",
+        "............",
+        "........aaa.",
+        "........aeay",
+        "...aaaaaaaay",
+        "wwwaaaaaa...",
+        "...alllla...",
+        "...wwww.....",
+        "...wwww.....",
+        "...wwww.....",
+        "....ww......"
+      ]
+    ],
+    "sit": [
+      [
+        "............",
+        "............",
+        "............",
+        "....aaaa....",
+        "....aeaa....",
+        "...yaaaa....",
+        "...yaaaa....",
+        "....aaaaww..",
+        "....alllww..",
+        "....alllww..",
+        "....alllwww.",
+        ".....f.f.ww."
+      ],
+      [
+        "............",
+        "............",
+        "............",
+        "....aaaa....",
+        "....aeaa....",
+        "...yaaaa....",
+        "...yaaaa....",
+        "....aaaaww..",
+        "....alllww..",
+        "....alllww..",
+        "....alllwww.",
+        ".....f.f.ww."
+      ],
+      [
+        "............",
+        "............",
+        "............",
+        "............",
+        "....aaaa....",
+        "....aeaa....",
+        "...yaaaa....",
+        "...yaaaaww..",
+        "....alllww..",
+        "....alllww..",
+        "....alllwww.",
+        ".....f.f.ww."
+      ]
+    ],
+    "perch": [
+      [
+        "............",
+        "............",
+        "............",
+        "....aaaa....",
+        "....aeaa....",
+        "...yaaaa....",
+        "...yaaaa....",
+        "....aaaaww..",
+        "....alllww..",
+        "....alllww..",
+        "....alllwww.",
+        ".....f.f.ww."
+      ],
+      [
+        "............",
+        "............",
+        "............",
+        "............",
+        "....aaaa....",
+        "....aeaa....",
+        "...yaaaa....",
+        "...yaaaaww..",
+        "....alllww..",
+        "....alllww..",
+        "....alllwww.",
+        ".....f.f.ww."
+      ]
+    ]
+  },
+  "routines": [
+    {
+      "id": "cage",
+      "at": "cage",
+      "pose": "perch",
+      "stay": [
+        40,
+        100
+      ],
+      "weight": 3
+    },
+    {
+      "id": "shelf",
+      "at": "shelf",
+      "pose": "perch",
+      "stay": [
+        20,
+        60
+      ],
+      "weight": 3
+    },
+    {
+      "id": "shoulder",
+      "at": "shoulder",
+      "pose": "perch",
+      "stay": [
+        10,
+        30
+      ],
+      "weight": 2
+    },
+    {
+      "id": "sill",
+      "at": "window",
+      "pose": "sit",
+      "stay": [
+        15,
+        40
+      ],
+      "weight": 1
+    }
+  ]
+}

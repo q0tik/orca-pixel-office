@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "id": "day",
+  "name": "Дневной офис",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "description": "Встроенная светлая тема: цвета палитры как есть.",
+  "theme": {
+    "palette": {},
+    "floors": {},
+    "furniture": {}
+  }
+}

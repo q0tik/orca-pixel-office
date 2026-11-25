@@ -1,0 +1,79 @@
+{
+  "manifestVersion": 2,
+  "id": "pixel-office",
+  "name": "Pixel Office",
+  "version": "0.6.0",
+  "description": "A big pixel-art office in an editor tab: departments, the owner's office and a lounge. Every Orca bot has a desk and walks where its real status puts it.",
+  "icon": "assets/icon.png",
+  "engines": {
+    "orca": ">=1.4.259"
+  },
+  "execution": "trusted-worker",
+  "pluginApi": 1,
+  "main": "src/worker.ts",
+  "contributes": {
+    "customEditors": [
+      {
+        "id": "pixel-office",
+        "title": "Pixel Office",
+        "extensions": [
+          ".pixel"
+        ],
+        "entry": "editor/main.ts",
+        "frame": "isolated"
+      }
+    ],
+    "newFiles": [
+      {
+        "id": "pixel-office",
+        "title": "Pixel Office",
+        "extension": ".pixel",
+        "template": "templates/office.pixel"
+      }
+    ],
+    "commands": [
+      {
+        "id": "pixel-office.open",
+        "title": "Open Pixel Office"
+      }
+    ],
+    "statusBarItems": [
+      {
+        "id": "working",
+        "text": "Pixel Office",
+        "icon": "bot",
+        "tone": "neutral",
+        "tooltip": "Pixel Office: open the bots' office",
+        "command": "pixel-office.open"
+      }
+    ],
+    "events": [
+      {
+        "on": "agent.status.changed"
+      },
+      {
+        "on": "workspace.changed"
+      },
+      {
+        "on": "workspace.created"
+      },
+      {
+        "on": "workspace.removed"
+      }
+    ]
+  },
+  "capabilities": [
+    {
+      "kind": "workspace:read"
+    },
+    {
+      "kind": "agent:read"
+    },
+    {
+      "kind": "workspace:write"
+    },
+    {
+      "kind": "storage:own"
+    }
+  ]
+}

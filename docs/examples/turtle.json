@@ -1,0 +1,120 @@
+{
+  "format": 1,
+  "id": "turtle",
+  "name": "Черепаха (пример)",
+  "author": "you",
+  "license": "MIT",
+  "moves": "walk",
+  "speed": 0.4,
+  "size": [
+    12,
+    8
+  ],
+  "rooms": [
+    "lounge",
+    "reception"
+  ],
+  "coats": [
+    {
+      "id": "green",
+      "name": "Зелёная",
+      "colors": {
+        "shell": "#5f8a3a",
+        "shellDark": "#3f5f26",
+        "skin": "#9bbf6a"
+      }
+    },
+    {
+      "id": "brown",
+      "name": "Бурая",
+      "colors": {
+        "shell": "#8a6a3a",
+        "shellDark": "#5f4626",
+        "skin": "#c9b27a"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "id": "tortila",
+      "name": "Тортила",
+      "coat": "green"
+    }
+  ],
+  "sprites": {
+    "legend": {
+      "s": "$shell",
+      "d": "$shellDark",
+      "k": "$skin",
+      "e": "@eye"
+    },
+    "walk": [
+      [
+        "............",
+        "...sssss....",
+        "..sssssss...",
+        "..sddsddske.",
+        "..ssssssskk.",
+        ".ksssssss...",
+        "...kk.kk....",
+        "...kk.kk...."
+      ],
+      [
+        "............",
+        "...sssss....",
+        "..sssssss...",
+        "..sddsddske.",
+        "..ssssssskk.",
+        ".ksssssss...",
+        "..kk...kk...",
+        "..kk...kk..."
+      ]
+    ],
+    "sit": [
+      [
+        "............",
+        "...sssss....",
+        "..sssssss...",
+        "..sddsddske.",
+        "..ssssssskk.",
+        ".ksssssss...",
+        "...kk.kk....",
+        "...kk.kk...."
+      ]
+    ],
+    "sleep": [
+      [
+        "............",
+        "...sssss....",
+        "..sssssss...",
+        "..sddsdds...",
+        "..sssssss...",
+        "..sssssss...",
+        "..ddddddd...",
+        "............"
+      ]
+    ]
+  },
+  "routines": [
+    {
+      "id": "nap",
+      "at": "anywhere",
+      "pose": "sleep",
+      "stay": [
+        60,
+        180
+      ],
+      "weight": 2
+    },
+    {
+      "id": "fish",
+      "at": "aquarium",
+      "pose": "sit",
+      "stay": [
+        30,
+        90
+      ],
+      "weight": 1
+    }
+  ]
+}

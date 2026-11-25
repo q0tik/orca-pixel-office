@@ -1,0 +1,256 @@
+{
+  "format": 1,
+  "id": "dog",
+  "name": "Собака",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "moves": "walk",
+  "speed": 2.2,
+  "size": [
+    16,
+    14
+  ],
+  "rooms": [
+    "lounge",
+    "reception",
+    "corridor",
+    "clevel",
+    "team"
+  ],
+  "coats": [
+    {
+      "id": "brown",
+      "name": "Коричневая",
+      "colors": {
+        "fur": "#a8743f",
+        "furLo": "#7d5328",
+        "ear": "#5e3d1d",
+        "collar": "#d9534f"
+      }
+    },
+    {
+      "id": "golden",
+      "name": "Золотистая",
+      "colors": {
+        "fur": "#e3b25f",
+        "furLo": "#b8873a",
+        "ear": "#c08a3a",
+        "collar": "#3e6fc4"
+      }
+    },
+    {
+      "id": "spotty",
+      "name": "Пятнистая",
+      "colors": {
+        "fur": "#f1ede4",
+        "furLo": "#b9b3a6",
+        "ear": "#2e2b36",
+        "collar": "#3a9a5b"
+      }
+    }
+  ],
+  "instances": [
+    {
+      "id": "bobik",
+      "name": "Бобик",
+      "coat": "brown"
+    }
+  ],
+  "sprites": {
+    "legend": {
+      "a": "$fur",
+      "b": "$furLo",
+      "k": "$ear",
+      "c": "$collar",
+      "n": "@ink",
+      "e": "@eye"
+    },
+    "walk": [
+      [
+        "................",
+        "................",
+        "..........kkaaa.",
+        "a.........kkaea.",
+        "aaa.......kkaaan",
+        "..aaaaaaaakkaaaa",
+        "..aaaaaaaaaaaaa.",
+        "..aaaaaaaaccc...",
+        "..aaaaaaaaaa....",
+        "..bbbbbbbbbb....",
+        "....bb.bbbb.....",
+        "....bb.bbbb.....",
+        "....bb.bbbb.....",
+        "....bb.bbbb....."
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "..........kkaaa.",
+        "a.........kkaea.",
+        "aaa.......kkaaan",
+        "..aaaaaaaakkaaaa",
+        "..aaaaaaaaaaaaa.",
+        "..aaaaaaaaccc...",
+        "..aaaaaaaaaa....",
+        "..bbbbbbbbbb....",
+        "...bb.bb..bb....",
+        "...bb.bb..bb....",
+        "...bb.bb..bb...."
+      ],
+      [
+        "................",
+        "................",
+        "..........kkaaa.",
+        "a.........kkaea.",
+        "aaa.......kkaaan",
+        "..aaaaaaaakkaaaa",
+        "..aaaaaaaaaaaaa.",
+        "..aaaaaaaaccc...",
+        "..aaaaaaaaaa....",
+        "..bbbbbbbbbb....",
+        "....bb.bbbb.....",
+        "....bb.bbbb.....",
+        "....bb.bbbb.....",
+        "....bb.bbbb....."
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "..........kkaaa.",
+        "a.........kkaea.",
+        "aaa.......kkaaan",
+        "..aaaaaaaakkaaaa",
+        "..aaaaaaaaaaaaa.",
+        "..aaaaaaaaccc...",
+        "..aaaaaaaaaa....",
+        "..bbbbbbbbbb....",
+        "...bb..bb.bb....",
+        "...bb..bb.bb....",
+        "...bb..bb.bb...."
+      ]
+    ],
+    "lie": [
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "...........kkaaa",
+        "..aaaaaaaaakkaaa",
+        ".aaaaaaaaaakkaba",
+        "..aaaaaaaaakkaan",
+        "..aaaaaaaaacccaa",
+        "..bbbbbbbbbbbbbb",
+        "................"
+      ],
+      [
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "...........kkaaa",
+        "...........kkaaa",
+        ".aaaaaaaaaakkaba",
+        "..aaaaaaaaakkaan",
+        "..aaaaaaaaacccaa",
+        "..bbbbbbbbbbbbbb",
+        "................"
+      ]
+    ],
+    "sit": [
+      [
+        "................",
+        "....kkaaaakk....",
+        "....kkaaaakk....",
+        "....kkeaaekk....",
+        "....kkaaaakk....",
+        ".....aannaa.....",
+        "....aaaaaaa.....",
+        "....acccccc.....",
+        "....aaaaaaa.....",
+        "...aaaaaaaaa..a.",
+        "...aaaaaaaaaaaa.",
+        "...aaaaaaaaa....",
+        "...aaaaaaaaa....",
+        ".....bb..bb....."
+      ],
+      [
+        "................",
+        "....kkaaaakk....",
+        "....kkaaaakk....",
+        "....kkeaaekk....",
+        "....kkaaaakk....",
+        ".....aannaa.....",
+        "....aaaaaaa.....",
+        "....acccccc.....",
+        "....aaaaaaa.....",
+        ".a.aaaaaaaaa....",
+        ".aaaaaaaaaaa....",
+        "...aaaaaaaaa....",
+        "...aaaaaaaaa....",
+        ".....bb..bb....."
+      ]
+    ]
+  },
+  "routines": [
+    {
+      "id": "follow",
+      "at": "bot",
+      "pose": "sit",
+      "stay": [
+        20,
+        50
+      ],
+      "weight": 3,
+      "follow": true
+    },
+    {
+      "id": "door",
+      "at": "owner-door",
+      "pose": "lie",
+      "stay": [
+        30,
+        90
+      ],
+      "weight": 2
+    },
+    {
+      "id": "bowl",
+      "at": "bowl",
+      "pose": "sit",
+      "stay": [
+        10,
+        25
+      ],
+      "weight": 2
+    },
+    {
+      "id": "bed",
+      "at": "bed",
+      "pose": "lie",
+      "stay": [
+        30,
+        90
+      ],
+      "weight": 1
+    },
+    {
+      "id": "stroll",
+      "at": "anywhere",
+      "pose": "sit",
+      "stay": [
+        4,
+        10
+      ],
+      "weight": 2
+    }
+  ]
+}
