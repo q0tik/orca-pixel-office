@@ -222,6 +222,10 @@ export const BASE_PALETTE = {
   fridgeLit: '#eaf6ff',
   fridgeShelf: '#a9c8de',
   moon: '#ffe6a8',
+  // Windows at night: stars, the city's dark blocks and their lit windows.
+  star: '#f4f0d8',
+  cityDark: '#070a1e',
+  cityLight: '#ffd36b',
   moonLo: '#d9b870',
   // Text overlays.
   tag: '#15121e',

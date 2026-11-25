@@ -40,7 +40,7 @@ import { mailPoint, ownerPoint, Reading, READ_MS } from '../engine/reading'
 import { origin, visibleRect } from '../engine/camera'
 import { parseMap, type World } from '../engine/world'
 import { FURNITURE } from '../engine/catalog'
-import { appliancesInUse, collectLights, LightCache, roomScreen, screenOf, SWITCHABLE, type Light, type ScreenKind } from '../engine/lights'
+import { appliancesInUse, collectLights, LightCache, occupiedRooms, roomScreen, roomTargets, RoomLights, screenOf, SWITCHABLE, type Light, type ScreenKind } from '../engine/lights'
 import type { Desk } from '../src/bots'
 import type { ChatAnswer, Extras } from '../src/extras'
 import type { Mail, MailEntry, Party } from '../src/mail'
@@ -251,9 +251,11 @@ const scheduler = new Scheduler(
     // Living things (5 Hz) and chat clouds change picture without anyone walking.
     const ambient = ambientWanted() && Math.floor(now / AMBIENT_MS) !== drawnAmbient
     const chat = lifeOn && visible() && Math.floor(now / (CHAT_TURN_MS / 5)) !== drawnChat && hasResting()
-    return walked || flying || moved || routed || ambient || chat || petted
+    // A room switching its light on or off fades over ~0.7 s: frames until it is done.
+    const fading = daylight.look.lamps && roomLights.moving()
+    return walked || flying || moved || routed || ambient || chat || petted || fading
   },
-  () => cast.animating() || fx.animating(Date.now()) || follow.moving() || ambientWanted() || (lifeOn && visible() && hasRoutines()) || reading.nextAt(Date.now()) < Infinity || (!!zoo && visible() && zoo.moving())
+  () => cast.animating() || fx.animating(Date.now()) || follow.moving() || (daylight.look.lamps && roomLights.moving()) || ambientWanted() || (lifeOn && visible() && hasRoutines()) || reading.nextAt(Date.now()) < Infinity || (!!zoo && visible() && zoo.moving())
 )
 
 /** Each bot's own office (a C-level office or the mini one), for resting at home. */
@@ -616,8 +618,8 @@ function draw(): void {
     envelopes: envelopeViews(),
     entranceMark: unknownAtEntrance() ? pointOf('outside') : null,
     daylight: { tint: daylight.look.tint, lamps: daylight.look.lamps },
-    lighting: lightingNow(screens, using),
-    lamps: { on: daylight.look.lamps, off: new Set(decor.off), key: `${daylight.look.lamps}|${decor.off.join(',')}` },
+    lighting: lightingNow(screens, using, actors, now),
+    lamps: { on: daylight.look.lamps, off: new Set(decor.off), key: `${daylight.look.lamps}|${decor.off.join(',')}`, night: daylight.phase === 'night' },
     using,
     ambientFrame: Math.floor(now / AMBIENT_MS),
     clock: { hours: typeof pinned === 'number' ? pinned : clockNow.getHours(), minutes: clockNow.getMinutes() },
@@ -738,9 +740,19 @@ const harnessStops = new Map<string, { x: number; y: number; facing: 'up'; doing
 /** The lights shining now and their key; the list is collected again only when the key changes. */
 const lightLists = new LightCache<Light[]>()
 
-function lightingNow(screens: ReadonlyMap<string, ScreenKind>, using: ReadonlySet<string>): { key: string; dark: { color: string; alpha: number }; lights: Light[] } | null {
+/** Each room's light: on while someone is in it, fading in and out (engine/lights.ts). */
+const roomLights = new RoomLights()
+
+function lightingNow(
+  screens: ReadonlyMap<string, ScreenKind>,
+  using: ReadonlySet<string>,
+  people: readonly { x: number; y: number }[],
+  now: number
+): NonNullable<Parameters<Renderer['draw']>[1]['lighting']> | null {
   const look = daylight.look
-  if (!world || !look.lamps || !look.dark) return null
+  if (!world || !look.lamps || !look.dark || !look.lit) return null
+  // The first night frame puts every room straight where it should be; after that the light fades.
+  roomLights.set(roomTargets(world, occupiedRooms(world, people)), now)
   const lit = [...screens].filter(([, k]) => k !== 'off').map(([d, k]) => `${d}=${k}`).sort()
   // Any look may change a light (a lamp's colour, the CEO's desk): every choice is in the key; they change rarely.
   const looks = Object.entries(decor.items).map(([k, v]) => `${k}=${v}`).sort()
@@ -758,7 +770,7 @@ function lightingNow(screens: ReadonlyMap<string, ScreenKind>, using: ReadonlySe
       }
     })
   )
-  return { key, dark: look.dark, lights }
+  return { key, shadeKey: `${daylight.phase}|${roomLights.signature()}`, dark: look.dark, lit: look.lit, levels: roomLights.now, lights }
 }
 // The dev harness (tools/harness) may ask where things are, for screenshots; Orca never sets this.
 if ((globalThis as { __pixelOfficeHarness?: boolean }).__pixelOfficeHarness) {

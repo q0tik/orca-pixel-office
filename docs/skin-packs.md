@@ -114,7 +114,7 @@ Desk chairs are their own `chair` target: recolouring a desk does not change its
   20 pixels up the wall). The sprite is drawn centred horizontally and standing on the bottom of the footprint.
 - One character is one art pixel; the office scales whole pixels only, so sprites stay crisp. Keep to a small palette
   and, ideally, to `@` colours, so the look fits both themes.
-- **Day and night**: in the evening and at night the office darkens and the lights cut pools out of the dark
+- **Day and night**: in the evening and at night the office darkens and the lights lift the dark where they fall
   (see [Lights](#lights)); sprites are darkened like everything else. Pixels in a shining palette colour (`@lampLit`,
   `@lampBulb`, `@flameTip`, `@flameCore`, `@neonA`, `@neonB`, `@garlandWarm`, `@moon`, `@microwaveLit`, `@fridgeLit`,
   `@screenLine`, `@ledGreen`, `@ledAmber`, `@ledBlue`) are drawn again over the dark, so they glow. `@` colours also
@@ -160,11 +160,14 @@ apart at a glance.
 
 ## Lights
 
-From the evening on the office darkens and every light cuts a soft pool, in pixel rings, out of the dark: on the floor
-and the walls of its own room, never through a wall. Lamps, candles, garlands, neon signs and the night light shine
-all night; the aquarium and the server racks glow; a screen glows while its bot works there (code, logs, charts or a
-chat, by the bot's role or its office) and shows a screensaver while the bot is away; the microwave, the coffee machine
-and the fridge light up only while a bot uses them. By day the lamps are off.
+From the evening on the whole office darkens in a cold blue-violet. A room where someone is (a bot, an employee, a
+trainee) switches its light on: the whole room, evenly, fading in over ~0.7 s; empty rooms stay dark; the hall is dimly
+lit. Every lamp lights what is round it (a desk lamp its desk, a wall lamp its wall and the floor under it, a floor lamp
+a sofa and its table), softly and stopped by walls, only a little through a doorway. Light is not painted on top: it
+lifts the night's dark off the scene, so floors, furniture and people keep their own colours and nothing is ever
+brighter than by day. Screens glow while their bot works there and show a screensaver while it is away; the microwave,
+the coffee machine and the fridge light up only while a bot uses them; the windows show a night city that lives
+(houses' windows going out and on, stars, a car, a plane). By day the lamps are off.
 
 A light is a piece of furniture like any other: put one on the map (`office/map.json`), and the owner can change its
 look in «Оформление» or switch it off there (the switch stays off after a restart). A new look of a light is a pack
@@ -174,10 +177,10 @@ variant with a `light` field. Example, `office/skins/lights.json`:
 { "id": "mint-lamp", "name": "Мятный торшер", "target": "floor-lamp", "base": "", "palette": { "lampShade": "#cdeedd", "lampLit": "#c8ffe4" }, "light": { "color": "#b8ffd8" } }
 ```
 
-`palette` recolours the lamp (`lampShade` by day, `lampLit` at night); `light.color` tints its pool; `light.radius` sets
-how far it reaches. The light map is computed once per change (the hour's phase, the theme, a lamp switched, a screen
-on or off, an appliance taken), not every frame; flames, garlands, signs and screens move on the office's one animation
-timer.
+`palette` recolours the lamp (`lampShade` by day, `lampLit` at night); `light.color` tints its light; `light.radius` sets
+how far it reaches (art pixels, at most 64: four tiles). The light map is computed once per change (the hour's phase,
+the theme, a lamp switched, a screen on or off, an appliance taken, a room's light fading), not every frame; flames,
+garlands, signs, screens and the city behind the windows move on the office's one animation timer.
 
 ## Where the owner's choices live
 

@@ -22,15 +22,19 @@ export type PhaseLook = {
   tint: { color: string; alpha: number } | null
   /** Lamps, candles, signs and lit screens shine (engine/lights.ts). */
   lamps: boolean
-  /** With the lamps on: the dark the light map cuts its pools out of (instead of `tint`). */
+  /**
+   * With the lamps on, the light map (engine/lights.ts) multiplies the office by a colour between these two:
+   * `dark` where no light falls (a cold blue-violet night), `lit` in full light (a warm tone just under day).
+   */
   dark?: { color: string; alpha: number }
+  lit?: { color: string; alpha: number }
 }
 
 export const PHASES: Record<Phase, PhaseLook> = {
   morning: { label: 'утро', sky: { sky: '#f4c8a8', glass: '#d9b8c6', glassHi: '#fff1e2' }, tint: { color: '#ffb36b', alpha: 0.06 }, lamps: false },
   day: { label: 'день', sky: {}, tint: null, lamps: false },
-  evening: { label: 'вечер', sky: { sky: '#e0855a', glass: '#7a5a8a', glassHi: '#ffd2a0' }, tint: { color: '#3a2050', alpha: 0.18 }, lamps: true, dark: { color: '#2a1a48', alpha: 0.3 } },
-  night: { label: 'ночь', sky: { sky: '#141a3a', glass: '#1c2450', glassHi: '#f4f0c8' }, tint: { color: '#0a1030', alpha: 0.38 }, lamps: true, dark: { color: '#060a26', alpha: 0.6 } }
+  evening: { label: 'вечер', sky: { sky: '#e0855a', glass: '#7a5a8a', glassHi: '#ffd2a0' }, tint: { color: '#3a2050', alpha: 0.18 }, lamps: true, dark: { color: '#9a8cb4', alpha: 1 }, lit: { color: '#fff4e6', alpha: 1 } },
+  night: { label: 'ночь', sky: { sky: '#0b1032', glass: '#10173f', glassHi: '#f4f0c8' }, tint: { color: '#0a1030', alpha: 0.38 }, lamps: true, dark: { color: '#2e3268', alpha: 1 }, lit: { color: '#fff0da', alpha: 1 } }
 }
 
 /** The phase now, at most once a minute: the same phase object until the minute passes. */

@@ -50,13 +50,16 @@ import {
   type Look,
   type CharPose,
   type FurnitureState,
+  nightWindow,
+  floorTone,
   type Paint
 } from './art'
 import { P } from './palette'
 import { drawSprite, withPalette, type SkinVariant } from './skins'
 import { framesOf, legendColor, type AnimalPose, type AnimalView, type Species } from '../engine/animals'
-import { APPLIANCES, LIGHT_CELL, LightCache, buildLightMap, lightKey, type Darkness, type Light, type LightMap, type ScreenKind } from '../engine/lights'
+import { APPLIANCES, LIGHT_CELL, LightCache, buildLightMap, lampField, lightKey, type Darkness, type LampField, type Light, type ScreenKind } from '../engine/lights'
 import { drawScreen, screenRects, SCREEN_FRAMES } from './lamps'
+import { windowCover, windowOps, windowSeed, type WindowOp } from './windows'
 
 /** Where an animal's sprite is (art pixels): centred on its tile, standing on its bottom, lifted by `dy`. */
 export function animalBox(v: Pick<AnimalView, 'x' | 'y' | 'dy'>, sp: Pick<Species, 'w' | 'h'>): { x: number; y: number; w: number; h: number } {
@@ -173,9 +176,21 @@ export type FrameState = {
    * Evening and night (engine/lights.ts): the dark and every light shining now. The map is rebuilt
    * only when `key` changes; without it the plain `daylight.tint` is laid over the office.
    */
-  lighting?: { key: string; dark: Darkness; lights: readonly Light[] } | null
+  lighting?: {
+    /** Names the accents and the lamps' state: the still layers are built again only when it changes. */
+    key: string
+    /** Names the rooms' light levels: the shade is built again only when it changes (a room fading in or out). */
+    shadeKey: string
+    /** The even dark over a room whose light is off, and the warm tone over one whose light is on. */
+    dark: Darkness
+    lit: Darkness
+    /** Room id → its light level now, 0 (off) to 1 (on). */
+    levels: ReadonlyMap<string, number>
+    /** The small accents: screens, lamps, candles, a garland (each at most two tiles across). */
+    lights: readonly Light[]
+  } | null
   /** Lamps, candles and signs are lit (evening, night), except those switched off in «Оформление» (item keys). `key` names this state (wall lamps baked into the walls follow it). */
-  lamps?: { on: boolean; off: ReadonlySet<string>; key?: string }
+  lamps?: { on: boolean; off: ReadonlySet<string>; key?: string; night?: boolean }
   /** Appliances a bot is using now (item keys): the microwave hums, the fridge stands open. */
   using?: ReadonlySet<string>
   /** A «?» at the entrance: some mail end could not be placed. */
@@ -266,6 +281,7 @@ export class Renderer {
     this.chunks.clear()
     this.sprites.clear()
     this.lightMaps.reset()
+    this.shades.reset()
   }
 
   setTheme(theme: RenderTheme): void {
@@ -319,9 +335,16 @@ export class Renderer {
   private readonly wallLights: PlacedFurniture[]
   /** Wall lamps: baked into the wall chunks, lit or not as `lampState` says. */
   private readonly wallLamps: PlacedFurniture[]
-  private lampState: { on: boolean; off: ReadonlySet<string>; key: string } = { on: false, off: new Set(), key: '' }
-  /** The light map's two bitmaps (the dark with its pools, the glow), rebuilt only when the lighting key changes. */
-  private readonly lightMaps = new LightCache<{ shade: Canvas; glow: Canvas; w: number; h: number; still: Canvas; stillKeys: Set<string> }>()
+  private lampState: { on: boolean; off: ReadonlySet<string>; key: string; night: boolean } = { on: false, off: new Set(), key: '', night: false }
+  /** The lamps' light field and the still shining things, rebuilt only when the lighting key changes. */
+  private readonly lightMaps = new LightCache<{ field: LampField; still: Canvas; stillKeys: Set<string>; windows: NightWindow[] }>()
+  /** The light map (lamps and rooms together), rebuilt only when the lamps or a room's light level change. */
+  private readonly shades = new LightCache<{ canvas: Canvas; data: Uint8ClampedArray }>()
+
+  /** How many times the light map was put together: on a change and while a room fades, never on a still frame. */
+  get shadeBuilds(): number {
+    return this.shades.builds
+  }
   /** Scratch bitmaps (by size) for drawing a figure shaded in front of something that glows. */
   private readonly scratch = new Map<string, Canvas>()
 
@@ -377,7 +400,9 @@ export class Renderer {
   draw(ctx: Ctx2D, frame: FrameState): void {
     const { camera, view } = frame
     // Lamps went on or off: the walls with lamps on them are baked again.
-    const lamps = frame.lamps ? { on: frame.lamps.on, off: frame.lamps.off, key: frame.lamps.key ?? `${frame.lamps.on}|${[...frame.lamps.off].join(',')}` } : { on: false, off: new Set<string>(), key: '' }
+    const lamps = frame.lamps
+      ? { on: frame.lamps.on, off: frame.lamps.off, night: !!frame.lamps.night, key: `${frame.lamps.key ?? `${frame.lamps.on}|${[...frame.lamps.off].join(',')}`}|${frame.lamps.night ? 'n' : ''}` }
+      : { on: false, off: new Set<string>(), key: '', night: false }
     if (lamps.key !== this.lampState.key) {
       this.lampState = lamps
       this.chunks.clear()
@@ -659,6 +684,8 @@ export class Renderer {
   livesIn(rect: Box, screens?: ReadonlyMap<string, ScreenKind>): boolean {
     const box = (item: PlacedFurniture) => ({ x: item.x * T, y: item.y * T - FURNITURE_HEADROOM, w: item.w * T, h: item.h * T + FURNITURE_HEADROOM })
     if (this.world.furniture.some((item) => ANIMATED.has(item.type) && intersects(box(item), rect))) return true
+    // At night the city behind the windows lives.
+    if (this.lampState.night && this.world.furniture.some((item) => item.type === 'window' && item.view !== 'inside' && intersects({ x: item.x * T, y: item.y * T, w: item.w * T, h: T }, rect))) return true
     if (!screens) return false
     return this.world.desks.some((desk) => (screens.get(desk.id) ?? 'off') !== 'off' && intersects({ x: desk.x * T, y: desk.y * T - FURNITURE_HEADROOM, w: 2 * T, h: T + FURNITURE_HEADROOM }, rect))
   }
@@ -771,7 +798,7 @@ export class Renderer {
       const p = paintAt(box.x - chunkBox.x, box.y - chunkBox.y)
       if (item.type === 'rug') this.paintItem(p, item, {}, 0)
       else if (WALL_LIGHTS.has(item.type)) this.paintItem(p, item, { lit: this.lampState.on && !this.lampState.off.has(lightKey(item)) }, 0)
-      else drawWallItem(p, item)
+      else drawWallItem(p, item, { night: this.lampState.night, seed: windowSeed(item), ...this.windowView(item) })
     }
     this.chunks.set(key, canvas)
     return canvas
@@ -859,27 +886,30 @@ export class Renderer {
   }
 
   /**
-   * The light map's bitmaps for this lighting, built once per key: the dark with its pools, the glow,
-   * and every still thing that shines (lamps, wall lamps, the CEO's lamp, the night light) baked in one
-   * layer, so a night frame draws them with one image instead of one each.
+   * Built once per lighting key: the lamps' light field (stopped by walls) and every still thing that
+   * shines by itself (lamp shades, wall lamps, the CEO's lamp, the night light, the stars and the lit
+   * windows of the city) in one layer.
    */
-  private lightBitmaps(lighting: NonNullable<FrameState['lighting']>, frame: FrameState): { shade: Canvas; glow: Canvas; w: number; h: number; still: Canvas; stillKeys: Set<string> } {
+  private lightBitmaps(lighting: NonNullable<FrameState['lighting']>, frame: FrameState): { field: LampField; still: Canvas; stillKeys: Set<string>; windows: NightWindow[] } {
     return this.lightMaps.get(lighting.key, () => {
-      const map: LightMap = buildLightMap(this.world, lighting.lights, lighting.dark)
-      const bitmap = (data: Uint8ClampedArray): Canvas => {
-        const canvas = this.makeCanvas(map.w, map.h)
-        const c = canvas.getContext('2d') as Ctx2D | null
-        if (c && 'createImageData' in c) {
-          const image = c.createImageData(map.w, map.h)
-          image.data.set(data)
-          c.putImageData(image, 0, 0)
-        }
-        return canvas
-      }
+      const field = lampField(this.world, lighting.lights)
       const still = this.makeCanvas(this.pixelWidth, this.pixelHeight)
       const sc = still.getContext('2d') as Ctx2D | null
       const stillKeys = new Set<string>()
+      const windows: NightWindow[] = []
       for (const item of this.world.furniture) {
+        if (item.type === 'window' && this.lampState.night && item.view !== 'inside') {
+          // Stars and the lit windows of the city, only where nothing stands in front of the window.
+          const seed = windowSeed(item)
+          const cover = windowCover(item, this.world.furniture, (p, f) => this.paintItem(p, f, this.itemState(f, frame, 0), 0))
+          const view = nightWindow(item.w * T, seed)
+          if (sc) {
+            for (const [x, y] of view.stars) if (!cover.has(`${x},${y}`)) ((sc.fillStyle = P.star), sc.fillRect(item.x * T + x, item.y * T + y, 1, 1))
+            for (const [x, y] of view.lights) if (!cover.has(`${x},${y}`)) ((sc.fillStyle = P.cityLight), sc.fillRect(item.x * T + x, item.y * T + y, 1, 1))
+          }
+          windows.push({ item, seed, cover, box: { x: item.x * T, y: item.y * T, w: item.w * T, h: T } })
+          continue
+        }
         if (!STILL_GLOW.has(item.type)) continue
         const state = this.itemState(item, frame, 0)
         if (!glows(item.type, state)) continue
@@ -887,39 +917,65 @@ export class Renderer {
         sc?.drawImage(this.furnitureSprite(item, { ...state, glowOnly: true }) as CanvasImageSource, box.x, box.y)
         stillKeys.add(lightKey(item))
       }
-      return { shade: bitmap(map.shade), glow: bitmap(map.glow), w: map.w, h: map.h, still, stillKeys }
+      return { field, still, stillKeys, windows }
+    })
+  }
+
+  /** A window into the next room shows that room's floor; one out of the building shows the sky. */
+  private windowView(item: PlacedFurniture): { inside?: boolean; beyond?: string } {
+    if (item.type !== 'window' || item.view !== 'inside') return {}
+    const W = this.world.width
+    const i = (item.y - 1) * W + item.x + Math.floor(item.w / 2)
+    return { inside: true, beyond: floorTone(item.y > 0 ? this.world.floors[i] : null) }
+  }
+
+  /** The light map: the lamps' field and the rooms' light together, one pixel per cell. */
+  private lightMap(lighting: NonNullable<FrameState['lighting']>, field: LampField): { canvas: Canvas; data: Uint8ClampedArray } {
+    return this.shades.get(`${lighting.key}#${lighting.shadeKey}`, () => {
+      const data = buildLightMap(this.world, lighting.levels, field, lighting.dark, lighting.lit)
+      const canvas = this.makeCanvas(field.w, field.h)
+      const c = canvas.getContext('2d') as Ctx2D | null
+      if (c && 'createImageData' in c) {
+        const image = c.createImageData(field.w, field.h)
+        image.data.set(data)
+        c.putImageData(image, 0, 0)
+      }
+      return { canvas, data }
     })
   }
 
   /**
-   * Night: the dark with its pools (one bitmap, scaled up in hard pixels), the warm glow added on top,
-   * the trembling halos of candles, then — in depth order — whatever shines by itself drawn again over
-   * the dark; a figure standing in front of something shining is drawn again too, shaded like the room.
+   * Night: the light map multiplied over the office (the dark lifted where light falls, never above day),
+   * then the still shining layer, then — in depth order — whatever moves and shines (flames, a garland, a
+   * sign, screens, racks, appliances in use); a figure standing in front of something shining is drawn
+   * again, lit like the place it stands in.
    */
   private drawNight(ctx: Ctx2D, frame: FrameState, list: readonly Drawable[], o: { x: number; y: number }, rect: Box, ambient: number, blit: (c: Canvas, x: number, y: number) => void): void {
     const lighting = frame.lighting!
     const z = frame.camera.zoom
     const maps = this.lightBitmaps(lighting, frame)
+    const lit = this.lightMap(lighting, maps.field)
+    const map = lit.canvas
     ctx.save()
-    ctx.imageSmoothingEnabled = false
-    ctx.drawImage(maps.shade, o.x, o.y, maps.w * LIGHT_CELL * z, maps.h * LIGHT_CELL * z)
-    ctx.globalCompositeOperation = 'lighter'
-    ctx.drawImage(maps.glow, o.x, o.y, maps.w * LIGHT_CELL * z, maps.h * LIGHT_CELL * z)
-    for (const light of lighting.lights) {
-      if (!light.flicker) continue
-      const r = Math.round(light.radius * 0.5)
-      if (!intersects({ x: light.x - r, y: light.y - r, w: r * 2, h: r * 2 }, rect)) continue
-      const step = (Math.imul(ambient + 7, light.x * 31 + light.y) >>> 3) % 3
-      const R = r - 2 + step * 2
-      blit(this.sprite(`halo|${R}|${light.color}`, R * 2, R * 2, (p) => paintHalo(p, R, light.color)), light.x - R, light.y - R)
-    }
-    ctx.restore()
-    // Still lights: one baked layer. Things that move (flames, a garland, a sign, screens, racks) one by one.
-    ctx.save()
+    // Smoothed when scaled: the light fades from cell to cell without steps.
+    ctx.imageSmoothingEnabled = true
+    ctx.globalCompositeOperation = 'multiply'
+    ctx.drawImage(map, o.x, o.y, maps.field.w * LIGHT_CELL * z, maps.field.h * LIGHT_CELL * z)
+    ctx.globalCompositeOperation = 'source-over'
     ctx.imageSmoothingEnabled = false
     ctx.drawImage(maps.still, o.x, o.y, this.pixelWidth * z, this.pixelHeight * z)
     ctx.restore()
     const shining: Box[] = []
+    // The city behind the windows lives: a few pixels change on the one ambient timer.
+    for (const win of maps.windows) {
+      if (!intersects(win.box, rect)) continue
+      shining.push(win.box)
+      for (const op of windowOps(win.box.w, win.seed, ambient)) {
+        if (win.cover.has(`${op.x},${op.y}`)) continue
+        ctx.fillStyle = op.glow ? WINDOW_COLOR[op.color]() : litColor(WINDOW_COLOR[op.color](), lit.data, maps.field.w, win.box.x + op.x, win.box.y + op.y)
+        ctx.fillRect(o.x + (win.box.x + op.x) * z, o.y + (win.box.y + op.y) * z, z, z)
+      }
+    }
     for (const item of this.wallLamps) if (maps.stillKeys.has(lightKey(item))) shining.push(wallLightBox(item))
     for (const item of this.wallLights) {
       const box = wallLightBox(item)
@@ -947,13 +1003,13 @@ export class Renderer {
           shining.push(d.box)
         }
       } else if (d.kind !== 'chair' && shining.some((b) => intersects(b, d.box))) {
-        this.shaded(ctx, this.figure(d, frame), maps, blit)
+        this.shaded(ctx, this.figure(d, frame), map, blit)
       }
     }
   }
 
-  /** A figure drawn again with the room's shade and glow on its own pixels only. */
-  private shaded(ctx: Ctx2D, fig: { canvas: Canvas; x: number; y: number; alpha: number }, maps: { shade: Canvas; glow: Canvas }, blit: (c: Canvas, x: number, y: number) => void): void {
+  /** A figure drawn again, multiplied by the light map on its own pixels only. */
+  private shaded(ctx: Ctx2D, fig: { canvas: Canvas; x: number; y: number; alpha: number }, map: Canvas, blit: (c: Canvas, x: number, y: number) => void): void {
     const w = fig.canvas.width
     const h = fig.canvas.height
     let tmp = this.scratch.get(`${w}x${h}`)
@@ -963,14 +1019,17 @@ export class Renderer {
     }
     const c = tmp.getContext('2d') as Ctx2D | null
     if (!c || !('clearRect' in c)) return
-    c.imageSmoothingEnabled = false
+    const k = LIGHT_CELL
     c.globalCompositeOperation = 'source-over'
     c.clearRect(0, 0, w, h)
+    c.imageSmoothingEnabled = false
     c.drawImage(fig.canvas, 0, 0)
-    c.globalCompositeOperation = 'source-atop'
-    const k = LIGHT_CELL
-    c.drawImage(maps.shade, fig.x / k, fig.y / k, w / k, h / k, 0, 0, w, h)
-    c.drawImage(maps.glow, fig.x / k, fig.y / k, w / k, h / k, 0, 0, w, h)
+    c.imageSmoothingEnabled = true
+    c.globalCompositeOperation = 'multiply'
+    c.drawImage(map, fig.x / k, fig.y / k, w / k, h / k, 0, 0, w, h)
+    c.globalCompositeOperation = 'destination-in'
+    c.imageSmoothingEnabled = false
+    c.drawImage(fig.canvas, 0, 0)
     c.globalCompositeOperation = 'source-over'
     if (fig.alpha < 1) ctx.globalAlpha = fig.alpha
     blit(tmp, fig.x, fig.y)
@@ -1065,6 +1124,27 @@ function isWallItem(item: PlacedFurniture): boolean {
   return FURNITURE[item.type].mount === 'wall'
 }
 
+/** A window at night: its seed, what covers it, where it is. */
+type NightWindow = { item: PlacedFurniture; seed: number; cover: Set<string>; box: Box }
+
+const WINDOW_COLOR: Record<WindowOp['color'], () => string> = {
+  cityDark: () => P.cityDark,
+  cityLight: () => P.cityLight,
+  sky: () => P.sky,
+  carHead: () => P.cityLight,
+  carTail: () => P.markerRed,
+  planeRed: () => P.markerRed,
+  planeWhite: () => P.white
+}
+
+/** A colour as the light map shows it at an art pixel (what is not a light is lit by its room). */
+function litColor(color: string, map: Uint8ClampedArray, cellsW: number, x: number, y: number): string {
+  const i = (Math.floor(y / LIGHT_CELL) * cellsW + Math.floor(x / LIGHT_CELL)) * 4
+  const n = parseInt(color.slice(1), 16)
+  const f = (v: number, c: number) => Math.round((v * (map[i + c] ?? 255)) / 255)
+  return `rgb(${f((n >> 16) & 255, 0)}, ${f((n >> 8) & 255, 1)}, ${f(n & 255, 2)})`
+}
+
 /** Lights on walls: drawn live, not baked into the building. */
 const WALL_LIGHTS: ReadonlySet<string> = new Set(['wall-lamp', 'garland', 'neon-sign'])
 /** Things that may have pixels shining by themselves at night (desks shine through their screens). */
@@ -1079,16 +1159,3 @@ function wallLightBox(item: PlacedFurniture): Box {
   return { x: item.x * T, y: item.y * T - FURNITURE_HEADROOM, w: item.w * T, h: T + FURNITURE_HEADROOM }
 }
 
-/** A soft round halo in hard pixel rings (2-pixel cells), for the trembling light of a flame. */
-export function paintHalo(p: Paint, R: number, color: string): void {
-  const n = parseInt(color.slice(1), 16)
-  const rgb = `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`
-  for (let y = 0; y < R * 2; y += 2) {
-    for (let x = 0; x < R * 2; x += 2) {
-      const d = Math.hypot(x + 1 - R, y + 1 - R) / R
-      if (d >= 1) continue
-      const band = Math.ceil((1 - d) * 3) / 3
-      p(x, y, 2, 2, `rgba(${rgb}, ${(band * 0.16).toFixed(3)})`)
-    }
-  }
-}

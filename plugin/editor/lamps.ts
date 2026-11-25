@@ -265,7 +265,11 @@ export function fridgeOpen(p: Brush, g: Brush): void {
 
 // ── Screens ──────────────────────────────────────────────────────────────────────────────
 
-/** Where a desk's screens are (footprint pixels): the monitor of a desk facing up, three on `multi`, the laptop's lid logo facing down. */
+/**
+ * Where a desk's screens are (footprint pixels): the monitor on the left of a desk facing up, the two side
+ * monitors and the small top one of `multi`, the lid logo of a laptop facing down. A bot at a desk facing
+ * up hides the middle of it with its head (x 10..21, y -16..-5): no screen is there.
+ */
 export function screenRects(item: { w: number; facing: 'up' | 'down'; variant?: string }): { x: number; y: number; w: number; h: number; lid?: boolean }[] {
   const W = item.w * T
   if (item.facing === 'down') {
@@ -273,11 +277,17 @@ export function screenRects(item: { w: number; facing: 'up' | 'down'; variant?: 
     return [{ x: lx + 4, y: 0, w: 4, h: 3, lid: true }]
   }
   if (item.variant === 'multi') {
-    return [0, 1, 2].map((i) => ({ x: i * 11 - (i === 2 ? 1 : 0) + 1, y: (i === 1 ? -12 : -9) + 1, w: 8, h: 7 }))
+    return [
+      { x: 1, y: -8, w: 8, h: 7 },
+      { x: W - 9, y: -8, w: 8, h: 7 },
+      { x: 12, y: -19, w: 8, h: 3 }
+    ]
   }
-  const mx = Math.floor(W / 2) - 8
-  return [{ x: mx + 1, y: -10, w: 14, h: 9 }]
+  return [{ x: 1, y: -10, w: 9, h: 9 }]
 }
+
+/** Where the head of a bot sitting at a desk facing up is (footprint pixels): screens must stay clear of it. */
+export const HEAD_AT_DESK = { x: 10, y: -16, w: 12, h: 12 }
 
 /** Frames a screen cycles through (the ambient frame, every other one). */
 export const SCREEN_FRAMES = 48
@@ -325,7 +335,8 @@ export function drawScreen(g: Brush, kind: ScreenKind, w: number, h: number, fra
       const bars = Math.max(3, Math.floor((w - 1) / 2))
       const t = Math.floor(f / 3)
       for (let i = 0; i < bars; i += 1) {
-        const v = 1 + ((hash(i, t >> 2) % (h - 2)) + i) % (h - 2)
+        const span = Math.max(1, h - 2)
+        const v = 1 + ((hash(i, t >> 2) % span) + i) % span
         const grow = i === bars - 1 ? Math.min(v, 1 + (t % 4)) : v
         g(1 + i * 2, h - 1 - grow, 1, grow, P.chartBar)
       }

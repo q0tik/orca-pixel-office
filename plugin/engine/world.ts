@@ -45,6 +45,8 @@ export type PlacedFurniture = {
   id?: string
   /** A free word for the picture (a counter's look, a plant's kind). */
   variant?: string
+  /** Windows: `outside` looks out of the building (the sky, at night the city), `inside` into the next room. */
+  view?: 'outside' | 'inside'
 }
 
 export type DeskSeat = {
@@ -390,6 +392,13 @@ export function parseMap(raw: unknown): ParseResult {
       const placed: PlacedFurniture = { type, x, y, w, h, facing, room: room.id }
       if (id) placed.id = id
       if (typeof entry.variant === 'string') placed.variant = entry.variant
+      if (type === 'window') {
+        // What the window looks out at: the map may say; else whatever is behind its wall (nothing: outside).
+        if (entry.view !== undefined && entry.view !== 'outside' && entry.view !== 'inside') return errors.add(path, `окно: view — "outside" (наружу) или "inside" (в соседнюю комнату)`)
+        const behind = (tx: number) => (y - 1 < 0 ? 'void' : tiles[at(tx, y - 1)])
+        const outsideNow = Array.from({ length: w }, (_, i) => behind(x + i)).every((k) => k === 'void')
+        placed.view = (entry.view as 'outside' | 'inside' | undefined) ?? (outsideNow ? 'outside' : 'inside')
+      }
       furniture.push(placed)
       if (type === 'desk' && id && seat) {
         deskIds.add(id)

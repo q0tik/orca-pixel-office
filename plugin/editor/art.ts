@@ -231,14 +231,37 @@ export function drawWallItem(p: Paint, item: Pick<PlacedFurniture, 'type' | 'w'>
       // Lights on walls are drawn live by the renderer (lit or not); the same picture.
       return drawFurniture(p, { ...item, h: 1, facing: 'down' }, state)
     case 'window': {
-      p(1, 4, width - 2, 10, P.frame)
-      p(2, 5, width - 4, 8, P.sky)
-      p(2, 10, width - 4, 3, P.glass)
-      for (let x = 16; x < width - 1; x += 16) p(x - 1, 5, 2, 8, P.frame)
-      p(2, 8, width - 4, 1, P.frame)
-      p(4, 6, 3, 1, P.glassHi)
-      p(5, 7, 1, 1, P.glassHi)
-      p(0, 13, width, 1, P.frameLo)
+      // `g` paints what shines at night (stars, lit windows of the city); with `glowOnly` only that.
+      const g = p
+      const b: Paint = state.glowOnly ? () => {} : p
+      b(1, 4, width - 2, 10, P.frame)
+      if (state.inside) {
+        // A window into the next room: through the glass its floor, a streak of reflection; no sky.
+        if (state.glowOnly) return
+        const floor = state.beyond ?? P.concrete
+        b(2, 5, width - 4, 8, floor)
+        for (let i = 0; i < 4; i += 1) b(4 + i, 9 - i, 1, 1, P.glassHi)
+        b(width - 9, 11, 3, 1, P.glassHi)
+        for (let x = 16; x < width - 1; x += 16) b(x - 1, 5, 2, 8, P.frame)
+        b(2, 8, width - 4, 1, P.frame)
+        b(0, 13, width, 1, P.frameLo)
+        return
+      }
+      b(2, 5, width - 4, 8, P.sky)
+      if (state.night) {
+        // Night: a deep blue sky with stars over the dark blocks of the city and their lit windows.
+        const view = nightWindow(width, state.seed ?? 0)
+        for (const [x, y, h] of view.blocks) b(x, y, 1, h, P.cityDark)
+        for (const [x, y] of view.stars) g(x, y, 1, 1, P.star)
+        for (const [x, y] of view.lights) g(x, y, 1, 1, P.cityLight)
+      } else {
+        b(2, 10, width - 4, 3, P.glass)
+        b(4, 6, 3, 1, P.glassHi)
+        b(5, 7, 1, 1, P.glassHi)
+      }
+      for (let x = 16; x < width - 1; x += 16) b(x - 1, 5, 2, 8, P.frame)
+      b(2, 8, width - 4, 1, P.frame)
+      b(0, 13, width, 1, P.frameLo)
       return
     }
     case 'whiteboard': {
@@ -360,12 +383,64 @@ export type FurnitureState = {
   active?: boolean
   /** Only what shines by itself, for drawing again over the dark at night. */
   glowOnly?: boolean
+  /** Windows: it is night (a dark blue sky, stars, the lights of the city). */
+  night?: boolean
+  /** Windows: the window's own seed, so no two windows show the same city. */
+  seed?: number
+  /** Windows: it looks into the next room (no sky, no city), whose floor shows through in `beyond`. */
+  inside?: boolean
+  beyond?: string
 }
 
 const NOTHING: Paint = () => {}
 
 /** Furniture whose picture changes with the ambient frame. */
 export const ANIMATED: ReadonlySet<FurnitureType> = new Set<FurnitureType>(['server-rack', 'aquarium', 'coffee-machine', 'water-cooler', 'candles', 'garland', 'neon-sign', 'microwave'])
+
+/** The main colour of a floor kind (what a window into that room shows through its glass). */
+export function floorTone(kind: FloorKind | null | undefined): string {
+  switch (kind) {
+    case 'wood':
+      return P.wood
+    case 'parquet':
+      return P.parquet
+    case 'carpet-red':
+      return P.carpetRed
+    case 'carpet-blue':
+      return P.carpetBlue
+    case 'carpet-green':
+      return P.carpetGreen
+    case 'tile':
+      return P.tile
+    case 'marble':
+      return P.marble
+    case 'raised':
+      return P.raised
+    default:
+      return P.concrete
+  }
+}
+
+/**
+ * What a window shows at night (pixels of the wall tile row, `width` wide): the dark blocks of the city
+ * (x, top, height), its lit windows and the stars, from the window's own seed. Nothing on the frame bars.
+ */
+export function nightWindow(width: number, seed: number): { blocks: [number, number, number][]; lights: [number, number][]; unlit: [number, number][]; stars: [number, number][] } {
+  const glass = (x: number) => x >= 2 && x < width - 2 && x % 16 !== 15 && x % 16 !== 0
+  const blocks: [number, number, number][] = []
+  const lights: [number, number][] = []
+  const unlit: [number, number][] = []
+  const stars: [number, number][] = []
+  for (let x = 2; x < width - 2; x += 1) {
+    const h = 1 + (hash(Math.floor(x / 3), 11, width, seed) % 3)
+    blocks.push([x, 13 - h, h])
+    if (!glass(x) || h < 2) continue
+    if (hash(x, 5, seed) % 3 === 0) lights.push([x, 13 - h + 1])
+    else unlit.push([x, 13 - h + 1])
+  }
+  for (let x = 3; x < width - 3; x += 1) if (glass(x) && hash(x, 7, width, seed) % 5 === 0) stars.push([x, 5 + (hash(x, 3, seed) % 3)])
+  return { blocks, lights, unlit, stars }
+}
 
 /** Whether a thing in this state has pixels that shine by themselves (drawn again over the dark). */
 export function glows(type: FurnitureType, state: FurnitureState): boolean {
@@ -390,7 +465,7 @@ export function drawFurniture(brush: Paint, item: Pick<PlacedFurniture, 'type' |
     case 'desk':
       if (item.facing === 'up') deskUp(p, W, !!state.screenOn, item.variant, (state.papers ?? 0) > 0)
       else deskDown(p, W, !!state.screenOn, item.variant, (state.papers ?? 0) > 0)
-      paperStack(p, state.papers ?? 0, item.facing === 'up' ? 2 : W - 10, 8)
+      paperStack(p, state.papers ?? 0, W - 10, 8)
       return
     case 'ceo-desk':
       ceoDesk(p)
@@ -704,7 +779,10 @@ function aquarium(cab: Paint, p: Paint, W: number, frame: number): void {
   p(W - 12, -2 - b * 2, 1, 1, P.glassHi)
 }
 
-/** Facing up: the bot sits below the desk with its back to us, looking at the lit screen. */
+/**
+ * Facing up: the bot sits below the desk with its back to us. Its head covers the middle of the desk,
+ * so the monitor stands on the left, where its screen stays in view; the keyboard is in front of the bot.
+ */
 function deskUp(p: Paint, W: number, on: boolean, variant?: string, stack = false): void {
   if (variant === 'multi') return deskMulti(p, W, on, stack)
   p(1, 12, 2, 4, P.deskLeg)
@@ -713,37 +791,30 @@ function deskUp(p: Paint, W: number, on: boolean, variant?: string, stack = fals
   p(0, 2, W, 1, P.deskTopHi)
   p(0, 10, W, 3, P.deskFront)
   p(0, 12, W, 1, P.deskDark)
-  // Monitor on a stand, its screen towards the chair (and us).
-  const mx = Math.floor(W / 2) - 8
-  p(mx + 6, -1, 4, 5, P.metalLo)
-  p(mx + 4, 3, 8, 1, P.metalLo)
-  p(mx, -11, 16, 11, P.metalLo)
-  p(mx + 1, -10, 14, 9, on ? P.screenOn : P.screenOff)
-  if (on) {
-    p(mx + 2, -9, 6, 1, P.screenLine)
-    p(mx + 9, -9, 3, 1, P.screenLineDim)
-    p(mx + 3, -7, 8, 1, P.screenLineDim)
-    p(mx + 3, -5, 5, 1, P.screenLine)
-    p(mx + 9, -5, 4, 1, P.screenLineDim)
-    p(mx + 2, -3, 7, 1, P.screenLine)
-  } else {
-    p(mx + 11, -9, 2, 1, P.metal)
-  }
-  p(mx + 13, -1, 1, 1, on ? P.working : P.metal)
-  // Keyboard, mouse, mug, papers.
-  p(mx + 2, 5, 12, 3, P.keyboardLo)
-  p(mx + 3, 5, 10, 2, P.keyboard)
-  p(mx + 16, 6, 2, 2, P.keyboard)
+  monitor(p, 0, -11, 11, 11, on)
+  p(4, 0, 3, 4, P.metalLo)
+  p(2, 3, 7, 1, P.metalLo)
+  // Keyboard and mouse in front of the bot, papers and a mug on the right.
+  p(10, 5, 12, 3, P.keyboardLo)
+  p(11, 5, 10, 2, P.keyboard)
+  p(23, 6, 2, 2, P.keyboard)
   if (!stack) {
-    p(3, 3, 6, 5, P.paper)
-    p(4, 4, 4, 1, P.paperLine)
-    p(4, 6, 3, 1, P.paperLine)
+    p(24, 3, 5, 4, P.paper)
+    p(25, 4, 3, 1, P.paperLine)
   }
-  p(W - 6, 3, 3, 4, P.white)
-  p(W - 6, 3, 3, 1, P.coffee)
+  p(W - 4, 2, 3, 4, P.white)
+  p(W - 4, 2, 3, 1, P.coffee)
 }
 
-/** The tech office: three monitors in a row, all lit while its bot works. */
+/** A monitor's bezel and screen (lit or dark) in the box x, y, w, h; its screen is the box less a pixel. */
+function monitor(p: Paint, x: number, y: number, w: number, h: number, on: boolean): void {
+  p(x, y, w, h, P.metalLo)
+  p(x + 1, y + 1, w - 2, h - 2, on ? P.screenOn : P.screenOff)
+  if (on) for (let r = 0; r * 2 < h - 3; r += 1) p(x + 2, y + 2 + r * 2, 2 + ((r * 3) % (w - 4)), 1, r % 2 ? P.screenLineDim : P.screenLine)
+  else p(x + w - 3, y + 2, 1, 1, P.metal)
+}
+
+/** The tech office: a monitor either side of the bot and a small third one on a pole above its head. */
 function deskMulti(p: Paint, W: number, on: boolean, stack: boolean): void {
   p(1, 12, 2, 4, P.deskLeg)
   p(W - 3, 12, 2, 4, P.deskLeg)
@@ -751,20 +822,18 @@ function deskMulti(p: Paint, W: number, on: boolean, stack: boolean): void {
   p(0, 2, W, 1, P.deskTopHi)
   p(0, 10, W, 3, P.deskFront)
   p(0, 12, W, 1, P.deskDark)
-  for (let i = 0; i < 3; i += 1) {
-    const mx = i * 11 - (i === 2 ? 1 : 0)
-    const y = i === 1 ? -12 : -9
-    p(mx + 4, y + 9, 2, 3, P.metalLo)
-    p(mx, y, 10, 9, P.metalLo)
-    p(mx + 1, y + 1, 8, 7, on ? P.screenOn : P.screenOff)
-    if (on) {
-      for (let r = 0; r < 3; r += 1) p(mx + 2, y + 2 + r * 2, 3 + ((i + r) % 3) * 2, 1, r % 2 ? P.screenLineDim : P.screenLine)
-    }
-  }
-  p(9, 5, 14, 3, P.keyboardLo)
-  p(10, 5, 12, 2, P.keyboard)
-  p(25, 6, 2, 2, P.keyboard)
-  if (!stack) p(2, 4, 5, 4, P.paper)
+  monitor(p, 0, -9, 10, 9, on)
+  p(4, 0, 2, 3, P.metalLo)
+  monitor(p, W - 10, -9, 10, 9, on)
+  p(W - 6, 0, 2, 3, P.metalLo)
+  // The top monitor stands on a pole down to the desk (behind the bot's head while it works).
+  monitor(p, 11, -20, 10, 5, on)
+  p(15, -15, 2, 18, P.metalLo)
+  p(13, 2, 6, 2, P.metalLo)
+  p(10, 5, 12, 3, P.keyboardLo)
+  p(11, 5, 10, 2, P.keyboard)
+  p(23, 6, 2, 2, P.keyboard)
+  if (!stack) p(W - 8, 3, 5, 4, P.paper)
 }
 
 /** Facing down: the bot sits behind the desk facing us, a laptop lid towards us. */

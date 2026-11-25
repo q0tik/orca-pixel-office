@@ -9,9 +9,9 @@
       "h": 9,
       "floor": "carpet-red",
       "furniture": [
-        { "type": "window", "x": 2, "y": 0, "w": 3 },
+        { "type": "window", "x": 2, "y": 0, "w": 3, "view": "outside" },
         { "type": "clock", "x": 6, "y": 0 },
-        { "type": "window", "x": 9, "y": 0, "w": 3 },
+        { "type": "window", "x": 9, "y": 0, "w": 3, "view": "outside" },
         { "type": "bookshelf", "x": 1, "y": 1 },
         { "type": "big-plant", "x": 12, "y": 1 },
         { "type": "rug", "x": 3, "y": 2, "w": 8, "h": 5, "variant": "cream" },
@@ -22,7 +22,6 @@
         { "type": "plant", "x": 12, "y": 7 },
         { "type": "wall-lamp", "x": 5, "y": 0 },
         { "type": "wall-lamp", "x": 7, "y": 0 },
-        { "type": "floor-lamp", "x": 1, "y": 4 },
         { "type": "floor-lamp", "x": 12, "y": 4 }
       ]
     },
@@ -35,14 +34,13 @@
       "wall": "rose",
       "furniture": [
         { "type": "mirror", "x": 1, "y": 0 },
-        { "type": "window", "x": 3, "y": 0, "w": 2 },
+        { "type": "window", "x": 3, "y": 0, "w": 2, "view": "outside" },
         { "type": "picture", "x": 5, "y": 0 },
         { "type": "rug", "x": 1, "y": 4, "w": 5, "h": 3, "variant": "cream" },
         { "type": "desk", "id": "desk", "x": 2, "y": 3, "facing": "down", "variant": "tidy" },
         { "type": "flowers", "x": 5, "y": 2 },
         { "type": "chair", "x": 5, "y": 6, "facing": "up" },
-        { "type": "plant", "x": 1, "y": 7 },
-        { "type": "floor-lamp", "x": 5, "y": 4, "variant": "paper" }
+        { "type": "plant", "x": 1, "y": 7 }
       ]
     },
     "reception": {
@@ -65,9 +63,7 @@
         { "type": "big-plant", "x": 18, "y": 4 },
         { "type": "wall-lamp", "x": 5, "y": 0, "variant": "globe" },
         { "type": "wall-lamp", "x": 7, "y": 0, "variant": "globe" },
-        { "type": "wall-lamp", "x": 11, "y": 0 },
-        { "type": "floor-lamp", "x": 3, "y": 4 },
-        { "type": "candles", "x": 2, "y": 4, "variant": "jar" }
+        { "type": "floor-lamp", "x": 3, "y": 4 }
       ]
     },
     "office-server": {
@@ -79,7 +75,7 @@
       "wall": "navy",
       "furniture": [
         { "type": "whiteboard", "x": 3, "y": 0, "variant": "arch" },
-        { "type": "window", "x": 6, "y": 0, "w": 2 },
+        { "type": "window", "x": 6, "y": 0, "w": 2, "view": "outside" },
         { "type": "server-rack", "x": 1, "y": 1 },
         { "type": "server-rack", "x": 1, "y": 2 },
         { "type": "server-rack", "x": 1, "y": 3 },
@@ -93,8 +89,7 @@
         { "type": "chair", "x": 6, "y": 11, "facing": "up" },
         { "type": "big-plant", "x": 1, "y": 12 },
         { "type": "printer", "x": 8, "y": 12 },
-        { "type": "wall-lamp", "x": 2, "y": 0, "variant": "bulb" },
-        { "type": "floor-lamp", "x": 2, "y": 6, "variant": "arc" }
+        { "type": "wall-lamp", "x": 2, "y": 0, "variant": "bulb" }
       ]
     },
     "office-sales": {
@@ -106,7 +101,7 @@
       "wall": "stripes",
       "furniture": [
         { "type": "chart", "x": 1, "y": 0 },
-        { "type": "window", "x": 4, "y": 0, "w": 2 },
+        { "type": "window", "x": 4, "y": 0, "w": 2, "view": "outside" },
         { "type": "picture", "x": 7, "y": 0 },
         { "type": "trophy", "x": 8, "y": 1 },
         { "type": "desk", "id": "desk", "x": 3, "y": 4, "facing": "down", "variant": "phone" },
@@ -118,9 +113,7 @@
         { "type": "plant", "x": 1, "y": 12 },
         { "type": "big-plant", "x": 8, "y": 12 },
         { "type": "wall-lamp", "x": 3, "y": 0 },
-        { "type": "wall-lamp", "x": 6, "y": 0 },
-        { "type": "desk-lamp", "x": 4, "y": 4 },
-        { "type": "candles", "x": 3, "y": 10 }
+        { "type": "desk-lamp", "x": 4, "y": 4 }
       ]
     },
     "office-free": {
@@ -130,7 +123,7 @@
       "h": 14,
       "floor": "wood",
       "furniture": [
-        { "type": "window", "x": 1, "y": 0, "w": 3 },
+        { "type": "window", "x": 1, "y": 0, "w": 3, "view": "outside" },
         { "type": "clock", "x": 5, "y": 0 },
         { "type": "bookshelf", "x": 6, "y": 1 },
         { "type": "plant", "x": 8, "y": 1 },
@@ -139,8 +132,7 @@
         { "type": "chair", "x": 7, "y": 11, "facing": "up" },
         { "type": "big-plant", "x": 1, "y": 12 },
         { "type": "wall-lamp", "x": 4, "y": 0, "variant": "globe" },
-        { "type": "desk-lamp", "x": 4, "y": 5, "variant": "arm" },
-        { "type": "floor-lamp", "x": 8, "y": 8 }
+        { "type": "desk-lamp", "x": 4, "y": 5, "variant": "arm" }
       ]
     },
     "office-vacant": {
@@ -152,7 +144,7 @@
       "wall": "bare",
       "furniture": [
         { "type": "sign", "x": 3, "y": 0 },
-        { "type": "window", "x": 6, "y": 0, "w": 2 },
+        { "type": "window", "x": 6, "y": 0, "w": 2, "view": "outside" },
         { "type": "boxes", "x": 1, "y": 1 },
         { "type": "boxes", "x": 2, "y": 1 },
         { "type": "boxes", "x": 1, "y": 2 },
@@ -160,8 +152,7 @@
         { "type": "desk", "id": "desk", "x": 4, "y": 6, "facing": "down", "variant": "boxed" },
         { "type": "paint", "x": 7, "y": 9 },
         { "type": "boxes", "x": 8, "y": 11 },
-        { "type": "chair", "x": 1, "y": 11, "facing": "up" },
-        { "type": "wall-lamp", "x": 5, "y": 0, "variant": "bulb" }
+        { "type": "chair", "x": 1, "y": 11, "facing": "up" }
       ]
     },
     "openspace": {
@@ -211,15 +202,7 @@
         { "type": "plant", "x": 1, "y": 19 },
         { "type": "big-plant", "x": 32, "y": 19 },
         { "type": "wall-lamp", "x": 11, "y": 0 },
-        { "type": "wall-lamp", "x": 26, "y": 0 },
-        { "type": "floor-lamp", "x": 10, "y": 6 },
-        { "type": "floor-lamp", "x": 10, "y": 11 },
-        { "type": "floor-lamp", "x": 10, "y": 16 },
-        { "type": "floor-lamp", "x": 22, "y": 6 },
-        { "type": "floor-lamp", "x": 22, "y": 11 },
-        { "type": "floor-lamp", "x": 22, "y": 16 },
-        { "type": "floor-lamp", "x": 32, "y": 7 },
-        { "type": "floor-lamp", "x": 32, "y": 13 }
+        { "type": "wall-lamp", "x": 26, "y": 0 }
       ],
       "spots": [
         { "kind": "standby", "x": 21, "y": 18 },
@@ -237,7 +220,7 @@
       "furniture": [
         { "type": "picture", "x": 3, "y": 0 },
         { "type": "clock", "x": 9, "y": 0 },
-        { "type": "window", "x": 15, "y": 0, "w": 3 },
+        { "type": "window", "x": 15, "y": 0, "w": 3, "view": "inside" },
         { "type": "counter", "x": 2, "y": 1, "w": 2 },
         { "type": "sink", "x": 4, "y": 1 },
         { "type": "stove", "x": 5, "y": 1 },
@@ -269,7 +252,6 @@
         { "type": "microwave", "x": 7, "y": 1 },
         { "type": "neon-sign", "x": 1, "y": 0 },
         { "type": "garland", "x": 4, "y": 0, "w": 4 },
-        { "type": "floor-lamp", "x": 3, "y": 11, "variant": "arc" },
         { "type": "floor-lamp", "x": 17, "y": 11 },
         { "type": "candles", "x": 5, "y": 13 },
         { "type": "candles", "x": 10, "y": 13 },
@@ -313,13 +295,8 @@
           { "type": "plant", "x": 40, "y": 3 },
           { "type": "plant", "x": 54, "y": 3 },
           { "type": "wall-lamp", "x": 5, "y": 0 },
-          { "type": "wall-lamp", "x": 19, "y": 0 },
           { "type": "wall-lamp", "x": 27, "y": 0 },
-          { "type": "wall-lamp", "x": 36, "y": 0 },
-          { "type": "wall-lamp", "x": 45, "y": 0 },
-          { "type": "floor-lamp", "x": 17, "y": 3 },
-          { "type": "floor-lamp", "x": 33, "y": 3 },
-          { "type": "floor-lamp", "x": 47, "y": 3 }
+          { "type": "wall-lamp", "x": 45, "y": 0 }
         ]
       }
     ],
