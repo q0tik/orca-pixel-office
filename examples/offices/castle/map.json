@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "name": "Замок «Багрово-Багов»",
+  "stamps": {
+    "throne": {
+      "kind": "owner",
+      "label": "Тронный зал",
+      "w": 14,
+      "h": 9,
+      "floor": "carpet-red",
+      "wall": "rose",
+      "furniture": [
+        { "type": "window", "x": 2, "y": 0, "w": 2, "view": "outside" },
+        { "type": "garland", "x": 5, "y": 0, "w": 4 },
+        { "type": "window", "x": 10, "y": 0, "w": 2, "view": "outside" },
+        { "type": "candles", "x": 2, "y": 2 },
+        { "type": "candles", "x": 11, "y": 2 },
+        { "type": "ceo-desk", "x": 5, "y": 2 },
+        { "type": "candles", "x": 2, "y": 6, "variant": "jar" },
+        { "type": "candles", "x": 11, "y": 6, "variant": "jar" },
+        { "type": "rug", "x": 4, "y": 5, "w": 6, "h": 3, "variant": "cream" },
+        { "type": "big-plant", "x": 1, "y": 7 },
+        { "type": "big-plant", "x": 12, "y": 7 },
+        { "type": "bookshelf", "x": 1, "y": 1 },
+        { "type": "floor-lamp", "x": 12, "y": 1 }
+      ]
+    },
+    "library": {
+      "kind": "clevel",
+      "label": "Библиотека",
+      "w": 12,
+      "h": 9,
+      "floor": "wood",
+      "wall": "stripes",
+      "furniture": [
+        { "type": "bookshelf", "x": 1, "y": 1 },
+        { "type": "bookshelf", "x": 3, "y": 1 },
+        { "type": "bookshelf", "x": 5, "y": 1 },
+        { "type": "bookshelf", "x": 7, "y": 1 },
+        { "type": "bookshelf", "x": 9, "y": 1 },
+        { "type": "wall-lamp", "x": 5, "y": 0, "variant": "globe" },
+        { "type": "desk", "id": "d1", "x": 2, "y": 4, "facing": "up", "variant": "tidy" },
+        { "type": "desk", "id": "d2", "x": 5, "y": 4, "facing": "up" },
+        { "type": "desk", "id": "d3", "x": 8, "y": 4, "facing": "up", "variant": "tidy" },
+        { "type": "candles", "x": 3, "y": 4 },
+        { "type": "candles", "x": 6, "y": 4, "variant": "jar" },
+        { "type": "candles", "x": 9, "y": 4 },
+        { "type": "plant", "x": 10, "y": 7 }
+      ]
+    },
+    "barracks": {
+      "kind": "team",
+      "label": "Казарма",
+      "w": 10,
+      "h": 21,
+      "floor": "concrete",
+      "wall": "bare",
+      "furniture": [
+        { "type": "sign", "x": 3, "y": 0 },
+        { "type": "wall-lamp", "x": 6, "y": 0, "variant": "bulb" },
+        { "type": "desk", "id": "k1", "x": 2, "y": 4, "facing": "up" },
+        { "type": "desk", "id": "k2", "x": 5, "y": 4, "facing": "up" },
+        { "type": "desk", "id": "k3", "x": 2, "y": 9, "facing": "up" },
+        { "type": "desk", "id": "k4", "x": 5, "y": 9, "facing": "up" },
+        { "type": "desk", "id": "k5", "x": 2, "y": 14, "facing": "up" },
+        { "type": "desk", "id": "k6", "x": 5, "y": 14, "facing": "up" },
+        { "type": "boxes", "x": 8, "y": 1 },
+        { "type": "boxes", "x": 8, "y": 2 },
+        { "type": "ladder", "x": 8, "y": 18 },
+        { "type": "paint", "x": 1, "y": 19 }
+      ]
+    },
+    "feast": {
+      "kind": "lounge",
+      "label": "Пиршественный зал",
+      "w": 25,
+      "h": 10,
+      "floor": "parquet",
+      "wall": "bare",
+      "furniture": [
+        { "type": "garland", "x": 8, "y": 0, "w": 6 },
+        { "type": "counter", "x": 1, "y": 1, "w": 2 },
+        { "type": "stove", "x": 3, "y": 1 },
+        { "type": "kitchen-table", "x": 7, "y": 3, "w": 6, "h": 2 },
+        { "type": "chair", "x": 7, "y": 2, "facing": "down" },
+        { "type": "chair", "x": 8, "y": 2, "facing": "down" },
+        { "type": "chair", "x": 9, "y": 2, "facing": "down" },
+        { "type": "chair", "x": 10, "y": 2, "facing": "down" },
+        { "type": "chair", "x": 11, "y": 2, "facing": "down" },
+        { "type": "chair", "x": 12, "y": 2, "facing": "down" },
+        { "type": "chair", "x": 7, "y": 5, "facing": "up" },
+        { "type": "chair", "x": 8, "y": 5, "facing": "up" },
+        { "type": "chair", "x": 9, "y": 5, "facing": "up" },
+        { "type": "chair", "x": 10, "y": 5, "facing": "up" },
+        { "type": "chair", "x": 11, "y": 5, "facing": "up" },
+        { "type": "chair", "x": 12, "y": 5, "facing": "up" },
+        { "type": "candles", "x": 7, "y": 3 },
+        { "type": "candles", "x": 10, "y": 3, "variant": "jar" },
+        { "type": "candles", "x": 12, "y": 4 },
+        { "type": "sofa", "x": 17, "y": 6, "w": 4 },
+        { "type": "coffee-table", "x": 17, "y": 8, "w": 4 },
+        { "type": "floor-lamp", "x": 15, "y": 6 },
+        { "type": "pet-bed", "x": 22, "y": 8 },
+        { "type": "pet-bowl", "x": 21, "y": 8 },
+        { "type": "night-light", "x": 1, "y": 8 }
+      ]
+    }
+  },
+  "plan": {
+    "rooms": [
+      { "id": "throne", "stamp": "throne", "x": 0, "y": 0 },
+      { "id": "library", "stamp": "library", "x": 13, "y": 0 },
+      { "id": "barracks", "stamp": "barracks", "x": 24, "y": 0 },
+      { "id": "feast", "stamp": "feast", "x": 0, "y": 11 }
+    ],
+    "corridors": [
+      {
+        "id": "gallery",
+        "x": 0,
+        "y": 8,
+        "w": 25,
+        "h": 4,
+        "floor": "concrete",
+        "furniture": [
+          { "type": "plant", "x": 1, "y": 2 },
+          { "type": "plant", "x": 22, "y": 2 }
+        ]
+      }
+    ],
+    "doors": [
+      { "x": 7, "y": 8, "owner": true },
+      { "x": 19, "y": 8 },
+      { "x": 24, "y": 9 },
+      { "x": 5, "y": 11 },
+      { "x": 20, "y": 11 },
+      { "x": 24, "y": 16 }
+    ],
+    "spots": [
+      { "kind": "owner-wait", "x": 6, "y": 9, "facing": "up" },
+      { "kind": "owner-wait", "x": 8, "y": 9, "facing": "up" },
+      { "kind": "owner-wait", "x": 5, "y": 9, "facing": "up" },
+      { "kind": "owner-wait", "x": 9, "y": 9, "facing": "up" },
+      { "kind": "entrance", "x": 23, "y": 10, "facing": "left" }
+    ]
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "theme": "loft",
+  "animals": {
+    "dog": { "coat": "spotty" },
+    "parrot": { "coat": "green" },
+    "cat": { "off": true }
+  },
+  "bots": [
+    {
+      "key": "lancelot",
+      "name": "Сэр Ланцелот",
+      "role": "CTO",
+      "state": "working",
+      "character": "knight",
+      "coat": "gold",
+      "workers": [
+        { "name": "moat", "state": "working", "subagents": 2, "character": "knight", "coat": "steel" },
+        { "name": "drawbridge", "state": "working", "subagents": 1, "character": "knight", "coat": "black" }
+      ]
+    },
+    {
+      "key": "kostey",
+      "name": "Кощей",
+      "role": "CFO",
+      "state": "waiting",
+      "character": "skeleton",
+      "coat": "old",
+      "needsYou": 1,
+      "workers": [
+        { "name": "treasury", "state": "blocked", "subagents": 0, "character": "skeleton", "coat": "bone" }
+      ]
+    },
+    {
+      "key": "merlin",
+      "name": "Мерлин",
+      "role": "CIO",
+      "state": "working",
+      "character": "hooded",
+      "coat": "crimson",
+      "workers": [
+        { "name": "spellbook", "state": "working", "subagents": 3, "character": "hooded", "coat": "green" },
+        { "name": "potions", "state": "waiting", "subagents": 0, "character": "ninja", "coat": "navy" }
+      ]
+    },
+    { "key": "shut", "name": "Шут", "role": "CMO", "state": "idle", "character": "pirate", "coat": "blue" }
+  ],
+  "mail": [
+    [
+      "question",
+      "kostey",
+      "lancelot"
+    ],
+    [
+      "status",
+      "owner",
+      "merlin"
+    ],
+    [
+      "handoff",
+      "merlin",
+      "shut"
+    ]
+  ]
+}

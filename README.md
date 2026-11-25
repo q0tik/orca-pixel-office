@@ -166,6 +166,18 @@ No network, no hooks, no writes to Orca.
   the colours.
 - **Shift+D** shows a debug line (frames, timers, seats).
 
+## Examples
+
+Four more buildings to copy or to look at: a garage startup, an orbital station, a corporation of 12 executives and 36
+employees, a castle. Each is a `map.json` in the same format as the shipped one, with made-up bots for the harness;
+how to switch to one is in [examples/offices](examples/offices/README.md).
+
+| Garage | Orbital station |
+|---|---|
+| ![Garage](examples/offices/garage/demo.gif) | ![Orbital station](examples/offices/station/demo.gif) |
+| **Corporation** | **Castle** |
+| ![Corporation](examples/offices/corp/demo.gif) | ![Castle at night](examples/offices/castle/night.png) |
+
 ## Characters
 
 ![All the characters: facing us, walking, and as a trainee](docs/screenshots/characters.png)

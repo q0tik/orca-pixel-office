@@ -52,7 +52,7 @@ import { AppearanceStore, cleanPlate, type Appearance, type KeyValueStore } from
 import { CHAIR_POSES, drawCharacter, lookOf } from './art'
 import { Daylight } from './daylight'
 import { endRef, hitPoint, hitSegment, LEGEND_TYPES, mailTooltip, typeName } from './mailview'
-import { assignWorkerDesks, parseWorkerDesks, workerLabels, presentWorkers, WORKER_DESKS_KEY, WORKER_LINGER_MS, WORKER_ROOM, workerKey, workerTarget, type WorkerInfo } from '../engine/workers'
+import { assignWorkerDesks, parseWorkerDesks, workerLabels, presentWorkers, WORKER_DESKS_KEY, WORKER_LINGER_MS, isWorkerDesk, workerKey, workerTarget, type WorkerInfo } from '../engine/workers'
 import type { DeskSeat, PlacedFurniture } from '../engine/world'
 import { applyPalette, DEFAULT_THEME, pickTheme, THEME_STORAGE_KEY, type Theme } from './theme'
 import { builtinVariants, chooseItems, chooseRoom, DECOR_STORAGE_KEY, emptyDecor, itemKey, loadPacks, parseDecor, serializeDecor, switchLight, variantsFor, type Decor, type SkinPack, type SkinTarget, type SkinVariant } from './skins'
@@ -537,7 +537,7 @@ function placeWorkers(botDesks: Set<string>): void {
   const subs = new Map<string, { key: string; color: string; live: boolean }>()
   for (const w of workers) for (const sa of w.subagents ?? []) subs.set(`${w.id}#${sa.id}`, { key: workerKey(w.id), color: STATE_COLOR.working, live: true })
   fx.syncInterns(subs, Date.now())
-  const free = world.desks.filter((d) => d.room === WORKER_ROOM && !botDesks.has(d.id))
+  const free = world.desks.filter((d) => isWorkerDesk(d) && !botDesks.has(d.id))
   const assigned = assignWorkerDesks(workers, free, storedWorkerDesks, pins.workers)
   workerSeats = assigned.seats
   workerOverflow = assigned.overflow
@@ -1010,7 +1010,7 @@ function pinPlaces(kind: PinKind): DeskSeat[] {
   if (!world) return []
   if (kind === 'bots') return world.desks.filter(isBotPlace)
   const botDesks = new Set([...botDeskIds.values()].filter(Boolean))
-  return world.desks.filter((d) => d.room === WORKER_ROOM && !botDesks.has(d.id))
+  return world.desks.filter((d) => isWorkerDesk(d) && !botDesks.has(d.id))
 }
 
 /** Who sits where now, for the kind being pinned. */

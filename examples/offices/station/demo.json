@@ -1,0 +1,88 @@
+{
+  "theme": "day",
+  "animals": {
+    "parrot": { "coat": "blue" },
+    "cat": { "coat": "black" },
+    "dog": { "off": true }
+  },
+  "bots": [
+    {
+      "key": "zond",
+      "name": "Зонд-3",
+      "role": "CTO",
+      "state": "working",
+      "character": "android",
+      "coat": "chrome",
+      "items": { "in_progress": 3 },
+      "workers": [
+        { "name": "telemetry", "state": "working", "subagents": 2, "character": "retro-robot", "coat": "teal" },
+        { "name": "docking", "state": "working", "subagents": 1 }
+      ]
+    },
+    { "key": "gagarina", "name": "Гагарина", "role": "COO", "state": "waiting", "character": "astronaut", "coat": "orange", "needsYou": 2 },
+    {
+      "key": "blip",
+      "name": "Блип",
+      "role": "CSO",
+      "state": "working",
+      "character": "alien",
+      "coat": "green",
+      "workers": [
+        { "name": "xeno-scan", "state": "working", "subagents": 1, "character": "alien", "coat": "purple" }
+      ]
+    },
+    { "key": "gayka", "name": "Гайка", "role": "CFO", "state": "done", "character": "retro-robot", "coat": "tin" },
+    { "key": "lunokhod", "name": "Луноход", "role": "CIO", "state": "idle", "character": "retro-robot", "coat": "teal" },
+    {
+      "key": "orbita",
+      "name": "Орбита",
+      "role": "CMO",
+      "state": "waiting",
+      "character": "astronaut",
+      "coat": "white",
+      "workers": [
+        { "name": "press-kit", "state": "blocked", "subagents": 0 }
+      ]
+    },
+    {
+      "key": "kvazar",
+      "name": "Квазар",
+      "role": "CDO",
+      "state": "working",
+      "character": "android",
+      "coat": "black",
+      "workers": [
+        { "name": "star-map", "state": "working", "subagents": 2, "character": "android", "coat": "white" },
+        { "name": "nav-ui", "state": "waiting", "subagents": 0 }
+      ]
+    },
+    { "key": "pulsar", "name": "Пульсар", "role": "CHRO", "state": "idle", "character": "alien", "coat": "grey" }
+  ],
+  "mail": [
+    [
+      "handoff",
+      "zond",
+      "kvazar"
+    ],
+    [
+      "question",
+      "orbita",
+      "gagarina"
+    ],
+    [
+      "status",
+      "owner",
+      "blip"
+    ],
+    [
+      "status",
+      "outside",
+      "zond"
+    ],
+    [
+      "handoff",
+      "kvazar",
+      "pulsar"
+    ]
+  ]
+}

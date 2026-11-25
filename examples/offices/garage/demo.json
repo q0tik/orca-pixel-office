@@ -1,0 +1,38 @@
+{
+  "theme": "loft",
+  "animals": {
+    "cat": { "coat": "calico" },
+    "dog": { "off": true },
+    "parrot": { "off": true }
+  },
+  "bots": [
+    {
+      "key": "toster",
+      "name": "Тостер",
+      "role": "CTO",
+      "state": "working",
+      "character": "retro-robot",
+      "coat": "red",
+      "items": { "in_progress": 2, "done": 4 }
+    },
+    { "key": "bob", "name": "Енот Боб", "role": "COO", "state": "waiting", "character": "raccoon", "coat": "classic", "needsYou": 1 },
+    { "key": "mila", "name": "Мила", "role": "CMO", "state": "idle", "character": "" }
+  ],
+  "mail": [
+    [
+      "handoff",
+      "toster",
+      "mila"
+    ],
+    [
+      "question",
+      "bob",
+      "toster"
+    ],
+    [
+      "status",
+      "owner",
+      "bob"
+    ]
+  ]
+}

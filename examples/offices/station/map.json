@@ -1,0 +1,207 @@
+{
+  "version": 1,
+  "name": "Орбитальная станция «Кефир-7»",
+  "stamps": {
+    "lab-a": {
+      "kind": "clevel",
+      "label": "Лаборатория А",
+      "w": 11,
+      "h": 10,
+      "floor": "raised",
+      "wall": "navy",
+      "furniture": [
+        { "type": "window", "x": 4, "y": 0, "w": 3, "view": "outside" },
+        { "type": "wall-lamp", "x": 2, "y": 0, "variant": "bulb" },
+        { "type": "wall-lamp", "x": 8, "y": 0, "variant": "bulb" },
+        { "type": "desk", "id": "d1", "x": 2, "y": 3, "facing": "up", "variant": "multi" },
+        { "type": "desk", "id": "d2", "x": 6, "y": 3, "facing": "up", "variant": "multi" },
+        { "type": "desk", "id": "d3", "x": 2, "y": 6, "facing": "up" },
+        { "type": "desk", "id": "d4", "x": 6, "y": 6, "facing": "up" },
+        { "type": "server-rack", "x": 1, "y": 1 },
+        { "type": "server-rack", "x": 9, "y": 3 },
+        { "type": "server-rack", "x": 9, "y": 4 },
+        { "type": "server-rack", "x": 9, "y": 5 },
+        { "type": "plant", "x": 1, "y": 8, "variant": "cactus" },
+        { "type": "printer", "x": 9, "y": 8 }
+      ]
+    },
+    "lab-b": {
+      "kind": "clevel",
+      "label": "Лаборатория Б",
+      "w": 11,
+      "h": 10,
+      "floor": "tile",
+      "wall": "sage",
+      "furniture": [
+        { "type": "window", "x": 4, "y": 0, "w": 3, "view": "outside" },
+        { "type": "wall-lamp", "x": 2, "y": 0, "variant": "bulb" },
+        { "type": "wall-lamp", "x": 8, "y": 0, "variant": "bulb" },
+        { "type": "desk", "id": "d1", "x": 2, "y": 3, "facing": "up", "variant": "multi" },
+        { "type": "desk", "id": "d2", "x": 6, "y": 3, "facing": "up", "variant": "multi" },
+        { "type": "desk", "id": "d3", "x": 2, "y": 6, "facing": "up" },
+        { "type": "desk", "id": "d4", "x": 6, "y": 6, "facing": "up" },
+        { "type": "bookshelf", "x": 8, "y": 1 },
+        { "type": "aquarium", "x": 7, "y": 8 },
+        { "type": "trophy", "x": 9, "y": 5 },
+        { "type": "plant", "x": 1, "y": 8 },
+        { "type": "desk-lamp", "x": 3, "y": 6 }
+      ]
+    },
+    "bridge": {
+      "kind": "owner",
+      "label": "Мостик",
+      "w": 22,
+      "h": 10,
+      "floor": "carpet-blue",
+      "wall": "navy",
+      "furniture": [
+        { "type": "window", "x": 3, "y": 0, "w": 6, "view": "outside" },
+        { "type": "clock", "x": 10, "y": 0 },
+        { "type": "window", "x": 12, "y": 0, "w": 6, "view": "outside" },
+        { "type": "server-rack", "x": 1, "y": 1 },
+        { "type": "server-rack", "x": 1, "y": 2 },
+        { "type": "server-rack", "x": 20, "y": 1 },
+        { "type": "server-rack", "x": 20, "y": 2 },
+        { "type": "ceo-desk", "x": 9, "y": 3 },
+        { "type": "chair", "x": 10, "y": 5, "facing": "up" },
+        { "type": "trophy", "x": 16, "y": 3 },
+        { "type": "floor-lamp", "x": 3, "y": 4 },
+        { "type": "floor-lamp", "x": 18, "y": 4 },
+        { "type": "rug", "x": 5, "y": 6, "w": 12, "h": 2, "variant": "blue" },
+        { "type": "big-plant", "x": 1, "y": 8 },
+        { "type": "big-plant", "x": 20, "y": 8 }
+      ]
+    },
+    "hydro": {
+      "kind": "lounge",
+      "label": "Гидропоника и камбуз",
+      "w": 15,
+      "h": 14,
+      "floor": "tile",
+      "wall": "sage",
+      "furniture": [
+        { "type": "garland", "x": 2, "y": 0, "w": 4 },
+        { "type": "neon-sign", "x": 8, "y": 0 },
+        { "type": "counter", "x": 1, "y": 1, "w": 3 },
+        { "type": "sink", "x": 4, "y": 1 },
+        { "type": "stove", "x": 5, "y": 1 },
+        { "type": "fridge", "x": 6, "y": 1 },
+        { "type": "coffee-machine", "x": 7, "y": 1 },
+        { "type": "microwave", "x": 8, "y": 1 },
+        { "type": "kitchen-table", "x": 2, "y": 4, "w": 3, "h": 2 },
+        { "type": "chair", "x": 3, "y": 3, "facing": "down" },
+        { "type": "chair", "x": 3, "y": 6, "facing": "up" },
+        { "type": "plant", "x": 9, "y": 3, "variant": "cactus" },
+        { "type": "plant", "x": 10, "y": 3 },
+        { "type": "plant", "x": 11, "y": 3, "variant": "cactus" },
+        { "type": "plant", "x": 12, "y": 3 },
+        { "type": "plant", "x": 13, "y": 3, "variant": "cactus" },
+        { "type": "big-plant", "x": 9, "y": 6 },
+        { "type": "big-plant", "x": 10, "y": 6 },
+        { "type": "big-plant", "x": 11, "y": 6 },
+        { "type": "big-plant", "x": 12, "y": 6 },
+        { "type": "big-plant", "x": 13, "y": 6 },
+        { "type": "sofa", "x": 2, "y": 9 },
+        { "type": "coffee-table", "x": 2, "y": 11, "w": 3 },
+        { "type": "sofa", "x": 8, "y": 9 },
+        { "type": "coffee-table", "x": 8, "y": 11, "w": 3 },
+        { "type": "candles", "x": 9, "y": 11 },
+        { "type": "floor-lamp", "x": 6, "y": 9 },
+        { "type": "pet-bed", "x": 12, "y": 11 },
+        { "type": "pet-bowl", "x": 13, "y": 11 },
+        { "type": "night-light", "x": 13, "y": 12 }
+      ]
+    },
+    "airlock": {
+      "kind": "reception",
+      "label": "Шлюз",
+      "w": 8,
+      "h": 14,
+      "floor": "marble",
+      "furniture": [
+        { "type": "clock", "x": 2, "y": 0 },
+        { "type": "wall-lamp", "x": 5, "y": 0, "variant": "globe" },
+        { "type": "loveseat", "x": 1, "y": 2 },
+        { "type": "coffee-table", "x": 1, "y": 3, "w": 2 },
+        { "type": "water-cooler", "x": 6, "y": 1 },
+        { "type": "bird-cage", "x": 6, "y": 4 },
+        { "type": "aquarium", "x": 1, "y": 8 },
+        { "type": "big-plant", "x": 1, "y": 11 },
+        { "type": "plant", "x": 6, "y": 11 }
+      ]
+    },
+    "control": {
+      "kind": "team",
+      "label": "Центр управления",
+      "w": 21,
+      "h": 14,
+      "floor": "raised",
+      "wall": "navy",
+      "furniture": [
+        { "type": "whiteboard", "x": 3, "y": 0 },
+        { "type": "chart", "x": 8, "y": 0 },
+        { "type": "tv", "x": 13, "y": 0 },
+        { "type": "clock", "x": 17, "y": 0 },
+        { "type": "printer", "x": 1, "y": 1 },
+        { "type": "server-rack", "x": 19, "y": 1 },
+        { "type": "server-rack", "x": 19, "y": 2 },
+        { "type": "desk", "id": "c1", "x": 2, "y": 4, "facing": "up", "variant": "multi" },
+        { "type": "desk", "id": "c5", "x": 2, "y": 9, "facing": "up" },
+        { "type": "desk", "id": "c2", "x": 6, "y": 4, "facing": "up", "variant": "multi" },
+        { "type": "desk", "id": "c6", "x": 6, "y": 9, "facing": "up" },
+        { "type": "desk", "id": "c3", "x": 11, "y": 4, "facing": "up", "variant": "multi" },
+        { "type": "desk", "id": "c7", "x": 11, "y": 9, "facing": "up" },
+        { "type": "desk", "id": "c4", "x": 15, "y": 4, "facing": "up", "variant": "multi" },
+        { "type": "desk", "id": "c8", "x": 15, "y": 9, "facing": "up" },
+        { "type": "plant", "x": 1, "y": 12 },
+        { "type": "big-plant", "x": 19, "y": 12 }
+      ]
+    }
+  },
+  "plan": {
+    "rooms": [
+      { "id": "lab-a", "stamp": "lab-a", "x": 0, "y": 0 },
+      { "id": "bridge", "stamp": "bridge", "x": 10, "y": 0 },
+      { "id": "lab-b", "stamp": "lab-b", "x": 31, "y": 0 },
+      { "id": "hydro", "stamp": "hydro", "x": 0, "y": 13 },
+      { "id": "airlock", "stamp": "airlock", "x": 14, "y": 13 },
+      { "id": "control", "stamp": "control", "x": 21, "y": 13 }
+    ],
+    "corridors": [
+      {
+        "id": "ring",
+        "x": 0,
+        "y": 9,
+        "w": 42,
+        "h": 5,
+        "floor": "concrete",
+        "furniture": [
+          { "type": "wall-lamp", "x": 8, "y": 0 },
+          { "type": "wall-lamp", "x": 33, "y": 0 },
+          { "type": "plant", "x": 1, "y": 3 },
+          { "type": "water-cooler", "x": 28, "y": 1 },
+          { "type": "plant", "x": 40, "y": 3 }
+        ]
+      }
+    ],
+    "doors": [
+      { "x": 20, "y": 9, "owner": true },
+      { "x": 5, "y": 9 },
+      { "x": 36, "y": 9 },
+      { "x": 10, "y": 13 },
+      { "x": 17, "y": 13 },
+      { "x": 31, "y": 13 },
+      { "x": 14, "y": 20 },
+      { "x": 21, "y": 18 }
+    ],
+    "spots": [
+      { "kind": "owner-wait", "x": 19, "y": 10, "facing": "up" },
+      { "kind": "owner-wait", "x": 21, "y": 10, "facing": "up" },
+      { "kind": "owner-wait", "x": 18, "y": 10, "facing": "up" },
+      { "kind": "owner-wait", "x": 22, "y": 10, "facing": "up" },
+      { "kind": "kitchen", "x": 5, "y": 15, "facing": "up" },
+      { "kind": "kitchen", "x": 7, "y": 15, "facing": "up" },
+      { "kind": "entrance", "x": 18, "y": 25, "facing": "up" }
+    ]
+  }
+}

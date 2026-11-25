@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "name": "Гараж «Стартап на коленке»",
+  "stamps": {
+    "boss": {
+      "kind": "owner",
+      "label": "CEO",
+      "w": 9,
+      "h": 7,
+      "floor": "carpet-red",
+      "wall": "stripes",
+      "furniture": [
+        { "type": "window", "x": 2, "y": 0, "w": 2, "view": "outside" },
+        { "type": "clock", "x": 5, "y": 0 },
+        { "type": "wall-lamp", "x": 6, "y": 0 },
+        { "type": "bookshelf", "x": 1, "y": 1 },
+        { "type": "plant", "x": 7, "y": 1 },
+        { "type": "ceo-desk", "x": 3, "y": 2 },
+        { "type": "chair", "x": 4, "y": 4, "facing": "up" },
+        { "type": "floor-lamp", "x": 7, "y": 4 }
+      ]
+    },
+    "shop": {
+      "kind": "clevel",
+      "label": "Верстак",
+      "w": 16,
+      "h": 7,
+      "floor": "concrete",
+      "wall": "bare",
+      "furniture": [
+        { "type": "window", "x": 2, "y": 0, "w": 3, "view": "outside" },
+        { "type": "sign", "x": 7, "y": 0 },
+        { "type": "whiteboard", "x": 10, "y": 0 },
+        { "type": "wall-lamp", "x": 13, "y": 0, "variant": "bulb" },
+        { "type": "server-rack", "x": 1, "y": 1 },
+        { "type": "server-rack", "x": 1, "y": 2 },
+        { "type": "paint", "x": 12, "y": 1 },
+        { "type": "ladder", "x": 13, "y": 1 },
+        { "type": "boxes", "x": 14, "y": 1 },
+        { "type": "boxes", "x": 14, "y": 2 },
+        { "type": "desk", "id": "d1", "x": 3, "y": 3, "facing": "up", "variant": "multi" },
+        { "type": "desk-lamp", "x": 4, "y": 3 },
+        { "type": "desk", "id": "d2", "x": 7, "y": 3, "facing": "up" },
+        { "type": "desk", "id": "d3", "x": 11, "y": 3, "facing": "up", "variant": "boxed" },
+        { "type": "plant", "x": 6, "y": 1, "variant": "cactus" },
+        { "type": "printer", "x": 14, "y": 5 }
+      ]
+    },
+    "den": {
+      "kind": "lounge",
+      "label": "Диван и кухня",
+      "w": 24,
+      "h": 7,
+      "floor": "parquet",
+      "furniture": [
+        { "type": "tv", "x": 9, "y": 0 },
+        { "type": "garland", "x": 16, "y": 0, "w": 4 },
+        { "type": "neon-sign", "x": 20, "y": 0 },
+        { "type": "counter", "x": 16, "y": 1, "w": 2 },
+        { "type": "sink", "x": 18, "y": 1 },
+        { "type": "microwave", "x": 19, "y": 1 },
+        { "type": "fridge", "x": 21, "y": 1 },
+        { "type": "coffee-machine", "x": 22, "y": 1 },
+        { "type": "rug", "x": 6, "y": 2, "w": 9, "h": 4, "variant": "blue" },
+        { "type": "floor-lamp", "x": 6, "y": 2 },
+        { "type": "sofa", "x": 8, "y": 2 },
+        { "type": "armchair", "x": 13, "y": 3 },
+        { "type": "coffee-table", "x": 8, "y": 4, "w": 3 },
+        { "type": "candles", "x": 9, "y": 4, "variant": "jar" },
+        { "type": "pet-bed", "x": 2, "y": 4 },
+        { "type": "pet-bowl", "x": 3, "y": 5 },
+        { "type": "night-light", "x": 1, "y": 5 },
+        { "type": "plant", "x": 1, "y": 1 },
+        { "type": "big-plant", "x": 22, "y": 5 }
+      ]
+    }
+  },
+  "plan": {
+    "rooms": [
+      { "id": "boss", "stamp": "boss", "x": 0, "y": 0 },
+      { "id": "shop", "stamp": "shop", "x": 8, "y": 0 },
+      { "id": "den", "stamp": "den", "x": 0, "y": 6 }
+    ],
+    "corridors": [],
+    "doors": [
+      { "x": 4, "y": 6, "owner": true },
+      { "x": 15, "y": 6 }
+    ],
+    "spots": [
+      { "kind": "owner-wait", "x": 3, "y": 7, "facing": "up" },
+      { "kind": "owner-wait", "x": 5, "y": 7, "facing": "up" },
+      { "kind": "owner-wait", "x": 2, "y": 7, "facing": "up" },
+      { "kind": "owner-wait", "x": 6, "y": 7, "facing": "up" },
+      { "kind": "kitchen", "x": 18, "y": 8, "facing": "up" },
+      { "kind": "entrance", "x": 21, "y": 10, "facing": "left" }
+    ]
+  }
+}

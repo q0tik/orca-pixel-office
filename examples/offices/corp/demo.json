@@ -1,0 +1,242 @@
+{
+  "theme": "day",
+  "animals": {
+    "dog": { "coat": "golden" },
+    "cat": { "coat": "grey" },
+    "parrot": { "coat": "red" }
+  },
+  "bots": [
+    {
+      "key": "vlast",
+      "name": "Властелина",
+      "role": "CEO-офис",
+      "state": "waiting",
+      "character": "fox",
+      "coat": "silver",
+      "needsYou": 1,
+      "items": { "in_progress": 1, "done": 0 },
+      "workers": [
+        { "name": "api-1", "state": "working", "subagents": 1, "character": "", "coat": "" },
+        { "name": "ui-1", "state": "working", "subagents": 0, "character": "", "coat": "" },
+        { "name": "billing-1", "state": "working", "subagents": 2, "character": "fox", "coat": "red" }
+      ]
+    },
+    {
+      "key": "grom",
+      "name": "Громов",
+      "role": "CTO",
+      "state": "working",
+      "character": "android",
+      "coat": "chrome",
+      "needsYou": 0,
+      "items": { "in_progress": 2, "done": 1 },
+      "workers": [
+        { "name": "search-1", "state": "waiting", "subagents": 1, "character": "deer", "coat": "brown" },
+        { "name": "mobile-1", "state": "working", "subagents": 0, "character": "", "coat": "" },
+        { "name": "infra-1", "state": "blocked", "subagents": 1, "character": "raccoon", "coat": "rusty" }
+      ]
+    },
+    {
+      "key": "sova",
+      "name": "Совушкина",
+      "role": "CFO",
+      "state": "working",
+      "character": "",
+      "coat": "",
+      "needsYou": 0,
+      "items": { "in_progress": 3, "done": 2 },
+      "workers": [
+        { "name": "docs-1", "state": "working", "subagents": 3, "character": "hooded", "coat": "grey" },
+        { "name": "qa-1", "state": "done", "subagents": 0, "character": "", "coat": "" },
+        { "name": "data-1", "state": "working", "subagents": 1, "character": "android", "coat": "white" }
+      ]
+    },
+    {
+      "key": "brut",
+      "name": "Брутус",
+      "role": "CSO",
+      "state": "waiting",
+      "character": "knight",
+      "coat": "steel",
+      "needsYou": 1,
+      "items": { "in_progress": 1, "done": 3 },
+      "workers": [
+        { "name": "ads-1", "state": "working", "subagents": 0, "character": "skeleton", "coat": "bone" },
+        { "name": "crm-1", "state": "working", "subagents": 2, "character": "", "coat": "" },
+        { "name": "auth-1", "state": "waiting", "subagents": 1, "character": "rabbit", "coat": "grey" }
+      ]
+    },
+    {
+      "key": "kexa",
+      "name": "Кекса",
+      "role": "CMO",
+      "state": "done",
+      "character": "cat",
+      "coat": "ginger",
+      "needsYou": 0,
+      "items": { "in_progress": 2, "done": 4 },
+      "workers": [
+        { "name": "chat-1", "state": "working", "subagents": 0, "character": "", "coat": "" },
+        { "name": "maps-1", "state": "blocked", "subagents": 1, "character": "", "coat": "" },
+        { "name": "promo-1", "state": "working", "subagents": 3, "character": "fox", "coat": "red" }
+      ]
+    },
+    {
+      "key": "tor",
+      "name": "Торопыга",
+      "role": "COO",
+      "state": "working",
+      "character": "rabbit",
+      "coat": "white",
+      "needsYou": 0,
+      "items": { "in_progress": 3, "done": 5 },
+      "workers": [
+        { "name": "audit-1", "state": "done", "subagents": 0, "character": "deer", "coat": "brown" },
+        { "name": "cache-1", "state": "working", "subagents": 1, "character": "", "coat": "" },
+        { "name": "cdn-1", "state": "working", "subagents": 0, "character": "raccoon", "coat": "rusty" }
+      ]
+    },
+    {
+      "key": "misha",
+      "name": "Михалыч",
+      "role": "CIO",
+      "state": "idle",
+      "character": "bear",
+      "coat": "brown",
+      "needsYou": 0,
+      "items": { "in_progress": 1, "done": 6 },
+      "workers": [
+        { "name": "api-2", "state": "working", "subagents": 2, "character": "hooded", "coat": "grey" },
+        { "name": "ui-2", "state": "waiting", "subagents": 1, "character": "", "coat": "" },
+        { "name": "billing-2", "state": "working", "subagents": 0, "character": "android", "coat": "white" }
+      ]
+    },
+    {
+      "key": "bambuk",
+      "name": "Бамбук",
+      "role": "CDO",
+      "state": "working",
+      "character": "panda",
+      "coat": "classic",
+      "needsYou": 0,
+      "items": { "in_progress": 2, "done": 7 },
+      "workers": [
+        { "name": "search-2", "state": "blocked", "subagents": 1, "character": "skeleton", "coat": "bone" },
+        { "name": "mobile-2", "state": "working", "subagents": 3, "character": "", "coat": "" },
+        { "name": "infra-2", "state": "done", "subagents": 0, "character": "rabbit", "coat": "grey" }
+      ]
+    },
+    {
+      "key": "tenx",
+      "name": "Тень",
+      "role": "CISO",
+      "state": "working",
+      "character": "ninja",
+      "coat": "black",
+      "needsYou": 0,
+      "items": { "in_progress": 3, "done": 8 },
+      "workers": [
+        { "name": "docs-2", "state": "working", "subagents": 1, "character": "", "coat": "" },
+        { "name": "qa-2", "state": "working", "subagents": 0, "character": "", "coat": "" },
+        { "name": "data-2", "state": "working", "subagents": 2, "character": "fox", "coat": "red" }
+      ]
+    },
+    {
+      "key": "yorsh",
+      "name": "Ёрш",
+      "role": "CPO",
+      "state": "idle",
+      "character": "pirate",
+      "coat": "red",
+      "needsYou": 0,
+      "items": { "in_progress": 1, "done": 9 },
+      "workers": [
+        { "name": "ads-2", "state": "waiting", "subagents": 1, "character": "deer", "coat": "brown" },
+        { "name": "crm-2", "state": "working", "subagents": 0, "character": "", "coat": "" },
+        { "name": "auth-2", "state": "blocked", "subagents": 1, "character": "raccoon", "coat": "rusty" }
+      ]
+    },
+    {
+      "key": "volk",
+      "name": "Серый",
+      "role": "CHRO",
+      "state": "waiting",
+      "character": "wolf",
+      "coat": "grey",
+      "needsYou": 1,
+      "items": { "in_progress": 2, "done": 10 },
+      "workers": [
+        { "name": "chat-2", "state": "working", "subagents": 3, "character": "hooded", "coat": "grey" },
+        { "name": "maps-2", "state": "done", "subagents": 0, "character": "", "coat": "" },
+        { "name": "promo-2", "state": "working", "subagents": 1, "character": "android", "coat": "white" }
+      ]
+    },
+    {
+      "key": "zhuk",
+      "name": "Жук",
+      "role": "CAO",
+      "state": "working",
+      "character": "retro-robot",
+      "coat": "tin",
+      "needsYou": 0,
+      "items": { "in_progress": 3, "done": 11 },
+      "workers": [
+        { "name": "audit-2", "state": "working", "subagents": 0, "character": "skeleton", "coat": "bone" },
+        { "name": "cache-2", "state": "working", "subagents": 2, "character": "", "coat": "" },
+        { "name": "cdn-2", "state": "waiting", "subagents": 1, "character": "rabbit", "coat": "grey" }
+      ]
+    }
+  ],
+  "mail": [
+    [
+      "handoff",
+      "grom",
+      "tenx"
+    ],
+    [
+      "question",
+      "sova",
+      "vlast"
+    ],
+    [
+      "status",
+      "owner",
+      "grom"
+    ],
+    [
+      "handoff",
+      "bambuk",
+      "kexa"
+    ],
+    [
+      "question",
+      "tor",
+      "misha"
+    ],
+    [
+      "status",
+      "outside",
+      "zhuk"
+    ],
+    [
+      "handoff",
+      "yorsh",
+      "volk"
+    ],
+    [
+      "question",
+      "brut",
+      "sova"
+    ],
+    [
+      "status",
+      "owner",
+      "bambuk"
+    ],
+    [
+      "handoff",
+      "kexa",
+      "tor"
+    ]
+  ]
+}

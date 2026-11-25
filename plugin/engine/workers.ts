@@ -8,8 +8,10 @@ import type { DeskSeat } from './world'
 
 export const WORKER_LINGER_MS = 10 * 60_000
 export const WORKER_DESKS_KEY = 'workerDesks'
-/** The room workers sit in. */
+/** The room workers sit in on the shipped map; any room of kind `team` takes workers (isWorkerDesk). */
 export const WORKER_ROOM = 'teams'
+/** A desk for workers: one in a room of kind `team` («Команды и отделы», or several such rooms). */
+export const isWorkerDesk = (desk: { roomKind: string }): boolean => desk.roomKind === 'team'
 
 export type WorkerInfo = {
   id: string

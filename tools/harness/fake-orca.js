@@ -30,7 +30,11 @@ let mail = { entries: [], error: null, at: 0 }
 const ready = Promise.all([
   fetch('desks.json').then((r) => r.json()).then((o) => (office = o)),
   fetch('extras.json').then((r) => (r.ok ? r.json() : null)).then((e) => e && (extras = { ...e, at: Date.now() - 20_000 })).catch(() => {}),
-  fetch('mail.json').then((r) => (r.ok ? r.json() : null)).then((m) => m && (mail = m)).catch(() => {})
+  fetch('mail.json').then((r) => (r.ok ? r.json() : null)).then((m) => m && (mail = m)).catch(() => {}),
+  // Example offices (tools/examples): the storage to start with (theme, animals, looks), when it is empty.
+  fetch('preset.json').then((r) => (r.ok ? r.json() : null)).then((p) => {
+    if (p && !memory.keys().length) for (const [k, v] of Object.entries(p)) memory.set(k, JSON.stringify(v))
+  }).catch(() => {})
 ])
 window.orca = {
   plugin: {
@@ -49,10 +53,10 @@ window.orca = {
   },
   document: { get: async () => ({ kind: 'text', text: '' }) },
   storage: {
-    get: async (k) => (memory.has(k) ? JSON.parse(memory.get(k)) : null),
+    get: async (k) => (await ready, memory.has(k) ? JSON.parse(memory.get(k)) : null),
     set: async (k, v) => void memory.set(k, JSON.stringify(v)),
     delete: async (k) => void memory.delete(k),
-    keys: async () => memory.keys(),
+    keys: async () => (await ready, memory.keys()),
     onDidChange: () => ({ dispose() {} })
   }
 }
