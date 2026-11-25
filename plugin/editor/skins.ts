@@ -29,6 +29,8 @@ export type SkinVariant = {
   base?: string
   palette?: Partial<Record<PaletteKey, string>>
   sprite?: Sprite
+  /** A light's look may change its light: its colour and reach (engine/lights.ts). */
+  light?: { color?: string; radius?: number }
 }
 
 export type SkinPack = { id: string; name: string; author: string; license: string; theme: Theme | null; variants: SkinVariant[]; characters: CharacterSkin[] }
@@ -75,8 +77,42 @@ const BUILTIN_ITEMS: Partial<Record<FurnitureType, [string, string][]>> = {
   whiteboard: [
     ['', 'Заметки'],
     ['arch', 'Схема архитектуры']
+  ],
+  'floor-lamp': [
+    ['', 'Торшер с абажуром'],
+    ['arc', 'Дуговой торшер'],
+    ['paper', 'Бумажный фонарь']
+  ],
+  'wall-lamp': [
+    ['', 'Бра с абажуром'],
+    ['globe', 'Бра-шар'],
+    ['bulb', 'Лампочка на проводе']
+  ],
+  'desk-lamp': [
+    ['', 'Банкирская лампа'],
+    ['arm', 'Лампа на ножке']
+  ],
+  candles: [
+    ['', 'Три свечи'],
+    ['jar', 'Свеча в банке']
+  ],
+  garland: [
+    ['', 'Тёплая гирлянда'],
+    ['rainbow', 'Разноцветная гирлянда']
+  ],
+  'neon-sign': [
+    ['', 'Неон: чашка кофе'],
+    ['heart', 'Неон: сердце'],
+    ['247', 'Неон: 24/7']
+  ],
+  'night-light': [
+    ['', 'Ночник-луна'],
+    ['star', 'Ночник-звезда']
   ]
 }
+
+/** Things whose look may say how they shine (`light` in a pack's variant). */
+const LIGHT_TARGETS: ReadonlySet<string> = new Set(['floor-lamp', 'wall-lamp', 'desk-lamp', 'candles', 'garland', 'neon-sign', 'night-light'])
 
 /** What ships in the code itself: every floor, every wall style, the furniture's own variants. */
 export function builtinVariants(): SkinVariant[] {
@@ -210,10 +246,27 @@ export function parsePack(raw: unknown, file: string): { pack: SkinPack | null; 
     }
     const palette = parsePalette(entry.palette, at, `${field}.palette`)
     const sprite = entry.sprite === undefined ? undefined : parseSprite(entry.sprite, target, at, `${field}.sprite`)
-    if (!palette && !sprite && base === undefined) at(field, 'нужно хотя бы одно: base, palette или sprite')
+    let light: SkinVariant['light']
+    if (entry.light !== undefined) {
+      if (!LIGHT_TARGETS.has(target)) at(`${field}.light`, `свет бывает только у светильников: ${[...LIGHT_TARGETS].join(', ')}`)
+      else if (!isObj(entry.light)) at(`${field}.light`, 'ожидается объект { "color": "#rrggbb", "radius": 8–96 }')
+      else {
+        light = {}
+        const { color, radius } = entry.light
+        if (color !== undefined) {
+          if (typeof color === 'string' && COLOR.test(color)) light.color = color
+          else at(`${field}.light.color`, `${JSON.stringify(color)} — ожидается "#rrggbb"`)
+        }
+        if (radius !== undefined) {
+          if (typeof radius === 'number' && Number.isInteger(radius) && radius >= 8 && radius <= 96) light.radius = radius
+          else at(`${field}.light.radius`, `${JSON.stringify(radius)} — целое от 8 до 96 (пиксели)`)
+        }
+      }
+    }
+    if (!palette && !sprite && base === undefined && !light) at(field, 'нужно хотя бы одно: base, palette, sprite или light')
     if (errors.length > before) return
     seen.add(vid)
-    variants.push({ id: `${id}:${vid}`, name: vname, target, pack: id, ...(base !== undefined ? { base } : {}), ...(palette ? { palette } : {}), ...(sprite ? { sprite } : {}) })
+    variants.push({ id: `${id}:${vid}`, name: vname, target, pack: id, ...(base !== undefined ? { base } : {}), ...(palette ? { palette } : {}), ...(sprite ? { sprite } : {}), ...(light ? { light } : {}) })
   })
   // Characters for people: a robot, a fox, a knight (editor/characters.ts, docs/characters.md).
   const parsed = parseCharacters(raw.characters, id, file)
@@ -251,9 +304,14 @@ export async function loadPacks(read: (file: string) => Promise<unknown>): Promi
 
 // ── The owner's choices («Оформление») ───────────────────────────────────────────────────
 
-export type Decor = { rooms: Record<string, { floor?: string; wall?: string }>; items: Record<string, string> }
+export type Decor = {
+  rooms: Record<string, { floor?: string; wall?: string }>
+  items: Record<string, string>
+  /** Lamps the owner switched off (item keys): dark at night too. */
+  off: string[]
+}
 
-export const emptyDecor = (): Decor => ({ rooms: {}, items: {} })
+export const emptyDecor = (): Decor => ({ rooms: {}, items: {}, off: [] })
 
 /** The stable name of one piece of furniture: its room, type and tile. */
 export function itemKey(item: Pick<PlacedFurniture, 'room' | 'type' | 'x' | 'y'>): string {
@@ -274,16 +332,25 @@ export function parseDecor(raw: unknown, known: ReadonlySet<string>): Decor {
     }
   }
   if (isObj(raw.items)) for (const [k, v] of Object.entries(raw.items)) if (typeof v === 'string' && known.has(v)) out.items[k] = v
+  if (Array.isArray(raw.off)) out.off = [...new Set(raw.off.filter((k): k is string => typeof k === 'string' && k.length > 0 && k.length < 200))].sort()
   return out
 }
 
-export function serializeDecor(d: Decor): { v: 1; rooms: Decor['rooms']; items: Decor['items'] } {
-  return { v: 1, rooms: JSON.parse(JSON.stringify(d.rooms)), items: { ...d.items } }
+export function serializeDecor(d: Decor): { v: 1; rooms: Decor['rooms']; items: Decor['items']; off: string[] } {
+  return { v: 1, rooms: JSON.parse(JSON.stringify(d.rooms)), items: { ...d.items }, off: [...d.off] }
+}
+
+/** Switches a lamp on or off (by its item key); the rest of the choices stay. */
+export function switchLight(d: Decor, key: string, on: boolean): Decor {
+  const off = new Set(d.off)
+  if (on) off.delete(key)
+  else off.add(key)
+  return { rooms: JSON.parse(JSON.stringify(d.rooms)), items: { ...d.items }, off: [...off].sort() }
 }
 
 /** Sets (or with null clears) a room's floor or walls. */
 export function chooseRoom(d: Decor, room: string, part: 'floor' | 'wall', variant: string | null): Decor {
-  const next = { rooms: JSON.parse(JSON.stringify(d.rooms)) as Decor['rooms'], items: { ...d.items } }
+  const next = { rooms: JSON.parse(JSON.stringify(d.rooms)) as Decor['rooms'], items: { ...d.items }, off: [...d.off] }
   const r = { ...(next.rooms[room] ?? {}) }
   if (variant) r[part] = variant
   else delete r[part]
@@ -294,7 +361,7 @@ export function chooseRoom(d: Decor, room: string, part: 'floor' | 'wall', varia
 
 /** Sets (or clears) the look of the given pieces of furniture. */
 export function chooseItems(d: Decor, keys: readonly string[], variant: string | null): Decor {
-  const next = { rooms: JSON.parse(JSON.stringify(d.rooms)) as Decor['rooms'], items: { ...d.items } }
+  const next = { rooms: JSON.parse(JSON.stringify(d.rooms)) as Decor['rooms'], items: { ...d.items }, off: [...d.off] }
   for (const k of keys) {
     if (variant) next.items[k] = variant
     else delete next.items[k]
@@ -317,13 +384,23 @@ export function withPalette<T>(overrides: Partial<Record<PaletteKey, string>> | 
   }
 }
 
-/** Paints a sprite with its bottom-left at (x, bottom); «@name» colours follow the theme and the hour. */
-export function drawSprite(p: Paint, sprite: Sprite, x: number, bottom: number): void {
+/** Palette colours that shine by themselves: a sprite's pixels in them glow at night. */
+export const GLOW_COLORS: ReadonlySet<string> = new Set(['lampLit', 'lampBulb', 'flameTip', 'flameCore', 'neonA', 'neonB', 'garlandWarm', 'moon', 'microwaveLit', 'fridgeLit', 'screenLine', 'ledGreen', 'ledAmber', 'ledBlue'])
+
+/**
+ * Paints a sprite with its bottom-left at (x, bottom); «@name» colours follow the theme and the hour.
+ * `glowOnly`: only the pixels in a shining palette colour (GLOW_COLORS), for the night's glow pass.
+ */
+export function drawSprite(p: Paint, sprite: Sprite, x: number, bottom: number, glowOnly = false): void {
   const top = bottom - sprite.h
   sprite.rows.forEach((row, dy) => {
     let dx = 0
     for (const ch of row) {
       const c = sprite.legend[ch]
+      if (c && glowOnly && !(c.startsWith('@') && GLOW_COLORS.has(c.slice(1)))) {
+        dx += 1
+        continue
+      }
       if (c) p(x + dx, top + dy, 1, 1, c.startsWith('@') ? (P[c.slice(1) as PaletteKey] as string) : c)
       dx += 1
     }

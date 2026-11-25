@@ -49,6 +49,10 @@ The interface is in Russian (the office was built for a Russian-speaking team); 
 - **Themes as skin packs**: «Дневной офис» (day office) and «Тёмный лофт» (dark loft), plus day and night from your
   clock, and live details: blinking server racks, fish, coffee steam, a cat, wall clocks with the real time, a notice
   board with the real number of bots waiting for you and at work.
+- **Night light**: in the evening and at night floor lamps, wall lamps, desk lamps, candles, a garland and a neon sign
+  cut soft pixel pools out of the dark; screens glow with live work while their bot works and show a screensaver while
+  it is away; the microwave hums, the coffee machine pours and the fridge stands open only while a bot uses them. See
+  [At night](#at-night).
 
 | Life in the lounge | Waiting for you in the reception |
 |---|---|
@@ -61,6 +65,46 @@ The interface is in Russian (the office was built for a Russian-speaking team); 
 | Decor mode | Dark loft at night |
 |---|---|
 | ![Decor mode](docs/screenshots/decor.png) | ![Dark loft at night](docs/screenshots/office-loft-night.png) |
+
+## At night
+
+![At night: candles, screens and the microwave in use](docs/screenshots/night.gif)
+
+From the evening on (by your clock) the office darkens and the lights come on. Nothing here costs a token: it is only
+pictures.
+
+- **Lamps**: floor lamps along the aisles of «Команды и отделы» and in the hall, wall lamps in the offices, the
+  reception and the hall, desk lamps, the CEO's lamp and wall lamps by the clock in the CEO's office. Every light cuts
+  a soft pool, in pixel rings, out of the dark: on the floor and the walls of its own room, never through a wall. By
+  day they are off.
+- **Screens**: while a bot or an employee works, its screen glows on the desk and on its face and shows something
+  alive, by role or office: scrolling code, logs by the server racks for a CTO, charts for sales and money, a chat for
+  an assistant. While its owner is away the screen shows a screensaver (a drifting logo, flying stars); a desk nobody
+  owns stays dark.
+- **Kitchen and sofas**: warm floor lamps by the sofas, candles with trembling flames on the tables, a garland and a
+  neon cup on the wall. The microwave lights up and hums while a bot warms its lunch, the coffee machine lights up
+  while it pours, the fridge glows inside while it stands open.
+- **Little things**: the aquarium glows, the server racks' lights shine in the dark, a moon night light by the cat's bed.
+- **Lights are furniture**: click one in «Оформление» to change its look or switch it off (kept after a restart). More
+  looks come as a skin pack with their own colour of light: `plugin/office/skins/lights.json`, see
+  [docs/skin-packs.md](docs/skin-packs.md#lights).
+- **Cheap**: the light map is computed once per change (the hour, the theme, a lamp switched, a screen on or off, an
+  appliance taken), not every frame; flames, screens and the microwave move on the office's one animation timer.
+
+| «Дневной офис» at night: the teams | «Тёмный лофт» at night: the teams |
+|---|---|
+| ![Teams at night](docs/screenshots/night-teams.png) | ![Teams at night, dark loft](docs/screenshots/night-loft-teams.png) |
+
+| The CEO's office and the reception | The offices of the C-level |
+|---|---|
+| ![CEO and reception at night](docs/screenshots/night-ceo.png) | ![Offices at night](docs/screenshots/night-offices.png) |
+
+| The kitchen and the sofas | By day the lamps are off |
+|---|---|
+| ![Kitchen at night](docs/screenshots/night-kitchen.png) | ![The same office by day](docs/screenshots/day-lamps.png) |
+
+The dark loft at night: [the CEO](docs/screenshots/night-loft-ceo.png), [the offices](docs/screenshots/night-loft-offices.png),
+[the kitchen](docs/screenshots/night-loft-kitchen.png).
 
 The screenshots use the made-up demo office (`DEMO=1 tools/harness/build.sh`), not real bots. The animation and the
 social preview in `docs/media` are recorded from it, the same every time, by `tools/media/make.sh`.

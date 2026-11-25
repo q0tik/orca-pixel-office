@@ -40,6 +40,7 @@ import { mailPoint, ownerPoint, Reading, READ_MS } from '../engine/reading'
 import { origin, visibleRect } from '../engine/camera'
 import { parseMap, type World } from '../engine/world'
 import { FURNITURE } from '../engine/catalog'
+import { appliancesInUse, collectLights, LightCache, roomScreen, screenOf, SWITCHABLE, type Light, type ScreenKind } from '../engine/lights'
 import type { Desk } from '../src/bots'
 import type { ChatAnswer, Extras } from '../src/extras'
 import type { Mail, MailEntry, Party } from '../src/mail'
@@ -54,7 +55,7 @@ import { endRef, hitPoint, hitSegment, LEGEND_TYPES, mailTooltip, typeName } fro
 import { assignWorkerDesks, parseWorkerDesks, workerLabels, presentWorkers, WORKER_DESKS_KEY, WORKER_LINGER_MS, WORKER_ROOM, workerKey, workerTarget, type WorkerInfo } from '../engine/workers'
 import type { DeskSeat, PlacedFurniture } from '../engine/world'
 import { applyPalette, DEFAULT_THEME, pickTheme, THEME_STORAGE_KEY, type Theme } from './theme'
-import { builtinVariants, chooseItems, chooseRoom, DECOR_STORAGE_KEY, emptyDecor, itemKey, loadPacks, parseDecor, serializeDecor, variantsFor, type Decor, type SkinPack, type SkinTarget, type SkinVariant } from './skins'
+import { builtinVariants, chooseItems, chooseRoom, DECOR_STORAGE_KEY, emptyDecor, itemKey, loadPacks, parseDecor, serializeDecor, switchLight, variantsFor, type Decor, type SkinPack, type SkinTarget, type SkinVariant } from './skins'
 import type { CharacterSkin } from './characters'
 import { BUBBLE_COLOR, deskChair, drawAnimal, internSlots, mailColor, paintSkinnedItem, paintSkinnedTile, Renderer, STATE_COLOR, type BotLabel, type EnvelopeView, type InternGroup, type LinkView } from './render'
 
@@ -292,6 +293,11 @@ function retarget(): boolean {
   const views = new Map(cast.views().map((v) => [v.key, v]))
   const next = reading.apply(planned, views, now)
   for (const [k, t] of baseTargets) if (k.startsWith('w:')) next.set(k, t)
+  // The dev harness may send a bot to a tile (the microwave, for a screenshot); Orca never does.
+  for (const [k, stop] of harnessStops) {
+    const t = next.get(k)
+    if (t) next.set(k, { ...t, x: stop.x, y: stop.y, facing: stop.facing, pose: 'stand', doing: stop.doing, routine: 'rest' })
+  }
   targets = next
   const changed = cast.sync(world, targets, { snap: !settled })
   if (changed) scheduler.invalidate()
@@ -569,7 +575,7 @@ function draw(): void {
   const actors = cast.views()
   const now = Date.now()
   const byKey = new Map((bots ?? []).map((bot) => [bot.key, bot]))
-  const desks = new Map<string, { occupied: boolean; on: boolean; papers: number }>()
+  const desks = new Map<string, { occupied: boolean; on: boolean; papers: number; screen?: ScreenKind }>()
   // Resting at home in the office chair: that chair is taken (its back hidden behind the bot).
   for (const actor of actors) {
     if (actor.walking || !CHAIR_POSES.has(actor.target.pose as never)) continue
@@ -582,6 +588,14 @@ function draw(): void {
     const on = bot?.state === 'working'
     desks.set(actor.target.slot.slice('desk:'.length), { occupied: true, on, papers: on ? paperSheets(bot.since, now) : 0 })
   }
+  // What every screen shows: work while its owner works there, a screensaver while away.
+  const screens = screenKinds(actors)
+  lastScreens = screens
+  for (const [id, screen] of screens) {
+    const desk = desks.get(id)
+    desks.set(id, { occupied: desk?.occupied ?? false, on: desk?.on ?? false, papers: desk?.papers ?? 0, screen })
+  }
+  const using = appliancesInUse(world, actors)
   const clockNow = new Date(now)
   const pinned = (globalThis as { __pixelOfficeHour?: number }).__pixelOfficeHour
   renderer.draw(ctx, {
@@ -602,6 +616,9 @@ function draw(): void {
     envelopes: envelopeViews(),
     entranceMark: unknownAtEntrance() ? pointOf('outside') : null,
     daylight: { tint: daylight.look.tint, lamps: daylight.look.lamps },
+    lighting: lightingNow(screens, using),
+    lamps: { on: daylight.look.lamps, off: new Set(decor.off), key: `${daylight.look.lamps}|${decor.off.join(',')}` },
+    using,
     ambientFrame: Math.floor(now / AMBIENT_MS),
     clock: { hours: typeof pinned === 'number' ? pinned : clockNow.getHours(), minutes: clockNow.getMinutes() },
     notice: noticeNumbers(),
@@ -684,7 +701,64 @@ const AMBIENT_MS = 200
 const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 function ambientWanted(): boolean {
-  return !!renderer && !reducedMotion && visible() && renderer.livesIn(visibleRect(camera, view))
+  return !!renderer && !reducedMotion && visible() && renderer.livesIn(visibleRect(camera, view), lastScreens)
+}
+
+/** What the screens showed in the last frame (asked many times a second by the animation timer). */
+let lastScreens = new Map<string, ScreenKind>()
+
+// ── Night light: screens, appliances, the light map (engine/lights.ts) ───────────────────
+
+/** Desk id → what its screen shows: work while its bot or employee works there, a screensaver while away. */
+function screenKinds(actors: readonly { key: string; walking: boolean; target: Target }[]): Map<string, ScreenKind> {
+  const out = new Map<string, ScreenKind>()
+  if (!world) return out
+  const atDesk = new Map<string, string>()
+  for (const a of actors) if (!a.walking && a.target.place === 'desk') atDesk.set(a.target.slot.slice('desk:'.length), a.key)
+  const byDesk = new Map(world.desks.map((d) => [d.id, d]))
+  const put = (deskId: string, key: string, working: boolean, role: string) => {
+    const desk = byDesk.get(deskId)
+    if (!desk) return
+    out.set(deskId, screenOf({ working: working && atDesk.get(deskId) === key, owned: true, role, office: roomScreen(world!, desk.room), key: deskId }))
+  }
+  for (const bot of bots ?? []) {
+    const id = botDeskIds.get(bot.key)
+    if (id) put(id, bot.key, bot.state === 'working', bot.role)
+  }
+  for (const w of workers) {
+    const desk = workerSeats.get(w.id)
+    if (desk) put(desk.id, workerKey(w.id), w.live && w.state === 'working', '')
+  }
+  return out
+}
+
+/** Harness only (`__pixelOfficeSend`): bots sent to a tile for a screenshot. Empty in Orca. */
+const harnessStops = new Map<string, { x: number; y: number; facing: 'up'; doing: string }>()
+
+/** The lights shining now and their key; the list is collected again only when the key changes. */
+const lightLists = new LightCache<Light[]>()
+
+function lightingNow(screens: ReadonlyMap<string, ScreenKind>, using: ReadonlySet<string>): { key: string; dark: { color: string; alpha: number }; lights: Light[] } | null {
+  const look = daylight.look
+  if (!world || !look.lamps || !look.dark) return null
+  const lit = [...screens].filter(([, k]) => k !== 'off').map(([d, k]) => `${d}=${k}`).sort()
+  // Any look may change a light (a lamp's colour, the CEO's desk): every choice is in the key; they change rarely.
+  const looks = Object.entries(decor.items).map(([k, v]) => `${k}=${v}`).sort()
+  const key = [daylight.phase, theme.id, look.dark.color, look.dark.alpha, decor.off.join(','), looks.join(','), lit.join(','), [...using].sort().join(',')].join('|')
+  const off = new Set(decor.off)
+  const lights = lightLists.get(key, () =>
+    collectLights(world!, {
+      on: true,
+      off,
+      using,
+      screens,
+      look: (item) => {
+        const v = variants.get(decor.items[itemKey(item)] ?? '')
+        return v ? { variant: v.base, light: v.light } : null
+      }
+    })
+  )
+  return { key, dark: look.dark, lights }
 }
 // The dev harness (tools/harness) may ask where things are, for screenshots; Orca never sets this.
 if ((globalThis as { __pixelOfficeHarness?: boolean }).__pixelOfficeHarness) {
@@ -697,6 +771,32 @@ if ((globalThis as { __pixelOfficeHarness?: boolean }).__pixelOfficeHarness) {
       bots: cast.views().map((v) => ({ key: v.key, walking: v.walking, pose: v.target.pose, doing: v.target.doing, reading: v.target.reading, ...at(v.x + 0.5, v.y), room: world?.roomAt[Math.round(v.y) * world.width + Math.round(v.x)] })),
       zoom: camera.zoom / dpr
     }
+  }
+  ;(globalThis as { __pixelOfficeSend?: unknown }).__pixelOfficeSend = (key: string, x: number, y: number, doing = 'у техники') => {
+    harnessStops.set(key, { x, y, facing: 'up', doing })
+    retarget()
+    scheduler.wake()
+  }
+  // Frame time for the performance notes: draws the current picture `n` times and times each.
+  ;(globalThis as { __pixelOfficeDraw?: unknown }).__pixelOfficeDraw = draw
+  ;(globalThis as { __pixelOfficeBench?: unknown }).__pixelOfficeBench = (n = 200) => {
+    const times: number[] = []
+    for (let i = 0; i < n; i += 1) {
+      const start = performance.now()
+      draw()
+      times.push(performance.now() - start)
+    }
+    times.sort((a, b) => a - b)
+    const avg = times.reduce((s, t) => s + t, 0) / times.length
+    // With the GPU work flushed: n frames, each read back one pixel (canvas defers its drawing).
+    const start = performance.now()
+    for (let i = 0; i < n; i += 1) {
+      draw()
+      ctx.getImageData(0, 0, 1, 1)
+    }
+    const flushed = (performance.now() - start) / n
+    const r = (v: number) => Math.round(v * 1000) / 1000
+    return { n, avg: r(avg), p95: r(times[Math.floor(n * 0.95)]), flushed: r(flushed) }
   }
 }
 document.addEventListener('visibilitychange', () => {
@@ -735,7 +835,7 @@ function toggleDecorating(): void {
 /** Every piece of furniture one can dress, desk chairs included (they are `chair`s). */
 function dressable(): PlacedFurniture[] {
   if (!world) return []
-  return [...world.furniture.filter((f) => FURNITURE[f.type].mount === 'floor'), ...world.desks.map(deskChair)]
+  return [...world.furniture.filter((f) => FURNITURE[f.type].mount === 'floor' || SWITCHABLE.has(f.type)), ...world.desks.map(deskChair)]
 }
 
 /** What a click in «Оформление» points at: the front-most thing, else a rug, else the room. */
@@ -744,10 +844,12 @@ function decorAt(point: { x: number; y: number }): typeof decorTarget {
   let best: PlacedFurniture | null = null
   let rug: PlacedFurniture | null = null
   for (const item of dressable()) {
-    const tall = item.type === 'rug' || item.type === 'pet-bed' ? 0 : 12
+    const onWall = FURNITURE[item.type].mount === 'wall'
+    const tall = item.type === 'rug' || item.type === 'pet-bed' || onWall ? 0 : 12
     if (point.x < item.x * 16 || point.x >= (item.x + item.w) * 16 || point.y < item.y * 16 - tall || point.y >= (item.y + item.h) * 16) continue
     if (item.type === 'rug') rug = item
-    else if (!best || item.y + item.h > best.y + best.h) best = item
+    // The front-most; candles and a desk lamp before the table they stand on.
+    else if (!best || item.y + item.h > best.y + best.h || (item.y + item.h === best.y + best.h && 'onTop' in FURNITURE[item.type])) best = item
   }
   const pick = best ?? rug
   if (pick) return { kind: 'item', item: pick }
@@ -760,7 +862,9 @@ function decorAt(point: { x: number; y: number }): typeof decorTarget {
 const THING_NAMES: Partial<Record<string, string>> = {
   desk: 'стол', chair: 'кресло', armchair: 'кресло', sofa: 'диван', loveseat: 'диванчик', rug: 'ковёр', 'server-rack': 'серверная стойка',
   aquarium: 'аквариум', plant: 'растение', 'big-plant': 'большое растение', bookshelf: 'книжный шкаф', 'coffee-machine': 'кофемашина',
-  'water-cooler': 'кулер', trophy: 'кубок', flowers: 'цветы', boxes: 'коробки', 'ceo-desk': 'стол CEO', 'coffee-table': 'журнальный столик'
+  'water-cooler': 'кулер', trophy: 'кубок', flowers: 'цветы', boxes: 'коробки', 'ceo-desk': 'стол CEO', 'coffee-table': 'журнальный столик',
+  'floor-lamp': 'торшер', 'wall-lamp': 'бра', 'desk-lamp': 'настольная лампа', candles: 'свечи', garland: 'гирлянда', 'neon-sign': 'неоновая вывеска',
+  'night-light': 'ночник', microwave: 'микроволновка', fridge: 'холодильник'
 }
 
 async function saveDecor(next: Decor): Promise<void> {
@@ -830,6 +934,7 @@ function decorPanelHtml(): string {
     subtitle: `${world.rooms.find((r) => r.id === item.room)?.label ?? item.room} · ${options.length ? `вариантов: ${options.length}` : 'вариантов в пакетах пока нет'}`,
     sections: [{ part: 'item', label: 'Вид', options: options.map(option(current)), isDefault: !current }],
     all: same.length > 1 ? { label: name, count: same.length } : null,
+    light: SWITCHABLE.has(item.type) ? { on: !decor.off.includes(itemKey(item)) } : null,
     note: decorNote
   })
 }
@@ -1416,6 +1521,9 @@ panelBox.addEventListener('click', async (event) => {
     const part = el.getAttribute('data-part')
     if (decorTarget?.kind === 'room' && (part === 'floor' || part === 'wall')) void saveDecor(chooseRoom(decor, decorTarget.room, part, variant))
     else if (decorTarget?.kind === 'item') void saveDecor(chooseItems(decor, [itemKey(decorTarget.item)], variant))
+  } else if (action === 'decorLight' && decorTarget?.kind === 'item') {
+    const key = itemKey(decorTarget.item)
+    void saveDecor(switchLight(decor, key, decor.off.includes(key)))
   } else if (action === 'decorAll' && decorTarget?.kind === 'item') {
     const type = decorTarget.item.type
     void saveDecor(chooseItems(decor, dressable().filter((f) => f.type === type).map(itemKey), decor.items[itemKey(decorTarget.item)] ?? null))
@@ -1628,7 +1736,7 @@ async function toggleDebug(): Promise<void> {
 
 function updateDebug(): void {
   debugBox.textContent = [
-    `кадров ${scheduler.renders} · тиков ${scheduler.ticks} · таймер ${scheduler.running ? 'идёт' : 'стоит'} · чанков ${renderer?.chunkCount ?? 0}`,
+    `кадров ${scheduler.renders} · тиков ${scheduler.ticks} · таймер ${scheduler.running ? 'идёт' : 'стоит'} · чанков ${renderer?.chunkCount ?? 0} · карта света собрана ${renderer?.lightBuilds ?? 0} раз`,
     `камера ${camera.zoom}× (${Math.round(camera.x)},${Math.round(camera.y)}) · идут ${cast.walking()}`,
     ...(bots ?? []).map((b) => `${b.key}: ${b.state} → ${targets.get(b.key)?.slot ?? '—'}`),
     `последнее событие: ${lastEvent}`,

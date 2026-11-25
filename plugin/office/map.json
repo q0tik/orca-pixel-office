@@ -19,7 +19,11 @@
         { "type": "chair", "x": 5, "y": 5, "facing": "up" },
         { "type": "chair", "x": 7, "y": 5, "facing": "up" },
         { "type": "plant", "x": 1, "y": 7 },
-        { "type": "plant", "x": 12, "y": 7 }
+        { "type": "plant", "x": 12, "y": 7 },
+        { "type": "wall-lamp", "x": 5, "y": 0 },
+        { "type": "wall-lamp", "x": 7, "y": 0 },
+        { "type": "floor-lamp", "x": 1, "y": 4 },
+        { "type": "floor-lamp", "x": 12, "y": 4 }
       ]
     },
     "mini": {
@@ -37,7 +41,8 @@
         { "type": "desk", "id": "desk", "x": 2, "y": 3, "facing": "down", "variant": "tidy" },
         { "type": "flowers", "x": 5, "y": 2 },
         { "type": "chair", "x": 5, "y": 6, "facing": "up" },
-        { "type": "plant", "x": 1, "y": 7 }
+        { "type": "plant", "x": 1, "y": 7 },
+        { "type": "floor-lamp", "x": 5, "y": 4, "variant": "paper" }
       ]
     },
     "reception": {
@@ -57,7 +62,12 @@
         { "type": "loveseat", "x": 1, "y": 3 },
         { "type": "coffee-table", "x": 1, "y": 4, "w": 2 },
         { "type": "bird-cage", "x": 17, "y": 4 },
-        { "type": "big-plant", "x": 18, "y": 4 }
+        { "type": "big-plant", "x": 18, "y": 4 },
+        { "type": "wall-lamp", "x": 5, "y": 0, "variant": "globe" },
+        { "type": "wall-lamp", "x": 7, "y": 0, "variant": "globe" },
+        { "type": "wall-lamp", "x": 11, "y": 0 },
+        { "type": "floor-lamp", "x": 3, "y": 4 },
+        { "type": "candles", "x": 2, "y": 4, "variant": "jar" }
       ]
     },
     "office-server": {
@@ -82,7 +92,9 @@
         { "type": "bookshelf", "x": 3, "y": 9 },
         { "type": "chair", "x": 6, "y": 11, "facing": "up" },
         { "type": "big-plant", "x": 1, "y": 12 },
-        { "type": "printer", "x": 8, "y": 12 }
+        { "type": "printer", "x": 8, "y": 12 },
+        { "type": "wall-lamp", "x": 2, "y": 0, "variant": "bulb" },
+        { "type": "floor-lamp", "x": 2, "y": 6, "variant": "arc" }
       ]
     },
     "office-sales": {
@@ -104,7 +116,11 @@
         { "type": "coffee-table", "x": 2, "y": 10, "w": 2 },
         { "type": "armchair", "x": 6, "y": 10 },
         { "type": "plant", "x": 1, "y": 12 },
-        { "type": "big-plant", "x": 8, "y": 12 }
+        { "type": "big-plant", "x": 8, "y": 12 },
+        { "type": "wall-lamp", "x": 3, "y": 0 },
+        { "type": "wall-lamp", "x": 6, "y": 0 },
+        { "type": "desk-lamp", "x": 4, "y": 4 },
+        { "type": "candles", "x": 3, "y": 10 }
       ]
     },
     "office-free": {
@@ -121,7 +137,10 @@
         { "type": "desk", "id": "desk", "x": 3, "y": 5, "facing": "up" },
         { "type": "rug", "x": 2, "y": 8, "w": 5, "h": 3, "variant": "cream" },
         { "type": "chair", "x": 7, "y": 11, "facing": "up" },
-        { "type": "big-plant", "x": 1, "y": 12 }
+        { "type": "big-plant", "x": 1, "y": 12 },
+        { "type": "wall-lamp", "x": 4, "y": 0, "variant": "globe" },
+        { "type": "desk-lamp", "x": 4, "y": 5, "variant": "arm" },
+        { "type": "floor-lamp", "x": 8, "y": 8 }
       ]
     },
     "office-vacant": {
@@ -141,7 +160,8 @@
         { "type": "desk", "id": "desk", "x": 4, "y": 6, "facing": "down", "variant": "boxed" },
         { "type": "paint", "x": 7, "y": 9 },
         { "type": "boxes", "x": 8, "y": 11 },
-        { "type": "chair", "x": 1, "y": 11, "facing": "up" }
+        { "type": "chair", "x": 1, "y": 11, "facing": "up" },
+        { "type": "wall-lamp", "x": 5, "y": 0, "variant": "bulb" }
       ]
     },
     "openspace": {
@@ -189,7 +209,17 @@
         { "type": "desk", "id": "t24", "x": 29, "y": 14 },
 
         { "type": "plant", "x": 1, "y": 19 },
-        { "type": "big-plant", "x": 32, "y": 19 }
+        { "type": "big-plant", "x": 32, "y": 19 },
+        { "type": "wall-lamp", "x": 11, "y": 0 },
+        { "type": "wall-lamp", "x": 26, "y": 0 },
+        { "type": "floor-lamp", "x": 10, "y": 6 },
+        { "type": "floor-lamp", "x": 10, "y": 11 },
+        { "type": "floor-lamp", "x": 10, "y": 16 },
+        { "type": "floor-lamp", "x": 22, "y": 6 },
+        { "type": "floor-lamp", "x": 22, "y": 11 },
+        { "type": "floor-lamp", "x": 22, "y": 16 },
+        { "type": "floor-lamp", "x": 32, "y": 7 },
+        { "type": "floor-lamp", "x": 32, "y": 13 }
       ],
       "spots": [
         { "kind": "standby", "x": 21, "y": 18 },
@@ -211,7 +241,7 @@
         { "type": "counter", "x": 2, "y": 1, "w": 2 },
         { "type": "sink", "x": 4, "y": 1 },
         { "type": "stove", "x": 5, "y": 1 },
-        { "type": "counter", "x": 6, "y": 1, "w": 2 },
+        { "type": "counter", "x": 6, "y": 1 },
         { "type": "coffee-machine", "x": 8, "y": 1 },
         { "type": "counter", "x": 9, "y": 1, "w": 2 },
         { "type": "fridge", "x": 11, "y": 1 },
@@ -235,7 +265,17 @@
         { "type": "coffee-table", "x": 14, "y": 13, "w": 3 },
         { "type": "armchair", "x": 20, "y": 13 },
         { "type": "plant", "x": 1, "y": 19 },
-        { "type": "big-plant", "x": 21, "y": 19 }
+        { "type": "big-plant", "x": 21, "y": 19 },
+        { "type": "microwave", "x": 7, "y": 1 },
+        { "type": "neon-sign", "x": 1, "y": 0 },
+        { "type": "garland", "x": 4, "y": 0, "w": 4 },
+        { "type": "floor-lamp", "x": 3, "y": 11, "variant": "arc" },
+        { "type": "floor-lamp", "x": 17, "y": 11 },
+        { "type": "candles", "x": 5, "y": 13 },
+        { "type": "candles", "x": 10, "y": 13 },
+        { "type": "candles", "x": 15, "y": 13, "variant": "jar" },
+        { "type": "candles", "x": 5, "y": 6 },
+        { "type": "night-light", "x": 19, "y": 8 }
       ],
       "spots": [
         { "kind": "kitchen", "x": 3, "y": 2, "facing": "up" },
@@ -271,7 +311,15 @@
           { "type": "plant", "x": 1, "y": 3 },
           { "type": "water-cooler", "x": 28, "y": 1 },
           { "type": "plant", "x": 40, "y": 3 },
-          { "type": "plant", "x": 54, "y": 3 }
+          { "type": "plant", "x": 54, "y": 3 },
+          { "type": "wall-lamp", "x": 5, "y": 0 },
+          { "type": "wall-lamp", "x": 19, "y": 0 },
+          { "type": "wall-lamp", "x": 27, "y": 0 },
+          { "type": "wall-lamp", "x": 36, "y": 0 },
+          { "type": "wall-lamp", "x": 45, "y": 0 },
+          { "type": "floor-lamp", "x": 17, "y": 3 },
+          { "type": "floor-lamp", "x": 33, "y": 3 },
+          { "type": "floor-lamp", "x": 47, "y": 3 }
         ]
       }
     ],

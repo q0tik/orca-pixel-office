@@ -1,0 +1,16 @@
+{
+  "format": 1,
+  "id": "lights",
+  "name": "Ночной свет",
+  "author": "Pixel Office contributors",
+  "license": "MIT",
+  "description": "Ещё светильники для «Оформления»: цвет абажура и цвет света ночью.",
+  "variants": [
+    { "id": "mint-lamp", "name": "Мятный торшер", "target": "floor-lamp", "base": "", "palette": { "lampShade": "#cdeedd", "lampLit": "#c8ffe4" }, "light": { "color": "#b8ffd8" } },
+    { "id": "red-sconce", "name": "Красное бра", "target": "wall-lamp", "base": "", "palette": { "lampShade": "#d98080", "lampLit": "#ff9a8a" }, "light": { "color": "#ff9a7a", "radius": 40 } },
+    { "id": "lavender-candles", "name": "Лавандовые свечи", "target": "candles", "base": "", "palette": { "candle": "#d9c8f2", "candleLo": "#b9a2dc" }, "light": { "color": "#d9a8ff" } },
+    { "id": "icy-garland", "name": "Холодная гирлянда", "target": "garland", "base": "", "palette": { "garlandWarm": "#a8e0ff" }, "light": { "color": "#9fd8ff" } },
+    { "id": "blue-moon", "name": "Голубая луна", "target": "night-light", "base": "", "palette": { "moon": "#bfe2ff", "moonLo": "#8fb4d8" }, "light": { "color": "#a8d4ff", "radius": 30 } },
+    { "id": "green-neon", "name": "Неон: зелёные 24/7", "target": "neon-sign", "base": "247", "palette": { "neonB": "#7dff9a" }, "light": { "color": "#7dff9a" } }
+  ]
+}

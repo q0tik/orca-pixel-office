@@ -61,7 +61,7 @@ that the tests load: [`docs/examples/neon.json`](examples/neon.json). A bigger o
   `concrete`, `marble`, `raised`). A floor the owner picked in «Оформление» is not remapped.
 - `furniture.rug`: `red` | `blue` | `cream`; `furniture.plant`: `leafy` | `cactus`.
 
-The sky in the windows and the evening/night tone are laid over every theme by the clock; you do not set them.
+The sky in the windows, the evening and night dark and the lamps (see [Lights](#lights)) follow the clock in every theme; you do not set them.
 
 ### `variants`
 
@@ -74,11 +74,12 @@ The sky in the windows and the evening/night tone are laid over every theme by t
 | `id` | `a-z`, `0-9`, `-`; unique in the pack. |
 | `name` | Shown under the preview. |
 | `target` | `"floor"`, `"wall"` or a furniture type (list below). |
-| `base` | Optional: the built-in picture to start from. Floors: a floor kind. Walls: `plain`, `navy`, `stripes`, `rose`, `sage`, `bare`. Furniture: its built-in variant (desk: `""`, `multi`, `phone`, `tidy`, `boxed`; rug: `red`, `blue`, `cream`; plant: `""`, `cactus`; whiteboard: `""`, `arch`). **Required** for a floor or a wall without a sprite. |
+| `base` | Optional: the built-in picture to start from. Floors: a floor kind. Walls: `plain`, `navy`, `stripes`, `rose`, `sage`, `bare`. Furniture: its built-in variant (desk: `""`, `multi`, `phone`, `tidy`, `boxed`; rug: `red`, `blue`, `cream`; plant: `""`, `cactus`; whiteboard: `""`, `arch`; floor-lamp: `""`, `arc`, `paper`; wall-lamp: `""`, `globe`, `bulb`; desk-lamp: `""`, `arm`; candles: `""`, `jar`; garland: `""`, `rainbow`; neon-sign: `""`, `heart`, `247`; night-light: `""`, `star`). **Required** for a floor or a wall without a sprite. |
 | `palette` | Optional: palette entries swapped **only while this thing is drawn**. |
 | `sprite` | Optional: your own pixels (below). Not for walls or things on walls. |
+| `light` | Optional, lights only: `{ "color": "#rrggbb", "radius": 8–96 }`, the colour and reach (art pixels) of its light at night. See [Lights](#lights). |
 
-At least one of `base`, `palette`, `sprite` is needed. With a sprite, `base` and `palette` are ignored.
+At least one of `base`, `palette`, `sprite`, `light` is needed. With a sprite, `base` and `palette` are ignored.
 
 Which palette entries a built-in picture uses is easiest to see in `plugin/editor/art.ts` (each function reads `P.<name>`).
 The common ones: desks `deskTop deskTopHi deskFront deskDark deskLeg`; desk chairs and chairs `chair chairHi chairLo`;
@@ -113,15 +114,20 @@ Desk chairs are their own `chair` target: recolouring a desk does not change its
   20 pixels up the wall). The sprite is drawn centred horizontally and standing on the bottom of the footprint.
 - One character is one art pixel; the office scales whole pixels only, so sprites stay crisp. Keep to a small palette
   and, ideally, to `@` colours, so the look fits both themes.
-- **Day and night**: the evening and night tone is laid over everything, sprites included; `@` colours also follow the
-  theme. Fixed `#` colours stay as they are under the tone.
+- **Day and night**: in the evening and at night the office darkens and the lights cut pools out of the dark
+  (see [Lights](#lights)); sprites are darkened like everything else. Pixels in a shining palette colour (`@lampLit`,
+  `@lampBulb`, `@flameTip`, `@flameCore`, `@neonA`, `@neonB`, `@garlandWarm`, `@moon`, `@microwaveLit`, `@fridgeLit`,
+  `@screenLine`, `@ledGreen`, `@ledAmber`, `@ledBlue`) are drawn again over the dark, so they glow. `@` colours also
+  follow the theme; fixed `#` colours stay as they are.
 - Animated things (server racks' LEDs, fish, coffee steam) animate only in their built-in pictures; a sprite is still.
 
 ## Furniture types
 
 `desk`, `ceo-desk`, `chair`, `armchair`, `sofa`, `loveseat`, `coffee-table`, `kitchen-table`, `counter`, `sink`, `stove`,
 `coffee-machine`, `fridge`, `water-cooler`, `printer`, `plant`, `big-plant`, `bookshelf`, `rug`, `server-rack`, `trophy`,
-`flowers`, `boxes`, `ladder`, `paint`, `aquarium`, `pet-bed`. Footprints are in `plugin/engine/catalog.ts`.
+`flowers`, `boxes`, `ladder`, `paint`, `aquarium`, `pet-bed`, `pet-bowl`, `bird-cage`, and the lights: `floor-lamp`,
+`wall-lamp`, `desk-lamp`, `candles`, `garland`, `neon-sign`, `night-light`, `microwave`. Footprints are in
+`plugin/engine/catalog.ts`.
 
 ## Palette entries
 
@@ -142,15 +148,42 @@ Desk chairs are their own `chair` target: recolouring a desk does not change its
 `sand`, `fishOrange`, `fishYellow`, `steam`, `cork`, `corkLo`, `noteYellow`, `noteGreen`, `mirrorGlass`, `flowerPink`,
 `flowerRed`, `catFur`, `catFurLo`, `catNose`, `petBed`, `petBedHi`, `shoe`, `eye`, `mouth`, `bubble`, `working`,
 `waiting`, `blocked`, `done`, `idle`, `needsYou`, `needsYouLo`, `mailHandoff`, `mailQuestion`, `mailStatus`, `mailDone`,
-`mailEscalation`, `mailOther`, `envelope`, `tag`, `tagText`, `labelText`, `labelBack`, and `books` (an array).
+`mailEscalation`, `mailOther`, `envelope`, the night light `lampShade`, `lampLit`, `lampBulb`, `lampPole`, `lampBrass`,
+`bankerGreen`, `candle`, `candleLo`, `flameTip`, `flameCore`, `wick`, `neonA`, `neonB`, `neonOff`, `garlandWire`,
+`garlandWarm`, `garlandOff`, `codeA`, `codeB`, `codeC`, `logBg`, `logOk`, `logWarn`, `logErr`, `chartBg`, `chartBar`,
+`chartLine`, `chatBg`, `chatMe`, `chatThem`, `saverBg`, `saverStar`, `microwave`, `microwaveLo`, `microwaveGlass`,
+`microwaveLit`, `microwavePlate`, `fridgeLit`, `fridgeShelf`, `moon`, `moonLo`, then `tag`, `tagText`, `labelText`,
+`labelBack`, and `books` (an array).
 
 Status colours (`working`, `waiting`, `blocked`, …) mean something; a theme may tune them but should keep them telling
 apart at a glance.
 
+## Lights
+
+From the evening on the office darkens and every light cuts a soft pool, in pixel rings, out of the dark: on the floor
+and the walls of its own room, never through a wall. Lamps, candles, garlands, neon signs and the night light shine
+all night; the aquarium and the server racks glow; a screen glows while its bot works there (code, logs, charts or a
+chat, by the bot's role or its office) and shows a screensaver while the bot is away; the microwave, the coffee machine
+and the fridge light up only while a bot uses them. By day the lamps are off.
+
+A light is a piece of furniture like any other: put one on the map (`office/map.json`), and the owner can change its
+look in «Оформление» or switch it off there (the switch stays off after a restart). A new look of a light is a pack
+variant with a `light` field. Example, `office/skins/lights.json`:
+
+```json
+{ "id": "mint-lamp", "name": "Мятный торшер", "target": "floor-lamp", "base": "", "palette": { "lampShade": "#cdeedd", "lampLit": "#c8ffe4" }, "light": { "color": "#b8ffd8" } }
+```
+
+`palette` recolours the lamp (`lampShade` by day, `lampLit` at night); `light.color` tints its pool; `light.radius` sets
+how far it reaches. The light map is computed once per change (the hour's phase, the theme, a lamp switched, a screen
+on or off, an appliance taken), not every frame; flames, garlands, signs and screens move on the office's one animation
+timer.
+
 ## Where the owner's choices live
 
 In the plugin's storage (`orca.storage`, key `decor`):
-`{ "v": 1, "rooms": { "<room id>": { "floor": "<pack>:<variant>", "wall": "…" } }, "items": { "<room>:<type>:<x>,<y>": "…" } }`.
+`{ "v": 1, "rooms": { "<room id>": { "floor": "<pack>:<variant>", "wall": "…" } }, "items": { "<room>:<type>:<x>,<y>": "…" }, "off": ["<room>:<type>:<x>,<y>", …] }`;
+`off` lists the lights switched off.
 Built-in looks are `builtin:<target>:<base>`. If a pack is removed, the choices that used it are dropped and those things
 look as the map says again.
 

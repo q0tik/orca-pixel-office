@@ -412,7 +412,15 @@ export type DecorOption = { id: string; name: string; pack: string; selected: bo
 export type DecorSection = { part: string; label: string; options: DecorOption[]; isDefault: boolean }
 
 /** A room (floor, walls) or a piece of furniture: every look to pick, with a preview each. */
-export function renderDecorPanel(v: { title: string; subtitle: string; sections: DecorSection[]; all?: { label: string; count: number } | null; note?: string | null }): string {
+export function renderDecorPanel(v: {
+  title: string
+  subtitle: string
+  sections: DecorSection[]
+  all?: { label: string; count: number } | null
+  /** A lamp, candles, a sign: lit at night or switched off. */
+  light?: { on: boolean } | null
+  note?: string | null
+}): string {
   const h = escapeHtml
   const sections = v.sections
     .map((sec) =>
@@ -442,6 +450,11 @@ export function renderDecorPanel(v: { title: string; subtitle: string; sections:
       <button data-act="decorClose" title="Закрыть" style="${buttonStyle};min-width:26px">✕</button>
     </div>
     ${sections}
+    ${
+      v.light
+        ? `<button data-act="decorLight" style="${buttonStyle};width:100%;margin-top:12px;${v.light.on ? `background:${P.working};color:${P.ink}` : ''}">${v.light.on ? '💡 Свет ночью: горит — выключить' : '🌑 Свет выключен — включить'}</button>`
+        : ''
+    }
     ${v.all ? `<button data-act="decorAll" style="${buttonStyle};width:100%;margin-top:12px">Так же для всех: ${h(v.all.label)} (${v.all.count})</button>` : ''}
     <div style="font-size:11px;${muted};margin-top:10px">Меняется сразу и хранится в хранилище плагина. Варианты — из пакетов office/skins/*.json (см. docs/skin-packs.md).</div>
     ${v.note ? `<div style="font-size:11px;color:${P.waiting};margin-top:4px">${h(v.note)}</div>` : ''}`
@@ -502,7 +515,7 @@ export function renderDecorHint(animals: readonly AnimalRow[] = []): string {
       <div style="flex:1;font-size:15px;font-weight:bold">🎨 Оформление</div>
       <button data-act="decorClose" title="Выйти (Esc)" style="${buttonStyle};min-width:26px">✕</button>
     </div>
-    <div style="margin-top:10px;line-height:1.6">Кликните по комнате — поменять пол и стены.<br>По предмету — его вид (ковёр, стойка, диван, стол, кресло, аквариум, растение…).<br>По человечку — его внешность. По животному — включить, выключить, окрас.</div>
+    <div style="margin-top:10px;line-height:1.6">Кликните по комнате — поменять пол и стены.<br>По предмету — его вид (ковёр, стойка, диван, стол, кресло, аквариум, растение…).<br>По лампе, свечам, гирлянде, вывеске — вид и свет ночью: горит или выключен.<br>По человечку — его внешность. По животному — включить, выключить, окрас.</div>
     ${animalList(animals)}
     <div style="font-size:11px;${muted};margin-top:10px">Esc — выйти из оформления.</div>`
 }

@@ -1,5 +1,5 @@
 // «Жизнь» without tokens: decorative routines that always follow the real status. A resting bot
-// (done/idle in the lounge) strolls between the coffee machine, the cooler, the sofa, the aquarium,
+// (done/idle in the lounge) strolls between the coffee machine, the microwave, the fridge, the cooler, the sofa, the aquarium,
 // a window and the bookshelf; a bot waiting for the owner paces the reception by the owner's door
 // with its sign up. A working bot stays at its desk. Nothing here calls anything: it only picks
 // tiles over time, and the cast walks there by BFS. Real events win: a new status, Needs you, a
@@ -19,7 +19,8 @@ const REST_THINGS: Partial<Record<FurnitureType, string>> = {
   'water-cooler': 'у кулера',
   aquarium: 'смотрит на рыбок',
   bookshelf: 'у книжного шкафа',
-  fridge: 'у холодильника',
+  fridge: 'заглянул в холодильник',
+  microwave: 'греет обед в микроволновке',
   window: 'смотрит в окно'
 }
 /** Shared rooms only: nobody strolls into someone's office or the team room. */

@@ -28,6 +28,8 @@ export type FurnitureSpec = {
   needsId?: boolean
   /** Which ways it may face; the first is the default. */
   facings?: readonly ('up' | 'down')[]
+  /** Stands on another piece of furniture (candles on a table, a lamp on a desk): drawn over it. */
+  onTop?: boolean
 }
 
 export const FURNITURE = {
@@ -83,7 +85,24 @@ export const FURNITURE = {
   /** «СДАЁТСЯ». */
   sign: { w: 2, h: 1, mount: 'wall', blocking: 'none' },
   /** Real numbers from Orca: bots waiting for the owner and bots at work. */
-  'notice-board': { w: 2, h: 1, mount: 'wall', blocking: 'none' }
+  'notice-board': { w: 2, h: 1, mount: 'wall', blocking: 'none' },
+  // Night light (engine/lights.ts says how each one shines; they are lit from the evening on).
+  /** A floor lamp: by the sofas, in the aisles, in a corner. */
+  'floor-lamp': { w: 1, h: 1, mount: 'floor', blocking: 'block' },
+  /** A wall lamp (бра). */
+  'wall-lamp': { w: 1, h: 1, mount: 'wall', blocking: 'none' },
+  /** A lamp standing on a desk. */
+  'desk-lamp': { w: 1, h: 1, mount: 'floor', blocking: 'none', onTop: true },
+  /** Candles on a table; their flames flicker at night. */
+  candles: { w: 1, h: 1, mount: 'floor', blocking: 'none', onTop: true },
+  /** A string of little lights along a wall. */
+  garland: { w: 4, h: 1, mount: 'wall', blocking: 'none', sizable: { minW: 1, maxW: 12, minH: 1, maxH: 1 } },
+  /** A neon sign on a wall. */
+  'neon-sign': { w: 2, h: 1, mount: 'wall', blocking: 'none' },
+  /** A little night light on the floor (by the cat's bed). */
+  'night-light': { w: 1, h: 1, mount: 'floor', blocking: 'none' },
+  /** On a counter; it lights up and hums while a bot warms its lunch. */
+  microwave: { w: 1, h: 1, mount: 'floor', blocking: 'block' }
 } as const satisfies Record<string, FurnitureSpec>
 
 export type FurnitureType = keyof typeof FURNITURE

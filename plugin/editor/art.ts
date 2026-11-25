@@ -7,6 +7,7 @@ import type { Facing, PlacedFurniture } from '../engine/world'
 import { defaultAppearance, pantsFor, type Accessory, type Appearance } from './appearance'
 import { coatOf, paintPart, type CharacterSkin, type Dressed, type OwnerColors } from './characters'
 import { HAIRS, P, SHIRTS, SKINS } from './palette'
+import { candles, deskLamp, floorLamp, fridgeOpen, garland, microwave, neonSign, nightLight, wallLamp } from './lamps'
 
 export type Paint = (x: number, y: number, w: number, h: number, color: string) => void
 
@@ -221,9 +222,14 @@ export function drawDoor(p: Paint, orientation: 'h' | 'v', owner: boolean): void
 // ── Things on walls ──────────────────────────────────────────────────────────────────────
 
 /** Wall decoration across `w` tiles, drawn on the wall face (rows 4..13 of the tile). */
-export function drawWallItem(p: Paint, item: Pick<PlacedFurniture, 'type' | 'w'> & { variant?: string }): void {
+export function drawWallItem(p: Paint, item: Pick<PlacedFurniture, 'type' | 'w'> & { variant?: string }, state: FurnitureState = {}): void {
   const width = item.w * T
   switch (item.type) {
+    case 'wall-lamp':
+    case 'garland':
+    case 'neon-sign':
+      // Lights on walls are drawn live by the renderer (lit or not); the same picture.
+      return drawFurniture(p, { ...item, h: 1, facing: 'down' }, state)
     case 'window': {
       p(1, 4, width - 2, 10, P.frame)
       p(2, 5, width - 4, 8, P.sky)
@@ -348,19 +354,38 @@ export type FurnitureState = {
   papers?: number
   /** Living things (server LEDs, fish, steam, bubbles): the ambient frame; 0 when still. */
   frame?: number
+  /** Lights (lamps, candles, signs, the CEO's lamp, racks, the aquarium): shining now (evening, night, not switched off). */
+  lit?: boolean
+  /** Appliances: a bot is using it (the microwave hums, the fridge is open, the coffee machine pours). */
+  active?: boolean
+  /** Only what shines by itself, for drawing again over the dark at night. */
+  glowOnly?: boolean
 }
 
+const NOTHING: Paint = () => {}
+
 /** Furniture whose picture changes with the ambient frame. */
-export const ANIMATED: ReadonlySet<FurnitureType> = new Set<FurnitureType>(['server-rack', 'aquarium', 'coffee-machine', 'water-cooler'])
+export const ANIMATED: ReadonlySet<FurnitureType> = new Set<FurnitureType>(['server-rack', 'aquarium', 'coffee-machine', 'water-cooler', 'candles', 'garland', 'neon-sign', 'microwave'])
+
+/** Whether a thing in this state has pixels that shine by themselves (drawn again over the dark). */
+export function glows(type: FurnitureType, state: FurnitureState): boolean {
+  if (type === 'microwave' || type === 'fridge' || type === 'coffee-machine') return !!state.active
+  return !!state.lit && LIT_TYPES.has(type)
+}
+const LIT_TYPES: ReadonlySet<FurnitureType> = new Set<FurnitureType>(['floor-lamp', 'wall-lamp', 'desk-lamp', 'candles', 'garland', 'neon-sign', 'night-light', 'ceo-desk', 'server-rack', 'aquarium'])
 
 /**
  * One floor item, its footprint's top-left at (0,0); tall things draw up to
  * FURNITURE_HEADROOM pixels above it. Desk chairs are drawn by `drawDeskChair`.
  */
-export function drawFurniture(p: Paint, item: Pick<PlacedFurniture, 'type' | 'w' | 'h' | 'facing' | 'variant'>, state: FurnitureState = {}): void {
+export function drawFurniture(brush: Paint, item: Pick<PlacedFurniture, 'type' | 'w' | 'h' | 'facing' | 'variant'>, state: FurnitureState = {}): void {
   const W = item.w * T
   const H = item.h * T
   const frame = state.frame ?? 0
+  // `g` paints what shines by itself; with `glowOnly` nothing else is painted.
+  const g = brush
+  const p = state.glowOnly ? NOTHING : brush
+  const lit = !!state.lit
   switch (item.type) {
     case 'desk':
       if (item.facing === 'up') deskUp(p, W, !!state.screenOn, item.variant, (state.papers ?? 0) > 0)
@@ -368,7 +393,12 @@ export function drawFurniture(p: Paint, item: Pick<PlacedFurniture, 'type' | 'w'
       paperStack(p, state.papers ?? 0, item.facing === 'up' ? 2 : W - 10, 8)
       return
     case 'ceo-desk':
-      return ceoDesk(p)
+      ceoDesk(p)
+      if (lit) {
+        g(37, 8, 8, 3, P.lampLit)
+        g(38, 11, 6, 1, P.lampBulb)
+      }
+      return
     case 'chair':
       return chair(p, item.facing === 'down' ? 'down' : 'up', false)
     case 'armchair':
@@ -404,9 +434,19 @@ export function drawFurniture(p: Paint, item: Pick<PlacedFurniture, 'type' | 'w'
       p(6, -3, 4, 3, P.white)
       p(7, -2, 2, 1, P.coffee)
       p(10, -8, 1, 1, P.blocked)
+      if (state.active) {
+        // Pouring: the display and the spout light up, a stream runs into the cup.
+        g(5, -8, 4, 1, P.logOk)
+        g(10, -8, 1, 1, P.ledGreen)
+        g(5, -5, 6, 1, P.ledAmber)
+        g(7, -4, 2, 1 + (frame % 2), P.coffee)
+        g(6, -3, 4, 1, P.flameCore)
+        steam(p, frame + 1)
+      }
       steam(p, frame)
       return
     case 'fridge':
+      if (state.active) return fridgeOpen(p, g)
       p(1, -16, 14, 31, P.steel)
       p(2, -15, 12, 29, P.plastic)
       p(2, -5, 12, 1, P.steelLo)
@@ -445,7 +485,7 @@ export function drawFurniture(p: Paint, item: Pick<PlacedFurniture, 'type' | 'w'
     case 'loveseat':
       return loveseat(p, W)
     case 'server-rack':
-      return serverRack(p, frame)
+      return serverRack(p, lit ? g : p, frame)
     case 'trophy':
       return trophy(p)
     case 'flowers':
@@ -457,7 +497,24 @@ export function drawFurniture(p: Paint, item: Pick<PlacedFurniture, 'type' | 'w'
     case 'paint':
       return paint(p)
     case 'aquarium':
-      return aquarium(p, W, frame)
+      return aquarium(p, lit ? g : p, W, frame)
+    case 'floor-lamp':
+      return floorLamp(p, g, lit, item.variant)
+    case 'wall-lamp':
+      return wallLamp(p, g, lit, item.variant)
+    case 'desk-lamp':
+      return deskLamp(p, g, lit, item.variant)
+    case 'candles':
+      return candles(p, g, lit, frame, item.variant)
+    case 'garland':
+      return garland(p, g, lit, W, frame, item.variant)
+    case 'neon-sign':
+      return neonSign(p, g, lit, frame, item.variant)
+    case 'night-light':
+      return nightLight(p, g, lit, item.variant)
+    case 'microwave':
+      counter(p, W)
+      return microwave(p, g, !!state.active, frame)
     case 'pet-bowl':
       p(3, 10, 10, 4, P.steelLo)
       p(4, 9, 8, 2, P.steel)
@@ -534,7 +591,7 @@ function loveseat(p: Paint, W: number): void {
 }
 
 /** A tall rack of servers; its LEDs blink with the frame. */
-function serverRack(p: Paint, frame: number): void {
+function serverRack(p: Paint, leds: Paint, frame: number): void {
   p(1, -19, 14, 34, P.rackLo)
   p(2, -18, 12, 31, P.rack)
   p(2, -18, 12, 1, P.rackHi)
@@ -545,7 +602,7 @@ function serverRack(p: Paint, frame: number): void {
     for (let led = 0; led < 2; led += 1) {
       const v = hash(row, led, Math.floor(frame / (1 + ((row + led) % 3)))) % 5
       const color = v === 0 ? P.rackHi : v === 4 ? P.ledAmber : row === 0 && led === 0 ? P.ledBlue : P.ledGreen
-      p(10 + led * 2, y + 1, 1, 1, color)
+      leds(10 + led * 2, y + 1, 1, 1, color)
     }
   }
   p(1, 13, 14, 2, P.rackLo)
@@ -617,12 +674,13 @@ function paint(p: Paint): void {
 }
 
 /** A fish tank on its stand; the fish swim back and forth with the frame. */
-function aquarium(p: Paint, W: number, frame: number): void {
-  p(0, 5, W, 10, P.darkWood)
-  p(0, 5, W, 1, P.darkWoodHi)
-  p(2, 8, 4, 4, P.darkWoodLo)
-  p(W - 6, 8, 4, 4, P.darkWoodLo)
-  p(1, -12, W - 2, 17, P.steelLo)
+/** The cabinet is lit by the room; at night the tank (`g`) glows. */
+function aquarium(cab: Paint, p: Paint, W: number, frame: number): void {
+  cab(0, 5, W, 10, P.darkWood)
+  cab(0, 5, W, 1, P.darkWoodHi)
+  cab(2, 8, 4, 4, P.darkWoodLo)
+  cab(W - 6, 8, 4, 4, P.darkWoodLo)
+  cab(1, -12, W - 2, 17, P.steelLo)
   p(2, -11, W - 4, 15, P.aquaWater)
   p(2, -11, W - 4, 2, P.glassHi)
   p(2, 0, W - 4, 4, P.aquaWaterLo)
