@@ -178,6 +178,31 @@ export function releasedWorkspaces(json: unknown): Set<string> {
   return new Set([...byWorkspace].filter(([, all]) => all).map(([ws]) => ws))
 }
 
+/**
+ * When workers finished, as the plugin saw it. Orca gives the time for a worker whose agent is done;
+ * one whose agent has gone (a dispatch that succeeded) has none. The plugin's worker process remembers
+ * the workers it saw working, and when one stops it stamps that moment as `since`: the tab keeps it pale
+ * for ten minutes from then, however often the office is opened again. A worker never seen working gets
+ * no time and stays out of the office.
+ */
+export class FinishTracker {
+  private readonly liveSeen = new Set<string>()
+  private readonly finishedAt = new Map<string, number>()
+
+  stamp(interns: Intern[], now: number): Intern[] {
+    return interns.map((i) => {
+      if (i.live) {
+        this.liveSeen.add(i.id)
+        this.finishedAt.delete(i.id)
+        return i
+      }
+      if (this.liveSeen.has(i.id) && !this.finishedAt.has(i.id)) this.finishedAt.set(i.id, now)
+      const seen = this.finishedAt.get(i.id)
+      return i.since === null && seen !== undefined ? { ...i, since: seen } : i
+    })
+  }
+}
+
 export function isLive(state: InternState): boolean {
   return state === 'working' || state === 'blocked' || state === 'waiting'
 }

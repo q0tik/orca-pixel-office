@@ -181,7 +181,6 @@ let workers: WorkerInfo[] = []
 let workerSeats = new Map<string, DeskSeat>()
 let workerOverflow: string[] = []
 let storedWorkerDesks: Record<string, string> = {}
-const firstSeenDone = new Map<string, number>()
 /** Until the first workers/items answer, everyone is put in place without walking (no «забег»). */
 let settled = false
 /** Tooltip lines for the envelope or line under the pointer. */
@@ -532,7 +531,7 @@ function placeWorkers(botDesks: Set<string>): void {
   const all: WorkerInfo[] = bots.flatMap((bot) =>
     (extras?.bots[bot.key]?.interns ?? []).map((i) => ({ id: i.id, name: i.name, parentKey: bot.key, agent: i.agent, state: i.state, live: i.live, since: i.since, subagents: i.subagents ?? [] }))
   )
-  workers = presentWorkers(all, Date.now(), firstSeenDone)
+  workers = presentWorkers(all, Date.now())
   // «Стажёры»: the workers' subagents; a new one pops in by its worker's desk, a finished one fades.
   const subs = new Map<string, { key: string; color: string; live: boolean }>()
   for (const w of workers) for (const sa of w.subagents ?? []) subs.set(`${w.id}#${sa.id}`, { key: workerKey(w.id), color: STATE_COLOR.working, live: true })
@@ -1468,7 +1467,7 @@ function workerView(id: string) {
   if (!w) return null
   const parent = bots?.find((b) => b.key === w.parentKey)
   const rule = { working: 'работает', blocked: 'ждёт разрешения', waiting: 'ждёт ответа', done: 'закончил', idle: 'простаивает', unknown: 'нет данных' }[w.state]
-  const leaves = !w.live ? ` · уйдёт через ${formatDuration(Math.max(0, WORKER_LINGER_MS - (Date.now() - (w.since ?? firstSeenDone.get(w.id) ?? Date.now()))))}` : ''
+  const leaves = !w.live ? ` · уйдёт через ${formatDuration(Math.max(0, WORKER_LINGER_MS - (Date.now() - (w.since ?? Date.now()))))}` : ''
   return {
     id: w.id,
     name: w.name,

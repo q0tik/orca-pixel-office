@@ -43,15 +43,13 @@ test('more workers than desks: the rest is «+N»', () => {
 })
 
 test('a finished worker stays pale for 10 minutes, then leaves; a released one leaves at once', () => {
-  const seen = new Map<string, number>()
   const now = 1_000_000
   const list = [worker('live'), worker('done-old', { live: false, state: 'done', since: now - WORKER_LINGER_MS - 1 }), worker('done-new', { live: false, state: 'done', since: now - 60_000 }), worker('done-unknown', { live: false, state: 'done' })]
-  assert.deepEqual(presentWorkers(list, now, seen).map((w) => w.id), ['live', 'done-new', 'done-unknown'])
-  // Without a time from Orca, the clock starts when the office saw it finished.
-  assert.deepEqual(presentWorkers(list, now + WORKER_LINGER_MS, seen).map((w) => w.id), ['live'])
-  // Released: not in the list any more → gone, and forgotten.
-  assert.deepEqual(presentWorkers([worker('live')], now + 1, seen).map((w) => w.id), ['live'])
-  assert.equal(seen.size, 0)
+  // Without a time it finished, a worker is not in the office (opening the office again starts no clock).
+  assert.deepEqual(presentWorkers(list, now).map((w) => w.id), ['live', 'done-new'])
+  assert.deepEqual(presentWorkers(list, now + WORKER_LINGER_MS).map((w) => w.id), ['live'])
+  // Released: not in the list any more → gone.
+  assert.deepEqual(presentWorkers([worker('live')], now + 1).map((w) => w.id), ['live'])
   const desk = realMap().desks.find((d) => d.room === WORKER_ROOM)!
   assert.equal(workerTarget(worker('x', { live: false, state: 'done' }), desk).still, true, 'sits still, no typing')
   assert.equal(workerTarget(worker('x', { state: 'blocked' }), desk).bubble, 'blocked')

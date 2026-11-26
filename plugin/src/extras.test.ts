@@ -1,19 +1,8 @@
 // Fixtures are shaped like the real CLI answers (checked 2026-11-24) with made-up text only.
 import { assert, test } from 'orca/testing'
 import type { CliRequest, RunResult } from './cli'
-import {
-  releasedWorkspaces,
-  ExtrasSource,
-  LAST_SAID_MAX,
-  parseBotList,
-  parseCurrentChat,
-  parseInterns,
-  parseItems,
-  parseWorktreePs,
-  readExtras,
-  type Clock,
-  type Extras
-} from './extras'
+import { releasedWorkspaces, ExtrasSource, LAST_SAID_MAX, parseBotList, parseCurrentChat, parseInterns, parseItems, parseWorktreePs, readExtras, type Clock, type Extras, FinishTracker, type InternState } from './extras'
+import { presentWorkers } from '../engine/workers'
 
 const BOT = '[CTO] Тестовый'
 const BOT_WS = 'folder:bot-1'
@@ -253,4 +242,63 @@ test('«стажёры»: a worker’s subagents come from worktree ps while the
   assert.equal(interns[0].subagents.length, 1, 'the worker carries its trainee')
   const done = parseWorktreePs(ps(null))
   assert.deepEqual(done.get('repo::/w/one')!.subagents, [], 'gone from the list once finished')
+})
+
+// ── Who is in «Команды и отделы»: workers by their agents, not by their workspaces ─────────────
+
+const MIN = 60_000
+
+function teamToday(now: number) {
+  const ps = parseWorktreePs({
+    worktrees: [
+      // A shell left open, no agent: the workspace says «active», but nobody works there.
+      { worktreeId: 'w-shell', displayName: 'shell-open', path: '/w/shell-open', bot: '[CTO] Ада', status: 'active', liveTerminalCount: 1, agents: [] },
+      // Its dispatch succeeded long ago: the agent is done since 11 minutes.
+      { worktreeId: 'w-old', displayName: 'old', path: '/w/old', bot: '[CTO] Ада', status: 'active', liveTerminalCount: 1, agents: [{ state: 'done', stateStartedAt: now - 11 * MIN, agentType: 'claude', subagents: [{ id: 'stale', state: 'working', agentType: 'Explore', startedAt: now - 30 * MIN }] }] },
+      // Finished three minutes ago.
+      { worktreeId: 'w-recent', displayName: 'recent', path: '/w/recent', bot: '[CTO] Ада', status: 'inactive', liveTerminalCount: 0, agents: [{ state: 'done', stateStartedAt: now - 3 * MIN, agentType: 'claude' }] },
+      // At work, with a trainee.
+      { worktreeId: 'w-busy', displayName: 'busy', path: '/w/busy', bot: '[CTO] Ада', status: 'working', liveTerminalCount: 1, agents: [{ state: 'working', stateStartedAt: now - MIN, agentType: 'claude', subagents: [{ id: 's1', state: 'working', agentType: 'Explore', startedAt: now - 10_000 }] }] },
+      // An old workspace with nothing in it.
+      { worktreeId: 'w-ancient', displayName: 'ancient', path: '/w/ancient', bot: '[CTO] Ада', status: 'inactive', liveTerminalCount: 0, agents: [] }
+    ]
+  })
+  const work = { workspaces: ['w-shell', 'w-old', 'w-recent', 'w-busy', 'w-ancient'].map((id) => ({ id, name: id.slice(2), agent: id === 'w-busy' ? 'agent working' : 'agent idle' })) }
+  return parseInterns(work, ps, '[CTO] Ада', 'folder:ada')
+}
+
+const asWorkers = (interns: ReturnType<typeof teamToday>) => interns.map((i) => ({ id: i.id, name: i.name, parentKey: 'ada', agent: i.agent, state: i.state, live: i.live, since: i.since, subagents: i.subagents }))
+
+test('in the team room only workers whose agent works, or finished less than 10 minutes ago (pale)', () => {
+  const now = 10_000_000
+  const present = presentWorkers(asWorkers(teamToday(now)), now)
+  // A live terminal with no agent, an «active» workspace, an old one, a dispatch done 11 min ago: nobody.
+  assert.deepEqual(present.map((w) => w.id).sort(), ['w-busy', 'w-recent'])
+  assert.equal(present.find((w) => w.id === 'w-busy')!.live, true, 'working: at the desk')
+  assert.equal(present.find((w) => w.id === 'w-recent')!.live, false, 'done 3 min ago: pale (the tab draws finished workers at 45%)')
+  // Ten minutes after it finished, the recent one has left too; opening the office again brings nobody back.
+  assert.deepEqual(presentWorkers(asWorkers(teamToday(now)), now + 8 * MIN).map((w) => w.id), ['w-busy'])
+  assert.deepEqual(presentWorkers(asWorkers(teamToday(now)), now + 8 * MIN).map((w) => w.id), ['w-busy'])
+})
+
+test('trainees leave with their worker', () => {
+  const now = 10_000_000
+  const present = presentWorkers(asWorkers(teamToday(now)), now)
+  const trainees = present.flatMap((w) => (w.subagents ?? []).map((s) => `${w.id}#${s.id}`))
+  assert.deepEqual(trainees, ['w-busy#s1'], 'the old worker’s stale subagent is gone with it')
+})
+
+test('a worker the plugin saw working, whose agent then went away, stays pale 10 minutes from that moment', () => {
+  const tracker = new FinishTracker()
+  const t0 = 1_000_000
+  const intern = (live: boolean) => ({ id: 'w-x', name: 'x', agent: live ? 'claude' : null, state: (live ? 'working' : 'idle') as InternState, live, since: live ? t0 : null, subagents: [] })
+  const never = { id: 'w-never', name: 'never', agent: null, state: 'idle' as InternState, live: false, since: null, subagents: [] }
+  tracker.stamp([intern(true), never], t0)
+  // The dispatch succeeded and its agent left: no time from Orca, the plugin stamps when it saw it stop.
+  const after = tracker.stamp([intern(false), never], t0 + MIN)
+  assert.equal(after[0].since, t0 + MIN)
+  assert.equal(after[1].since, null, 'never seen working: no time')
+  const show = (now: number) => presentWorkers(asWorkers(tracker.stamp([intern(false), never], now)), now).map((w) => w.id)
+  assert.deepEqual(show(t0 + 5 * MIN), ['w-x'])
+  assert.deepEqual(show(t0 + 12 * MIN), [])
 })

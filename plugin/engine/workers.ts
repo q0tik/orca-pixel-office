@@ -28,24 +28,14 @@ export type WorkerInfo = {
 }
 
 /**
- * Which workers are in the office now: live ones, and finished ones for WORKER_LINGER_MS after
- * they finished (from `since`, else from when the office first saw them finished).
+ * Which workers are in the office now: those whose agent works, waits or is blocked, and finished
+ * ones (pale) for WORKER_LINGER_MS after they finished — from their agent's «done» time, or from when
+ * the plugin saw them finish (src/extras.ts FinishTracker). Opening the office again starts no clock.
  */
-export function presentWorkers(workers: readonly WorkerInfo[], now: number, firstSeenDone: Map<string, number>): WorkerInfo[] {
-  const out: WorkerInfo[] = []
-  const current = new Set(workers.map((w) => w.id))
-  for (const id of [...firstSeenDone.keys()]) if (!current.has(id)) firstSeenDone.delete(id)
-  for (const w of workers) {
-    if (w.live) {
-      firstSeenDone.delete(w.id)
-      out.push(w)
-      continue
-    }
-    if (!firstSeenDone.has(w.id)) firstSeenDone.set(w.id, now)
-    const doneAt = w.since ?? firstSeenDone.get(w.id)!
-    if (now - doneAt < WORKER_LINGER_MS) out.push(w)
-  }
-  return out
+export function presentWorkers(workers: readonly WorkerInfo[], now: number): WorkerInfo[] {
+  // Not a worker: an open terminal with no agent, an «active» workspace, an old one. With no time it
+  // finished (no agent's done, and the office never saw it finish), it is simply not in the office.
+  return workers.filter((w) => w.live || (w.since !== null && now - w.since < WORKER_LINGER_MS))
 }
 
 /** Keeps a stored mapping only if it is a plain { workerId: deskId } object. */

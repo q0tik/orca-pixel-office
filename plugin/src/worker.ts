@@ -6,7 +6,7 @@ import { mkdir, writeFile, access } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { OrcaWorkerApi } from 'orca/worker'
 import { nodeExec, OrcaCli } from './cli'
-import { ExtrasSource, parseCurrentChat, parseWorktreePs, readExtras, type ChatAnswer } from './extras'
+import { ExtrasSource, FinishTracker, parseCurrentChat, parseWorktreePs, readExtras, type ChatAnswer } from './extras'
 import { MailSource } from './mail'
 import {
   botKey,
@@ -153,11 +153,17 @@ export function createOffice(orca: OrcaWorkerApi, cli: OrcaCli = new OrcaCli(nod
     return scanned ? Promise.resolve() : scan()
   }
 
+  /** When workers stopped, as this process saw it (survives the office tab being opened again). */
+  const finished = new FinishTracker()
+
   const extras = new ExtrasSource(
     async () => {
       await ready()
       const refs = [...bots.values()].map((row) => ({ key: botKey(row), name: row.name, workspaceId: row.id }))
-      return readExtras((request) => cli.run(request), refs, await cli.source())
+      const fresh = await readExtras((request) => cli.run(request), refs, await cli.source())
+      // Workers that stopped since the last read get the moment they stopped (they stay pale 10 min).
+      for (const bot of Object.values(fresh.bots)) if (bot.interns) bot.interns = finished.stamp(bot.interns, Date.now())
+      return fresh
     },
     { now: () => Date.now(), setTimeout: (fn, ms) => setTimeout(fn, ms), clearTimeout: (h) => clearTimeout(h as ReturnType<typeof setTimeout>) },
     (fresh) => orca.panels.post('office.extras', fresh)
