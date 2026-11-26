@@ -1,7 +1,8 @@
 // Fixtures are shaped like the real CLI answers (checked 2026-11-24) with made-up text only.
 import { assert, test } from 'orca/testing'
 import type { CliRequest, RunResult } from './cli'
-import { releasedWorkspaces, ExtrasSource, LAST_SAID_MAX, parseBotList, parseCurrentChat, parseInterns, parseItems, parseWorktreePs, readExtras, type Clock, type Extras, FinishTracker, type InternState } from './extras'
+import { releasedWorkspaces, ExtrasSource, LAST_SAID_MAX, parseBotList, parseCurrentChat, parseInterns, parseItems, parseWorktreePs, readExtras, type Clock, type Extras, FinishTracker, type InternState, SubagentTracker } from './extras'
+import { traineesView } from '../editor/panel'
 import { presentWorkers } from '../engine/workers'
 
 const BOT = '[CTO] Тестовый'
@@ -225,23 +226,119 @@ test('reading extras drops released workers that have no live agent', async () =
   assert.ok(names.includes('alpha'), 'released but its agent still works: stays')
 })
 
-test('«стажёры»: a worker’s subagents come from worktree ps while they run, and leave when done', () => {
-  const ps = (subs: unknown[] | null) => ({
+// ── «Стажёры»: subagents from `worktree ps` (agents[].children), only what Orca observes ─────────
+
+const child = (id: string, state: string, extra: Record<string, unknown> = {}) => ({ id, providerId: 'p', kind: 'agent', name: 'general-purpose', agentType: 'general-purpose', model: 'some-model', state, membership: 'live', firstObservedAt: 100, observedAt: 200, ...extra })
+const agentWith = (children: unknown[] | undefined, observation: string | null = 'live') => ({ state: 'working', agentType: 'claude', stateStartedAt: 5, subagentObservation: observation, ...(children ? { children } : {}) })
+
+test('«стажёры»: children working → a trainee with what it does; done → pale with its time; no field → none', () => {
+  const ps = parseWorktreePs({
     worktrees: [
       {
         worktreeId: 'repo::/w/one',
         displayName: 'one',
-        bot: 'Ада',
-        agents: [{ state: 'working', agentType: 'claude', stateStartedAt: 5, ...(subs ? { subagents: subs, subagentObservation: 'live' } : {}) }]
+        bot: 'Тест',
+        agents: [
+          agentWith([
+            child('c1', 'working', { description: 'Probe subagent visibility', operation: { toolName: 'Bash', basis: 'reported' } }),
+            child('c2', 'done', { observedAt: 9_000 }),
+            child('c3', 'working', { kind: 'tool' }),
+            child('c4', 'working', { description: undefined, agentType: undefined, name: 'Explore' }),
+            { nope: true }
+          ])
+        ]
+      },
+      { worktreeId: 'repo::/w/two', displayName: 'two', bot: 'Тест', agents: [agentWith(undefined)] },
+      { worktreeId: 'repo::/w/three', displayName: 'three', bot: 'Тест', agents: [agentWith([child('x', 'working')], 'unverifiable')] },
+      { worktreeId: 'repo::/w/four', displayName: 'four', bot: 'Тест', agents: [agentWith([child('y', 'working')], null)] }
+    ]
+  })
+  const one = ps.get('repo::/w/one')!
+  assert.deepEqual(
+    one.subagents.map((s) => [s.id, s.label, s.live, s.tool, s.model, s.endedAt]),
+    [
+      ['c1', 'Probe subagent visibility', true, 'Bash', 'some-model', null],
+      ['c2', 'general-purpose', false, null, 'some-model', 9_000],
+      ['c4', 'Explore', true, null, 'some-model', null]
+    ],
+    'description, else agentType, else name; a child that is not an agent is not a trainee'
+  )
+  assert.equal(one.subagentsObserved, true)
+  assert.deepEqual(ps.get('repo::/w/two')!.subagents, [], 'no children field: none')
+  // Orca does not observe the subagents (unverifiable, or not at all): nothing is made up.
+  for (const id of ['repo::/w/three', 'repo::/w/four']) {
+    assert.deepEqual(ps.get(id)!.subagents, [], `${id}: none`)
+    assert.equal(ps.get(id)!.subagentsObserved, false)
+  }
+  // The worker carries its trainees and says whether they are observed.
+  const interns = parseInterns({ workspaces: [] }, ps, 'Тест', 'home')
+  assert.equal(interns.find((i) => i.id === 'repo::/w/one')!.subagents.length, 3)
+  assert.equal(interns.find((i) => i.id === 'repo::/w/three')!.subagentsObserved, false)
+})
+
+test('«стажёры»: only children of kind agent; a background command (kind command) is not a trainee', () => {
+  const ps = parseWorktreePs({
+    worktrees: [
+      {
+        worktreeId: 'repo::/w/home',
+        displayName: 'home',
+        bot: 'Тест',
+        botHome: true,
+        agents: [
+          agentWith([
+            child('a1', 'done', { description: 'Probe intern one', membership: 'settled' }),
+            { id: 'cmd1', kind: 'command', state: 'working', membership: 'live', description: 'Sleep 150 seconds then echo done' },
+            child('a2', 'working', { description: 'Working intern probe', operation: { toolName: 'Bash' } })
+          ])
+        ]
       }
     ]
   })
-  const running = parseWorktreePs(ps([{ id: 'sub-1', state: 'working', startedAt: 7, agentType: 'general-purpose' }, { nope: true }]))
-  assert.deepEqual(running.get('repo::/w/one')!.subagents, [{ id: 'sub-1', type: 'general-purpose', state: 'working', startedAt: 7 }])
-  const interns = parseInterns({ workspaces: [] }, running, 'Ада', 'home')
-  assert.equal(interns[0].subagents.length, 1, 'the worker carries its trainee')
-  const done = parseWorktreePs(ps(null))
-  assert.deepEqual(done.get('repo::/w/one')!.subagents, [], 'gone from the list once finished')
+  assert.deepEqual(ps.get('repo::/w/home')!.subagents.map((s) => [s.id, s.live]), [['a1', false], ['a2', true]])
+})
+
+test('«стажёры»: a finished trainee stays pale 10 minutes from when it finished, then leaves', () => {
+  const tracker = new SubagentTracker()
+  const sub = (live: boolean, endedAt: number | null = null) => ({ id: 's', label: 'x', type: null, model: null, tool: null, state: (live ? 'working' : 'done') as InternState, live, startedAt: 0, endedAt })
+  const t0 = 1_000_000
+  assert.equal(tracker.stamp('w:a', [sub(true)], t0).length, 1)
+  // Done, with Orca's time: pale until ten minutes after it.
+  assert.deepEqual(tracker.stamp('w:a', [sub(false, t0 + MIN)], t0 + 2 * MIN).map((s) => [s.live, s.endedAt]), [[false, t0 + MIN]])
+  assert.deepEqual(tracker.stamp('w:a', [sub(false, t0 + MIN)], t0 + 12 * MIN), [], 'gone after 10 minutes')
+  // Gone from the list while it worked: finished when the plugin noticed, pale, then gone.
+  tracker.stamp('bot:b', [sub(true)], t0)
+  assert.deepEqual(tracker.stamp('bot:b', [], t0 + MIN).map((s) => [s.live, s.endedAt]), [[false, t0 + MIN]])
+  assert.deepEqual(tracker.stamp('bot:b', [], t0 + 12 * MIN), [])
+  // A trainee never seen working, done with no time: not shown.
+  assert.deepEqual(tracker.stamp('w:c', [sub(false)], t0), [])
+})
+
+test('«стажёры» of a bot come from its own chats (its home row), summed over all of them; a worker’s stay with the worker', async () => {
+  const ps = {
+    worktrees: [
+      // The bot's home: an agent per chat; two chats run subagents, one is not observed.
+      {
+        worktreeId: BOT_WS, path: '/home/.orca/bots/test', bot: BOT, botHome: true, parent: null,
+        agents: [agentWith([child('h1', 'working', { description: 'Home chat probe' })]), agentWith([child('h2', 'working'), child('h3', 'blocked')]), agentWith([child('h4', 'working')], 'unverifiable')]
+      },
+      { worktreeId: `${REPO}::/w/alpha`, path: '/w/alpha', displayName: 'alpha', bot: BOT, parent: { state: 'known', selector: BOT_WS }, agents: [agentWith([child('w1', 'working')])] }
+    ]
+  }
+  const work = { botName: BOT, items: [], workspaces: [{ id: `${REPO}::/w/alpha`, name: 'alpha', agent: 'agent working' }] }
+  const { run } = fakeRun({ 'bot-list': BOT_LIST, 'worktree-ps': ps, 'bot-work': work, 'bot-items': ITEMS, 'worker-list': { workers: [] } })
+  const extras = await readExtras(run, [{ key: 'cto', name: BOT, workspaceId: BOT_WS }], '/bin/orca')
+  const bot = extras.bots.cto
+  assert.deepEqual(bot.trainees?.map((t) => t.id).sort(), ['h1', 'h2', 'h3'], 'all the bot’s observed chats, summed')
+  assert.equal(bot.traineesObserved, true)
+  assert.deepEqual(bot.interns?.find((i) => i.name === 'alpha')!.subagents.map((s) => s.id), ['w1'], 'the worker’s trainee stays with the worker')
+  // Not observed at all: none, and the panel says so.
+  const { run: run2 } = fakeRun({ 'bot-list': BOT_LIST, 'worktree-ps': { worktrees: [{ ...ps.worktrees[0], agents: [agentWith([child('h1', 'working')], 'unverifiable')] }] }, 'bot-work': work, 'bot-items': ITEMS, 'worker-list': { workers: [] } })
+  const unseen = (await readExtras(run2, [{ key: 'cto', name: BOT, workspaceId: BOT_WS }], '/bin/orca')).bots.cto
+  assert.deepEqual(unseen.trainees, [])
+  assert.equal(unseen.traineesObserved, false)
+  assert.equal(traineesView(unseen.trainees, unseen.traineesObserved ?? false, 0).kind === 'none' && (traineesView(unseen.trainees, false, 0) as { text: string }).text, 'субагенты не наблюдаются')
+  const shown = traineesView(bot.trainees, true, 0)
+  assert.ok(shown.kind === 'list' && shown.list.some((t) => t.label === 'Home chat probe' && t.hint.includes('some-model')))
 })
 
 // ── Who is in «Команды и отделы»: workers by their agents, not by their workspaces ─────────────
@@ -254,11 +351,11 @@ function teamToday(now: number) {
       // A shell left open, no agent: the workspace says «active», but nobody works there.
       { worktreeId: 'w-shell', displayName: 'shell-open', path: '/w/shell-open', bot: '[CTO] Ада', status: 'active', liveTerminalCount: 1, agents: [] },
       // Its dispatch succeeded long ago: the agent is done since 11 minutes.
-      { worktreeId: 'w-old', displayName: 'old', path: '/w/old', bot: '[CTO] Ада', status: 'active', liveTerminalCount: 1, agents: [{ state: 'done', stateStartedAt: now - 11 * MIN, agentType: 'claude', subagents: [{ id: 'stale', state: 'working', agentType: 'Explore', startedAt: now - 30 * MIN }] }] },
+      { worktreeId: 'w-old', displayName: 'old', path: '/w/old', bot: '[CTO] Ада', status: 'active', liveTerminalCount: 1, agents: [{ state: 'done', stateStartedAt: now - 11 * MIN, agentType: 'claude', subagentObservation: 'live', children: [{ id: 'stale', kind: 'agent', state: 'working', agentType: 'Explore', firstObservedAt: now - 30 * MIN }] }] },
       // Finished three minutes ago.
       { worktreeId: 'w-recent', displayName: 'recent', path: '/w/recent', bot: '[CTO] Ада', status: 'inactive', liveTerminalCount: 0, agents: [{ state: 'done', stateStartedAt: now - 3 * MIN, agentType: 'claude' }] },
       // At work, with a trainee.
-      { worktreeId: 'w-busy', displayName: 'busy', path: '/w/busy', bot: '[CTO] Ада', status: 'working', liveTerminalCount: 1, agents: [{ state: 'working', stateStartedAt: now - MIN, agentType: 'claude', subagents: [{ id: 's1', state: 'working', agentType: 'Explore', startedAt: now - 10_000 }] }] },
+      { worktreeId: 'w-busy', displayName: 'busy', path: '/w/busy', bot: '[CTO] Ада', status: 'working', liveTerminalCount: 1, agents: [{ state: 'working', stateStartedAt: now - MIN, agentType: 'claude', subagentObservation: 'live', children: [{ id: 's1', kind: 'agent', state: 'working', agentType: 'Explore', firstObservedAt: now - 10_000 }] }] },
       // An old workspace with nothing in it.
       { worktreeId: 'w-ancient', displayName: 'ancient', path: '/w/ancient', bot: '[CTO] Ада', status: 'inactive', liveTerminalCount: 0, agents: [] }
     ]

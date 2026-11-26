@@ -47,7 +47,7 @@ import type { Mail, MailEntry, Party } from '../src/mail'
 import type { Office, OfficeDebug } from '../src/protocol'
 import { employees, formatDuration, trainees, working } from './format'
 import { BASE_PALETTE, P } from './palette'
-import { buildPanel, buttonStyle as buttonCss, internColor, renderAnimalPanel, renderAppearanceEditor, renderDecorHint, renderDecorPanel, type DecorSection, renderOverflow, renderPanel, renderPinConfirm, renderPinPicker, renderPlace, renderWorkerPanel, type PinChoice, type PlaceView } from './panel'
+import { buildPanel, buttonStyle as buttonCss, internColor, renderAnimalPanel, renderAppearanceEditor, renderDecorHint, renderDecorPanel, type DecorSection, renderOverflow, renderPanel, renderPinConfirm, renderPinPicker, renderPlace, renderWorkerPanel, type PinChoice, type PlaceView, traineesView } from './panel'
 import { AppearanceStore, cleanPlate, type Appearance, type KeyValueStore } from './appearance'
 import { CHAIR_POSES, drawCharacter, lookOf } from './art'
 import { Daylight } from './daylight'
@@ -529,12 +529,14 @@ function apply(): void {
 function placeWorkers(botDesks: Set<string>): void {
   if (!world || !bots || !extras) return
   const all: WorkerInfo[] = bots.flatMap((bot) =>
-    (extras?.bots[bot.key]?.interns ?? []).map((i) => ({ id: i.id, name: i.name, parentKey: bot.key, agent: i.agent, state: i.state, live: i.live, since: i.since, subagents: i.subagents ?? [] }))
+    (extras?.bots[bot.key]?.interns ?? []).map((i) => ({ id: i.id, name: i.name, parentKey: bot.key, agent: i.agent, state: i.state, live: i.live, since: i.since, subagents: i.subagents ?? [], subagentsObserved: i.subagentsObserved ?? false }))
   )
   workers = presentWorkers(all, Date.now())
-  // «Стажёры»: the workers' subagents; a new one pops in by its worker's desk, a finished one fades.
+  // «Стажёры»: subagents of the workers (by the worker's desk) and of the bots' own chats (by the bot's
+  // desk); a new one pops in, a finished one stays pale 10 minutes, then fades.
   const subs = new Map<string, { key: string; color: string; live: boolean }>()
-  for (const w of workers) for (const sa of w.subagents ?? []) subs.set(`${w.id}#${sa.id}`, { key: workerKey(w.id), color: STATE_COLOR.working, live: true })
+  for (const w of workers) for (const sa of w.subagents ?? []) subs.set(`${w.id}#${sa.id}`, { key: workerKey(w.id), color: STATE_COLOR.working, live: sa.live })
+  for (const bot of bots) for (const sa of extras?.bots[bot.key]?.trainees ?? []) subs.set(`bot:${bot.key}#${sa.id}`, { key: bot.key, color: STATE_COLOR.working, live: sa.live })
   fx.syncInterns(subs, Date.now())
   const free = world.desks.filter((d) => isWorkerDesk(d) && !botDesks.has(d.id))
   const assigned = assignWorkerDesks(workers, free, storedWorkerDesks, pins.workers)
@@ -643,7 +645,7 @@ function draw(): void {
       // «N стажёров» by a worker's desk: its subagents running now.
       ...workers.flatMap((w) => {
         const desk = workerSeats.get(w.id)
-        const n = w.subagents?.length ?? 0
+        const n = (w.subagents ?? []).filter((s) => s.live).length
         return desk && n ? [{ seat: desk.seat, text: trainees(n), kind: 'counter' as const }] : []
       }),
       // A worker's desk: its name and the colour of its parent bot.
@@ -1125,9 +1127,20 @@ function placeView(kind: PinKind, who: string): PlaceView {
   return { title: placeTitle(desk), pinned: !!desk && pins[kind][who] === desk, pinnedElsewhere: !!pins[kind][who] && pins[kind][who] !== desk, kind, note: storageNote }
 }
 
-/** Each worker's subagents as small figures by its desk, in the worker's own shirt (its mark). */
+/** Subagents as small figures: a worker's by its desk, a bot's by its own desk; in their parent's look. */
 function traineeGroups(now: number): InternGroup[] {
   const out: InternGroup[] = []
+  for (const bot of bots ?? []) {
+    const id = botDeskIds.get(bot.key)
+    const desk = id && world ? world.desks.find((d) => d.id === id) : undefined
+    if (!desk) continue
+    const list = fx.internsOf(bot.key).flatMap((sid) => {
+      const look = fx.internLook(sid, now)
+      return look ? [{ id: `${bot.key}|${sid}`, color: look.color, alpha: look.alpha, dy: look.dy, shirt: lookOf(looks.get(bot.key), bot.key, characters).shirt, parent: bot.key }] : []
+    })
+    // In front of the desk: below the chair of a desk facing up, below the desk of one facing down.
+    if (list.length) out.push({ key: bot.key, seat: desk.facing === 'up' ? { x: desk.seat.x, y: desk.seat.y + 1 } : { x: desk.x, y: desk.y }, list })
+  }
   for (const w of workers) {
     const desk = workerSeats.get(w.id)
     if (!desk) continue
@@ -1303,7 +1316,7 @@ function toggleLegend(): void {
     LEGEND_TYPES.map((t) => `<div><span style="display:inline-block;width:10px;height:10px;background:${mailColor(t)};margin-right:6px"></span>${escapeHtml(typeName(t))} (${t})</div>`).join('') +
     `<div style="margin-top:6px">✉ конверт летит от отправителя к адресату, цвет — тип письма.</div>` +
     `<div>┄ пунктир — была переписка, гаснет за 10 минут.</div>` +
-    `<div>━ сплошная — сотрудник и его бот (при наведении или выборе сотрудника).</div><div>Маленькие фигурки у стола сотрудника — его стажёры (субагенты), пока работают.</div>` +
+    `<div>━ сплошная — сотрудник и его бот (при наведении или выборе сотрудника).</div><div>Маленькие фигурки у стола сотрудника или бота — его стажёры (субагенты): пока работают; закончившие бледнеют и уходят через 10 мин. Видны, только если Orca их наблюдает.</div>` +
     `<div style="margin-top:6px"><b>Кабинет CEO = овнер.</b> Письма от овнера (Orca пишет «Your owner…») летят от стола CEO; кресло пустое.</div>` +
     `<div><b>Вход = внешний или неизвестный адрес</b> (правый конец коридора, со знаком «?»): чужой компьютер, адрес, который офис не узнал.</div>` +
     `<div>Служебные уведомления Orca (например, «Your other chat…») — только строкой в журнале, без линии.</div>` +
@@ -1478,7 +1491,8 @@ function workerView(id: string) {
     state: rule + leaves,
     color: internColor(w.state),
     since: w.since === null ? null : formatDuration(Date.now() - w.since),
-    seated: workerSeats.has(w.id)
+    seated: workerSeats.has(w.id),
+    trainees: traineesView(w.subagents ?? [], w.subagentsObserved ?? false, Date.now())
   }
 }
 

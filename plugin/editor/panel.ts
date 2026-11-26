@@ -23,11 +23,53 @@ export type PanelModel = {
   chats: number
   chat: ChatView
   interns: { kind: 'none'; text: string } | { kind: 'list'; list: { name: string; agent: string; state: string; color: string; live: boolean }[] }
+  /** The subagents of the bot's own chats («стажёры бота»). */
+  trainees: TraineesView
   items: { kind: 'none'; text: string } | { kind: 'ok'; rows: { label: string; count: number; highlight: boolean }[]; needsYouTitles: string[] }
   /** When the workers/items were read, «N мин назад»; null when never. */
   readAgo: string | null
   /** Why workers/items may be missing (CLI not found, timeout). */
   readError: string | null
+}
+
+/** Trainees (subagents) as a panel shows them: each with what it does; model and tool in its hint. */
+export type TraineesView = { kind: 'none'; text: string } | { kind: 'list'; list: { label: string; state: string; hint: string; live: boolean }[] }
+
+const TRAINEE_LINGER = 10 * 60_000
+
+/** A list of trainees for a panel: «субагенты не наблюдаются» when Orca does not observe them. */
+export function traineesView(
+  list: readonly { label: string; state: string; live: boolean; model: string | null; tool: string | null; endedAt: number | null }[] | null | undefined,
+  observed: boolean,
+  now: number
+): TraineesView {
+  if (list === null || list === undefined) return { kind: 'none', text: NO_DATA }
+  if (!observed) return { kind: 'none', text: 'субагенты не наблюдаются' }
+  if (list.length === 0) return { kind: 'none', text: 'стажёров нет' }
+  return {
+    kind: 'list',
+    list: list.map((t) => ({
+      label: t.label,
+      state: t.live ? INTERN_LABELS[t.state as InternState] ?? t.state : `закончил · уйдёт через ${formatDuration(Math.max(0, TRAINEE_LINGER - (now - (t.endedAt ?? now))))}`,
+      hint: [t.model ? `модель: ${t.model}` : '', t.tool ? `инструмент: ${t.tool}` : ''].filter(Boolean).join(' · '),
+      live: t.live
+    }))
+  }
+}
+
+/** The trainees block of a panel. */
+export function renderTrainees(v: TraineesView): string {
+  const h = escapeHtml
+  if (v.kind === 'none') return section('Стажёры (субагенты)', `<div style="${muted}">${h(v.text)}</div>`)
+  return section(
+    'Стажёры (субагенты)',
+    v.list
+      .map(
+        (t) =>
+          `<div title="${h(t.hint)}" style="display:flex;gap:6px;align-items:baseline;${t.live ? '' : muted}"><span style="color:${t.live ? P.working : P.done}">●</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h(t.label)}</span><span>${h(t.state)}</span></div>`
+      )
+      .join('')
+  )
 }
 
 const ITEM_LABELS: Record<string, string> = {
@@ -105,6 +147,7 @@ export function buildPanel(
     chats: desk.sessions,
     chat: chatView,
     interns,
+    trainees: traineesView(bot ? bot.trainees ?? null : null, bot?.traineesObserved ?? false, now),
     items,
     readAgo: extras && extras.at > 0 ? formatDuration(now - extras.at) : null,
     readError: extras?.error ?? null
@@ -189,6 +232,7 @@ export function renderPanel(model: PanelModel, place = ''): string {
     place +
     section(`Текущий чат <button data-act="chat" title="Перечитать" style="${buttonStyle};min-width:0;height:18px;padding:0 6px;font-size:11px">↻</button>`, chat) +
     section('Сотрудники (воркеры)', interns) +
+    renderTrainees(model.trainees) +
     section('Items', items) +
     footer
   )
@@ -284,6 +328,8 @@ export type WorkerPanel = {
   color: string
   since: string | null
   seated: boolean
+  /** Its subagents («стажёры»). */
+  trainees?: TraineesView
 }
 
 /** A worker's panel: name, its bot (a link to it), agent, status and time; «Открыть в Orca». */
@@ -307,7 +353,8 @@ export function renderWorkerPanel(w: WorkerPanel): string {
       <button data-act="openWorker" data-id="${h(w.id)}" style="${buttonStyle};flex:1">Открыть в Orca</button>
       <button data-act="appearance" style="${buttonStyle}">Внешность</button>
     </div>
-    <div style="font-size:11px;${muted};margin-top:4px">Открывает воркспейс сотрудника.</div>`
+    <div style="font-size:11px;${muted};margin-top:4px">Открывает воркспейс сотрудника.</div>
+    ${w.trainees ? renderTrainees(w.trainees) : ''}`
 }
 
 /** Workers without a desk («+N»): a list, each opens its panel. */

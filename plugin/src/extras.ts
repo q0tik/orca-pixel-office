@@ -17,12 +17,106 @@ export type Intern = {
   live: boolean
   /** When its agent entered `state` (ms), from `worktree ps`; null when unknown. */
   since: number | null
-  /** Its agents' subagents running now («стажёры»), from `worktree ps`. */
+  /** Its agents' subagents («стажёры»): running, or finished less than 10 minutes ago (pale). */
   subagents: Subagent[]
+  /** Orca observes its agents' subagents (`subagentObservation: live`); else nothing is known of them. */
+  subagentsObserved?: boolean
 }
 
-/** A subagent a worker's agent runs inside its session (Agent/Task in Claude Code): only what `worktree ps` says. */
-export type Subagent = { id: string; type: string | null; state: InternState; startedAt: number | null }
+/**
+ * A subagent an agent runs inside its session («стажёр»): only what `orca worktree ps` says of it, in
+ * `agents[].children` — its kind, state, type and description; no transcripts, no hooks.
+ */
+export type Subagent = {
+  id: string
+  /** What it does: its description, else its type, else its name. */
+  label: string
+  type: string | null
+  model: string | null
+  /** The tool it is using now (`operation.toolName`), when Orca saw one. */
+  tool: string | null
+  state: InternState
+  /** Working, blocked or waiting. */
+  live: boolean
+  startedAt: number | null
+  /** When it finished (its last observation once done, or when the plugin saw it stop); null while it runs. */
+  endedAt: number | null
+}
+
+/** How long a finished trainee stays (pale) by its desk. */
+export const TRAINEE_LINGER_MS = 10 * 60_000
+
+/**
+ * An agent's subagents from `worktree ps` (`children`), only while Orca observes them live
+ * (`subagentObservation: live`): anything else and there are none — nothing is made up. A child is a
+ * trainee while it works, waits or is blocked; a done one is kept with the time it finished.
+ */
+export function parseChildren(agent: Record<string, unknown>): Subagent[] {
+  if (agent.subagentObservation !== 'live' || !Array.isArray(agent.children)) return []
+  return agent.children.filter(isObj).flatMap((c): Subagent[] => {
+    const id = str(c.id)
+    if (!id || (c.kind !== undefined && c.kind !== 'agent')) return []
+    const state = AGENT_STATES[String(c.state)] ?? 'unknown'
+    const live = isLive(state)
+    if (!live && state !== 'done') return []
+    const observedAt = typeof c.observedAt === 'number' ? c.observedAt : null
+    return [
+      {
+        id,
+        label: str(c.description) ?? str(c.agentType) ?? str(c.name) ?? 'субагент',
+        type: str(c.agentType) ?? str(c.name),
+        model: str(c.model),
+        tool: isObj(c.operation) ? str(c.operation.toolName) : null,
+        state,
+        live,
+        startedAt: typeof c.firstObservedAt === 'number' ? c.firstObservedAt : null,
+        endedAt: live ? null : observedAt
+      }
+    ]
+  })
+}
+
+/**
+ * When trainees finished, as the plugin saw it: one seen working that is now done without a time, or
+ * gone from the list, finished at that moment. A finished trainee stays (pale) TRAINEE_LINGER_MS from
+ * when it finished, then leaves; one never seen working and with no time is not shown.
+ */
+export class SubagentTracker {
+  private readonly seen = new Map<string, Subagent>()
+  private readonly ended = new Map<string, Subagent & { endedAt: number }>()
+
+  stamp(owner: string, list: readonly Subagent[], now: number): Subagent[] {
+    const mine = (k: string) => k.startsWith(`${owner}#`)
+    const out: Subagent[] = []
+    const present = new Set<string>()
+    for (const s of list) {
+      const k = `${owner}#${s.id}`
+      present.add(k)
+      if (s.live) {
+        this.seen.set(k, s)
+        this.ended.delete(k)
+        out.push(s)
+        continue
+      }
+      const endedAt = s.endedAt ?? this.ended.get(k)?.endedAt ?? (this.seen.has(k) ? now : null)
+      this.seen.delete(k)
+      if (endedAt === null) continue
+      this.ended.set(k, { ...s, endedAt })
+      if (now - endedAt < TRAINEE_LINGER_MS) out.push({ ...s, endedAt })
+    }
+    for (const [k, s] of [...this.seen]) {
+      if (!mine(k) || present.has(k)) continue
+      this.seen.delete(k)
+      this.ended.set(k, { ...s, state: 'done', live: false, tool: null, endedAt: now })
+    }
+    for (const [k, s] of [...this.ended]) {
+      if (!mine(k) || present.has(k)) continue
+      if (now - s.endedAt >= TRAINEE_LINGER_MS) this.ended.delete(k)
+      else out.push(s)
+    }
+    return out
+  }
+}
 
 export type Items = {
   /** By status as Orca names them: `needs_you`, `in_progress`, `planned`, `done`, `canceled`. */
@@ -41,6 +135,10 @@ export type BotExtras = {
   /** Null: the CLI did not answer (no data), [] — no workers. */
   interns: Intern[] | null
   items: Items | null
+  /** The subagents of the bot's own chats (all of them), «стажёры бота»; null when unknown. */
+  trainees?: Subagent[] | null
+  /** Orca observes the subagents of at least one of the bot's chats. */
+  traineesObserved?: boolean
 }
 
 export type Extras = {
@@ -98,8 +196,10 @@ export type PsRow = {
   addresses: string[]
   /** When the chosen agent entered its state (ms), or null. */
   since: number | null
-  /** Subagents of its agents, while they run (they leave the list when done). */
+  /** Subagents of its agents (`children`), only those Orca observes. */
   subagents: Subagent[]
+  /** At least one of its agents has its subagents observed live. */
+  subagentsObserved: boolean
 }
 
 /** `orca worktree ps`: per workspace, whose worker it is and its most urgent agent. */
@@ -132,9 +232,8 @@ export function parseWorktreePs(json: unknown): Map<string, PsRow> {
       home: row.botHome === true,
       since,
       addresses: agents.map((a) => str(a.address)).filter((a): a is string => a !== null),
-      subagents: agents.flatMap((a) => (Array.isArray(a.subagents) ? a.subagents.filter(isObj) : [])).flatMap((s) =>
-        str(s.id) ? [{ id: s.id as string, type: str(s.agentType), state: AGENT_STATES[String(s.state)] ?? 'unknown', startedAt: typeof s.startedAt === 'number' ? s.startedAt : null }] : []
-      )
+      subagents: agents.flatMap((a) => parseChildren(a)),
+      subagentsObserved: agents.some((a) => a.subagentObservation === 'live')
     })
   }
   return out
@@ -155,12 +254,12 @@ export function parseInterns(work: unknown, ps: Map<string, PsRow> | null, botNa
     // `bot work list` says «agent working» / «agent idle»; `worktree ps` knows the agent itself.
     const fromWork = /\b(working|blocked|waiting|done|idle)\b/.exec(String(w.agent ?? ''))?.[1] as InternState | undefined
     const state: InternState = row?.state ?? fromWork ?? 'unknown'
-    out.set(id, { id, name: str(w.name) ?? row?.name ?? id, agent: row?.agent ?? null, state, live: isLive(state), since: row?.since ?? null, subagents: row?.subagents ?? [] })
+    out.set(id, { id, name: str(w.name) ?? row?.name ?? id, agent: row?.agent ?? null, state, live: isLive(state), since: row?.since ?? null, subagents: row?.subagents ?? [], subagentsObserved: row?.subagentsObserved ?? false })
   }
   for (const row of ps?.values() ?? []) {
     if (out.has(row.id) || row.home || row.id === botWorkspaceId) continue
     if (row.bot !== botName && row.parent !== botWorkspaceId) continue
-    out.set(row.id, { id: row.id, name: row.name, agent: row.agent, state: row.state, live: isLive(row.state), since: row.since, subagents: row.subagents })
+    out.set(row.id, { id: row.id, name: row.name, agent: row.agent, state: row.state, live: isLive(row.state), since: row.since, subagents: row.subagents, subagentsObserved: row.subagentsObserved })
   }
   return [...out.values()].sort((a, b) => Number(b.live) - Number(a.live) || a.name.localeCompare(b.name))
 }
@@ -269,7 +368,10 @@ export async function readExtras(run: (request: CliRequest) => Promise<RunResult
       agent: listed?.agent ?? null,
       // A worker whose dispatches were all released (worker-release) and has no live agent is gone.
       interns: work === null ? null : parseInterns(work, ps, bot.name, bot.workspaceId).filter((i) => i.live || !released.has(i.id)),
-      items: items === null ? null : parseItems(items)
+      items: items === null ? null : parseItems(items),
+      // The bot's own chats (its home: one row, an agent per chat): their subagents, summed.
+      trainees: ps === null ? null : [...ps.values()].filter((r) => r.home && r.bot === bot.name).flatMap((r) => r.subagents),
+      traineesObserved: ps !== null && [...ps.values()].some((r) => r.home && r.bot === bot.name && r.subagentsObserved)
     }
   }
   out.error = errors.size ? [...errors].join(', ') : null

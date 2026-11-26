@@ -33,8 +33,8 @@ for (const [i, b] of demo.bots.entries()) {
   const interns = (b.workers ?? []).map((w, j) => {
     const id = `demo::/workspaces/${w.name}`
     look(`w:${id}`, w.character, w.coat)
-    const subagents = Array.from({ length: w.subagents ?? 0 }, (_, k) => ({ id: `demo-sub-${w.name}-${k}`, type: 'general-purpose', state: 'working', startedAt: now - (10 + k * 25) * 1000 }))
-    return { id, name: w.name, agent: 'claude', state: w.state, live: w.state !== 'done', since: now - (3 + i + j) * min, subagents }
+    const subagents = Array.from({ length: w.subagents ?? 0 }, (_, k) => ({ id: `demo-sub-${w.name}-${k}`, label: 'general-purpose', type: 'general-purpose', model: null, tool: null, state: 'working', live: true, startedAt: now - (10 + k * 25) * 1000, endedAt: null }))
+    return { id, name: w.name, agent: 'claude', state: w.state, live: w.state !== 'done', since: now - (3 + i + j) * min, subagents, subagentsObserved: true }
   })
   const needsYou = b.needsYou ?? 0
   bots[b.key] = { name: `[${b.role}] ${b.name}`, botId: `demo-${b.key}`, agent: 'claude', interns, items: { counts: { ...(b.items ?? {}), ...(needsYou ? { needs_you: needsYou } : {}) }, needsYou, needsYouTitles: Array(needsYou).fill('(demo item)') } }

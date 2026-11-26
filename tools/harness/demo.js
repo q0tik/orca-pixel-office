@@ -16,16 +16,16 @@ const desks = [
   bot('margaret', 'Margaret', 'COO', 'done', 8),
   bot('barbara', 'Barbara', 'CMO', 'idle', 55, { sessions: 0 })
 ]
-const worker = (name, state, ago, subagents = []) => ({ id: `demo::/workspaces/${name}`, name, agent: 'claude', state, live: state !== 'done', since: now - ago * min, subagents })
-// «Стажёры»: subagents a worker runs right now (as `orca worktree ps` reports them).
-const sub = (id, ago) => ({ id: `demo-sub-${id}`, type: 'general-purpose', state: 'working', startedAt: now - ago * 1000 })
+const worker = (name, state, ago, subagents = []) => ({ id: `demo::/workspaces/${name}`, name, agent: 'claude', state, live: state !== 'done', since: now - ago * min, subagents, subagentsObserved: true })
+// «Стажёры»: subagents an agent runs right now (as `orca worktree ps` reports them in `children`).
+const sub = (id, ago, label = 'Explore the code', tool = 'Read') => ({ id: `demo-sub-${id}`, label, type: 'general-purpose', model: 'demo-model', tool, state: 'working', live: true, startedAt: now - ago * 1000, endedAt: null })
 const items = (counts, needsYou = 0) => ({ counts, needsYou, needsYouTitles: needsYou ? ['(demo item)'] : [] })
 const extras = {
   at: now,
   source: 'demo',
   error: null,
   bots: {
-    ada: { name: '[CTO] Ada', botId: 'demo-ada', agent: 'claude', interns: [worker('demo-api', 'working', 9, [sub('a', 40), sub('b', 12)]), worker('demo-ui', 'working', 4, [sub('c', 5)])], items: items({ in_progress: 2, done: 5 }) },
+    ada: { name: '[CTO] Ada', botId: 'demo-ada', agent: 'claude', interns: [worker('demo-api', 'working', 9, [sub('a', 40), sub('b', 12, 'Run the tests', 'Bash')]), worker('demo-ui', 'working', 4, [sub('c', 5, 'Check the layout')])], items: items({ in_progress: 2, done: 5 }), trainees: [sub('d', 20, 'Review the plan', 'Grep')], traineesObserved: true },
     linus: { name: '[CSO] Linus', botId: 'demo-linus', agent: 'claude', interns: [], items: items({ done: 3 }) },
     grace: { name: '[assistant] Grace', botId: 'demo-grace', agent: 'claude', interns: [], items: items({ planned: 1 }) },
     alan: { name: '[CFO] Alan', botId: 'demo-alan', agent: 'claude', interns: [], items: items({}) },

@@ -13,6 +13,9 @@ export const WORKER_ROOM = 'teams'
 /** A desk for workers: one in a room of kind `team` («Команды и отделы», or several such rooms). */
 export const isWorkerDesk = (desk: { roomKind: string }): boolean => desk.roomKind === 'team'
 
+/** A subagent («стажёр») as the office draws it (src/extras.ts Subagent). */
+export type TraineeInfo = { id: string; label: string; type: string | null; model: string | null; tool: string | null; state: string; live: boolean; endedAt: number | null }
+
 export type WorkerInfo = {
   id: string
   name: string
@@ -23,8 +26,10 @@ export type WorkerInfo = {
   live: boolean
   /** When it entered its state (ms), or null when Orca did not say. */
   since: number | null
-  /** Its subagents running now («стажёры»), from `worktree ps`. */
-  subagents?: { id: string; type: string | null; state: string }[]
+  /** Its subagents («стажёры»): running, or finished less than 10 minutes ago (pale). */
+  subagents?: TraineeInfo[]
+  /** Orca observes them; else none are shown and the panel says so. */
+  subagentsObserved?: boolean
 }
 
 /**
