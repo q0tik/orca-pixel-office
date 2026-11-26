@@ -1150,7 +1150,7 @@ const WALL_LIGHTS: ReadonlySet<string> = new Set(['wall-lamp', 'garland', 'neon-
 /** Things that may have pixels shining by themselves at night (desks shine through their screens). */
 const MAY_GLOW: ReadonlySet<string> = new Set(['candles', 'garland', 'neon-sign', 'server-rack', 'aquarium', 'microwave', 'coffee-machine', 'fridge'])
 /** Lights whose glow never moves: baked once per lighting into one layer. */
-const STILL_GLOW: ReadonlySet<string> = new Set(['floor-lamp', 'wall-lamp', 'desk-lamp', 'night-light', 'ceo-desk'])
+const STILL_GLOW: ReadonlySet<string> = new Set(['floor-lamp', 'wall-lamp', 'desk-lamp', 'night-light', 'ceo-desk', 'device-stand'])
 /** Lights that stand still while off (their flames and twinkles need the frame only when lit). */
 const STILL_UNLIT: ReadonlySet<string> = new Set(['candles', 'garland', 'neon-sign'])
 

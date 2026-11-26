@@ -40,6 +40,7 @@ export const LIGHT_SPECS: Partial<Record<FurnitureType, LightSpec>> = {
   'neon-sign': { color: '#ff6fc8', radius: 30, strength: 0.6, dx: 16, dy: 8, when: 'night' },
   aquarium: { color: '#5fd6ff', radius: 30, strength: 0.55, dx: 16, dy: -3, when: 'night' },
   'server-rack': { color: '#5df08a', radius: 12, strength: 0.4, dx: 11, dy: -4, when: 'night' },
+  'device-stand': { color: '#8fd0ff', radius: 26, strength: 0.45, dx: 16, dy: -6, when: 'night' },
   microwave: { color: '#ffd56a', radius: 26, strength: 0.75, dx: 8, dy: -5, when: 'use' },
   'coffee-machine': { color: '#ffb35c', radius: 22, strength: 0.65, dx: 8, dy: -4, when: 'use' },
   fridge: { color: '#dff2ff', radius: 30, strength: 0.75, dx: 8, dy: 0, when: 'use' }

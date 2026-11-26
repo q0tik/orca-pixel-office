@@ -23,6 +23,7 @@ import {
   BOT_SEATS_KEY,
   emptyPins,
   isBotPlace,
+  placesLabel,
   occupantOf,
   parseDeskMap,
   parsePins,
@@ -486,7 +487,9 @@ function apply(): void {
     scheduler.invalidate()
     return
   }
-  const seated = assignBotSeats(bots.map((bot) => bot.key), world.desks, pins.bots, botMemory)
+  // A bot's role is its name's «[QA]» prefix; the map may keep places for a role.
+  const roles = Object.fromEntries(bots.filter((bot) => bot.role).map((bot) => [bot.key, bot.role]))
+  const seated = assignBotSeats(bots.map((bot) => bot.key), world.desks, pins.bots, botMemory, Math.random, roles)
   const seats = seated.seats
   if (JSON.stringify(seated.memory) !== JSON.stringify(botMemory)) {
     botMemory = seated.memory
@@ -631,6 +634,7 @@ function draw(): void {
     clouds: lifeOn ? chatClouds(actors.map((a) => ({ key: a.key, x: a.x, y: a.y, resting: a.target.routine === 'rest' && !a.walking })), now) : new Map(),
     highlights: [...pinHighlights(), ...decorHighlights()],
     plates: [
+      ...freePlates(),
       ...(bots ?? []).flatMap((bot) => {
         const seat = seatsByKey.get(bot.key)
         const text = looks.get(bot.key).plate
@@ -678,20 +682,24 @@ function noticeNumbers(): { waiting: number; working: number } {
 function roomLabels(): Map<string, string> {
   const out = new Map<string, string>()
   if (!world) return out
-  for (const desk of world.desks) {
-    if (!isBotPlace(desk)) continue
-    const room = world.rooms.find((r) => r.id === desk.room)
-    if (!room) continue
-    const who = occupantOf(desk.id, botDeskIds)
-    const name = who ? bots?.find((b) => b.key === who)?.name ?? who : null
-    // From afar the labels of narrow offices would run into each other: the name only.
-    if (camera.zoom / (window.devicePixelRatio || 1) < 2) {
-      if (name) out.set(room.id, `${name}${pins.bots[who!] === desk.id ? ' 📌' : ''}`)
-      continue
-    }
-    out.set(room.id, name ? `${room.label} · ${name}${pins.bots[who!] === desk.id ? ' 📌' : ''}` : `${room.label} · свободен`)
+  // From afar the labels of narrow offices would run into each other: the names only.
+  const close = camera.zoom / (window.devicePixelRatio || 1) >= 2
+  for (const room of world.rooms) {
+    const places = world.desks.filter((d) => d.room === room.id && isBotPlace(d)).map((desk) => {
+      const who = occupantOf(desk.id, botDeskIds)
+      return { name: who ? bots?.find((b) => b.key === who)?.name ?? who : null, pinned: !!who && pins.bots[who] === desk.id }
+    })
+    if (!places.length) continue
+    const label = placesLabel(room, places, close)
+    if (label) out.set(room.id, label)
   }
   return out
+}
+
+/** «Свободно» on the free places of a specialists' room (an office's label says it for the whole room). */
+function freePlates(): { seat: { x: number; y: number }; text: string; kind: 'plate' }[] {
+  if (!world) return []
+  return world.desks.filter((d) => d.roomKind === 'specialists' && !occupantOf(d.id, botDeskIds)).map((d) => ({ seat: d.seat, text: 'Свободно', kind: 'plate' as const }))
 }
 
 // ── Living things: LEDs, fish, steam, the cat ────────────────────────────────────────────
@@ -877,7 +885,7 @@ const THING_NAMES: Partial<Record<string, string>> = {
   aquarium: 'аквариум', plant: 'растение', 'big-plant': 'большое растение', bookshelf: 'книжный шкаф', 'coffee-machine': 'кофемашина',
   'water-cooler': 'кулер', trophy: 'кубок', flowers: 'цветы', boxes: 'коробки', 'ceo-desk': 'стол CEO', 'coffee-table': 'журнальный столик',
   'floor-lamp': 'торшер', 'wall-lamp': 'бра', 'desk-lamp': 'настольная лампа', candles: 'свечи', garland: 'гирлянда', 'neon-sign': 'неоновая вывеска',
-  'night-light': 'ночник', microwave: 'микроволновка', fridge: 'холодильник'
+  'night-light': 'ночник', microwave: 'микроволновка', fridge: 'холодильник', 'device-stand': 'стенд устройств'
 }
 
 async function saveDecor(next: Decor): Promise<void> {
@@ -1025,6 +1033,7 @@ function placeTitle(deskId: string | null): string {
   const desk = world.desks.find((d) => d.id === deskId)
   const room = desk && world.rooms.find((r) => r.id === desk.room)
   if (!desk || !room) return deskId
+  if (desk.roomKind === 'specialists') return `место ${world.desks.filter((d) => d.room === room.id).indexOf(desk) + 1} в «${room.label}»`
   return isBotPlace(desk) ? `«${room.label}»` : `стол ${deskId.split('.').pop()} в «${room.label}»`
 }
 

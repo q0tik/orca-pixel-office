@@ -54,7 +54,7 @@ export type DeskSeat = {
   id: string
   room: string
   roomKind: RoomKind
-  /** A preferred role (`CTO`): a bot with that role takes this desk first. */
+  /** The role this place is for (`QA`), the desk's own or its room's `forRole`: a bot with that role takes it first. */
   role: string | null
   facing: 'up' | 'down'
   /** The desk's top-left tile. */
@@ -158,6 +158,8 @@ type RoomSource = {
   h: number
   floor: FloorKind
   wall: WallStyle
+  /** A role the room is for (`"forRole": "QA"`): its desks go first to a bot with that role. */
+  forRole: string | null
   furniture: unknown[]
   spots: unknown[]
   furniturePath: string
@@ -204,6 +206,7 @@ export function parseMap(raw: unknown): ParseResult {
     const wall = oneOf(errors, stamp, 'wall', stampPath, WALLS, 'plain')
     if (w === null || h === null || kind === null || floor === null || wall === null) return
     const label = typeof entry.label === 'string' ? entry.label : typeof stamp.label === 'string' ? stamp.label : ''
+    const roleOf = (v: unknown) => (typeof v === 'string' && v.trim() ? v.trim() : null)
     sources.push({
       id,
       path,
@@ -215,6 +218,7 @@ export function parseMap(raw: unknown): ParseResult {
       h,
       floor,
       wall,
+      forRole: roleOf(entry.forRole) ?? roleOf(stamp.forRole),
       furniture: list(errors, stamp, 'furniture', stampPath),
       spots: list(errors, stamp, 'spots', stampPath),
       furniturePath: stampPath
@@ -243,6 +247,7 @@ export function parseMap(raw: unknown): ParseResult {
       h,
       floor,
       wall,
+      forRole: null,
       furniture: list(errors, entry, 'furniture', path),
       spots: list(errors, entry, 'spots', path),
       furniturePath: path
@@ -402,7 +407,8 @@ export function parseMap(raw: unknown): ParseResult {
       furniture.push(placed)
       if (type === 'desk' && id && seat) {
         deskIds.add(id)
-        const role = typeof entry.role === 'string' && entry.role.trim() ? entry.role.trim() : null
+        // The desk's own role, else the role its room is for.
+        const role = typeof entry.role === 'string' && entry.role.trim() ? entry.role.trim() : room.forRole
         desks.push({ id, room: room.id, roomKind: room.kind, role, facing, x, y, seat })
       }
       if (type === 'sofa') {

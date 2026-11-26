@@ -32,7 +32,9 @@ test('no seating config ships: places are described by the map only', () => {
   const world = realMap()
   const places = world.desks.filter(isBotPlace)
   assert.ok(places.length >= 5, 'four C-level offices and the mini office')
-  assert.equal(new Set(places.map((d) => d.room)).size, places.length, 'one desk per office')
+  const offices = places.filter((d) => d.roomKind === 'clevel')
+  assert.equal(new Set(offices.map((d) => d.room)).size, offices.length, 'one desk per office')
+  assert.ok(places.filter((d) => d.roomKind === 'specialists').length >= 3, 'and an open space of specialists’ places')
   assert.ok(places.some((d) => d.room === 'mini'), 'the mini office in the reception is a place')
 })
 
@@ -104,9 +106,10 @@ test('one bot per office: pinning to a taken office swaps, a stale pin is droppe
 
 test('more bots than offices: the rest sit in the team room, then stand', () => {
   const world = realMap()
-  const keys = Array.from({ length: 7 }, (_, i) => `bot${i}`)
+  const keys = Array.from({ length: 12 }, (_, i) => `bot${i}`)
   const r = assignBotSeats(keys, world.desks, {}, {}, seeded(11))
-  const places = world.desks.filter(isBotPlace).length
+  // Bots without a role leave the places the map keeps for a role (the QA anteroom).
+  const places = world.desks.filter((d) => isBotPlace(d) && !d.role).length
   assert.equal([...r.seats.values()].filter((d) => d && isBotPlace(d)).length, places)
   assert.equal([...r.seats.values()].filter((d) => d && d.roomKind === 'team').length, keys.length - places)
   const tiny = world.desks.filter((d) => d.id === 'teams.t1')

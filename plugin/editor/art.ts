@@ -447,7 +447,7 @@ export function glows(type: FurnitureType, state: FurnitureState): boolean {
   if (type === 'microwave' || type === 'fridge' || type === 'coffee-machine') return !!state.active
   return !!state.lit && LIT_TYPES.has(type)
 }
-const LIT_TYPES: ReadonlySet<FurnitureType> = new Set<FurnitureType>(['floor-lamp', 'wall-lamp', 'desk-lamp', 'candles', 'garland', 'neon-sign', 'night-light', 'ceo-desk', 'server-rack', 'aquarium'])
+const LIT_TYPES: ReadonlySet<FurnitureType> = new Set<FurnitureType>(['floor-lamp', 'wall-lamp', 'desk-lamp', 'candles', 'garland', 'neon-sign', 'night-light', 'ceo-desk', 'server-rack', 'aquarium', 'device-stand'])
 
 /**
  * One floor item, its footprint's top-left at (0,0); tall things draw up to
@@ -590,6 +590,8 @@ export function drawFurniture(brush: Paint, item: Pick<PlacedFurniture, 'type' |
     case 'microwave':
       counter(p, W)
       return microwave(p, g, !!state.active, frame)
+    case 'device-stand':
+      return deviceStand(p, lit ? g : p)
     case 'pet-bowl':
       p(3, 10, 10, 4, P.steelLo)
       p(4, 9, 8, 2, P.steel)
@@ -619,6 +621,30 @@ export function drawFurniture(brush: Paint, item: Pick<PlacedFurniture, 'type' |
     default:
       return
   }
+}
+
+/** A QA lab's device stand: a cabinet with a rack, phones and tablets on its two shelves, screens on. */
+function deviceStand(p: Paint, screen: Paint): void {
+  p(1, 6, 30, 9, P.metalLo)
+  p(2, 7, 28, 7, P.metal)
+  p(4, 9, 10, 1, P.metalLo)
+  p(18, 9, 10, 1, P.metalLo)
+  p(1, 14, 30, 1, P.ink)
+  p(2, -15, 2, 21, P.metalLo)
+  p(28, -15, 2, 21, P.metalLo)
+  p(2, -15, 28, 1, P.metalHi)
+  p(2, -4, 28, 2, P.metalLo)
+  const device = (x: number, y: number, w: number, h: number, ui: string[]) => {
+    p(x, y, w, h, P.ink)
+    screen(x + 1, y + 1, w - 2, h - 2, P.screenOn)
+    ui.forEach((c, i) => screen(x + 1, y + 1 + i * 2, Math.max(1, w - 2 - (i % 2)), 1, c))
+  }
+  // Top shelf: two phones and a tablet; bottom: a tablet and a phone on the cabinet.
+  device(5, -13, 4, 8, [P.codeA, P.chartBar, P.chatMe])
+  device(11, -13, 4, 8, [P.neonA, P.screenLine, P.codeB])
+  device(17, -12, 9, 7, [P.chatMe, P.chatThem, P.logOk])
+  device(6, -1, 8, 7, [P.chartBar, P.codeA, P.screenLine])
+  device(18, -2, 4, 8, [P.logOk, P.codeC, P.chatMe])
 }
 
 /** The paper stack on a desk: one sheet more for every few minutes its bot keeps working. */

@@ -70,26 +70,42 @@
       "kind": "clevel",
       "label": "Серверная",
       "w": 10,
-      "h": 14,
+      "h": 8,
       "floor": "raised",
       "wall": "navy",
       "furniture": [
         { "type": "whiteboard", "x": 3, "y": 0, "variant": "arch" },
         { "type": "window", "x": 6, "y": 0, "w": 2, "view": "outside" },
+        { "type": "wall-lamp", "x": 2, "y": 0, "variant": "bulb" },
         { "type": "server-rack", "x": 1, "y": 1 },
         { "type": "server-rack", "x": 1, "y": 2 },
         { "type": "server-rack", "x": 1, "y": 3 },
         { "type": "server-rack", "x": 1, "y": 4 },
-        { "type": "plant", "x": 8, "y": 1, "variant": "cactus" },
-        { "type": "desk", "id": "desk", "x": 4, "y": 4, "facing": "up", "variant": "multi" },
-        { "type": "server-rack", "x": 8, "y": 8 },
-        { "type": "server-rack", "x": 8, "y": 9 },
-        { "type": "rug", "x": 2, "y": 8, "w": 5, "h": 3, "variant": "blue" },
-        { "type": "bookshelf", "x": 3, "y": 9 },
-        { "type": "chair", "x": 6, "y": 11, "facing": "up" },
-        { "type": "big-plant", "x": 1, "y": 12 },
-        { "type": "printer", "x": 8, "y": 12 },
-        { "type": "wall-lamp", "x": 2, "y": 0, "variant": "bulb" }
+        { "type": "server-rack", "x": 8, "y": 1 },
+        { "type": "server-rack", "x": 8, "y": 2 },
+        { "type": "server-rack", "x": 8, "y": 3 },
+        { "type": "rug", "x": 2, "y": 4, "w": 5, "h": 2, "variant": "blue" },
+        { "type": "desk", "id": "desk", "x": 4, "y": 2, "facing": "up", "variant": "multi" },
+        { "type": "trophy", "x": 6, "y": 2 },
+        { "type": "big-plant", "x": 1, "y": 6 },
+        { "type": "plant", "x": 8, "y": 6, "variant": "cactus" }
+      ]
+    },
+    "qa-lab": {
+      "kind": "clevel",
+      "label": "Предбанник QA → CTO",
+      "forRole": "QA",
+      "w": 10,
+      "h": 7,
+      "floor": "tile",
+      "wall": "plain",
+      "furniture": [
+        { "type": "device-stand", "x": 1, "y": 1 },
+        { "type": "wall-lamp", "x": 7, "y": 0 },
+        { "type": "desk", "id": "desk", "x": 5, "y": 2, "facing": "up" },
+        { "type": "plant", "x": 8, "y": 1 },
+        { "type": "big-plant", "x": 1, "y": 5 },
+        { "type": "printer", "x": 8, "y": 5 }
       ]
     },
     "office-sales": {
@@ -136,23 +152,30 @@
       ]
     },
     "office-vacant": {
-      "kind": "clevel",
-      "label": "Сдаётся",
+      "kind": "specialists",
+      "label": "Open-space · специалисты",
       "w": 10,
       "h": 14,
-      "floor": "concrete",
-      "wall": "bare",
+      "floor": "carpet-blue",
+      "wall": "sage",
       "furniture": [
-        { "type": "sign", "x": 3, "y": 0 },
         { "type": "window", "x": 6, "y": 0, "w": 2, "view": "outside" },
-        { "type": "boxes", "x": 1, "y": 1 },
-        { "type": "boxes", "x": 2, "y": 1 },
-        { "type": "boxes", "x": 1, "y": 2 },
-        { "type": "ladder", "x": 8, "y": 1 },
-        { "type": "desk", "id": "desk", "x": 4, "y": 6, "facing": "down", "variant": "boxed" },
-        { "type": "paint", "x": 7, "y": 9 },
-        { "type": "boxes", "x": 8, "y": 11 },
-        { "type": "chair", "x": 1, "y": 11, "facing": "up" }
+        { "type": "whiteboard", "x": 2, "y": 0 },
+        { "type": "clock", "x": 5, "y": 0 },
+        { "type": "desk", "id": "s1", "x": 1, "y": 3, "facing": "down", "variant": "phone" },
+        { "type": "desk", "id": "s2", "x": 6, "y": 3, "facing": "down", "variant": "tidy" },
+        { "type": "desk-lamp", "x": 7, "y": 3, "variant": "arm" },
+        { "type": "desk", "id": "s3", "x": 1, "y": 8, "facing": "down" },
+        { "type": "desk-lamp", "x": 2, "y": 8 },
+        { "type": "desk", "id": "s4", "x": 6, "y": 8, "facing": "down", "variant": "boxed" },
+        { "type": "plant", "x": 8, "y": 2 },
+        { "type": "big-plant", "x": 3, "y": 2 },
+        { "type": "flowers", "x": 3, "y": 8 },
+        { "type": "plant", "x": 8, "y": 7, "variant": "cactus" },
+        { "type": "rug", "x": 3, "y": 5, "w": 4, "h": 1, "variant": "cream" },
+        { "type": "bookshelf", "x": 6, "y": 11 },
+        { "type": "water-cooler", "x": 8, "y": 12 },
+        { "type": "big-plant", "x": 1, "y": 12 }
       ]
     },
     "openspace": {
@@ -274,6 +297,7 @@
       { "id": "mini", "stamp": "mini", "x": 13, "y": 0 },
       { "id": "reception", "stamp": "reception", "x": 0, "y": 8 },
       { "id": "office-1", "stamp": "office-server", "x": 19, "y": 0 },
+      { "id": "qa", "stamp": "qa-lab", "x": 19, "y": 7 },
       { "id": "office-2", "stamp": "office-sales", "x": 28, "y": 0 },
       { "id": "office-3", "stamp": "office-free", "x": 37, "y": 0 },
       { "id": "office-4", "stamp": "office-vacant", "x": 46, "y": 0 },
@@ -311,7 +335,8 @@
       { "x": 10, "y": 17 },
       { "x": 24, "y": 17 },
       { "x": 51, "y": 17 },
-      { "x": 33, "y": 28 }
+      { "x": 33, "y": 28 },
+      { "x": 23, "y": 7 }
     ],
     "spots": [
       { "kind": "owner-wait", "x": 5, "y": 9, "facing": "up" },

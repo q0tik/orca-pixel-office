@@ -35,9 +35,28 @@ export function serializePins(pins: Pins): { v: 1; bots: Record<string, string>;
   return { v: 1, bots: { ...pins.bots }, workers: { ...pins.workers } }
 }
 
-/** A bot's own place: the desk of an office (`clevel` room). */
-export function isBotPlace(desk: DeskSeat): boolean {
-  return desk.roomKind === 'clevel'
+/** A bot's own place: the desk of an office (`clevel`) or a place in a specialists' room (`specialists`). */
+export function isBotPlace(desk: Pick<DeskSeat, 'roomKind'>): boolean {
+  return desk.roomKind === 'clevel' || desk.roomKind === 'specialists'
+}
+
+/**
+ * The label of a room with bots' places. An office: its name and who sits there (📌 when pinned), or
+ * «свободен». A specialists' room: its name and the names of those sitting there, or how many places
+ * are free. From afar only the names.
+ */
+export function placesLabel(
+  room: { label: string; kind: string },
+  places: readonly { name: string | null; pinned: boolean }[],
+  close: boolean
+): string | null {
+  const names = places.filter((p) => p.name).map((p) => `${p.name}${p.pinned ? ' 📌' : ''}`)
+  if (room.kind !== 'specialists') {
+    if (!close) return names[0] ?? null
+    return names.length ? `${room.label} · ${names[0]}` : `${room.label} · свободен`
+  }
+  if (!close) return names.length ? names.join(', ') : null
+  return names.length ? `${room.label} · ${names.join(', ')}` : `${room.label} · свободно мест: ${places.length}`
 }
 
 export type BotSeating = {
@@ -46,19 +65,29 @@ export type BotSeating = {
   memory: Record<string, string>
 }
 
+/** Roles compare without case and spaces round them: «QA», «qa». */
+const sameRole = (a: string | null | undefined, b: string | null | undefined): boolean => !!a && !!b && a.trim().toLowerCase() === b.trim().toLowerCase()
+
+/** May a bot with `role` sit at `desk` without a pin: the desk is for no role, or for its own. */
+const fitsRole = (desk: DeskSeat, role: string | undefined): boolean => !desk.role || sameRole(desk.role, role)
+
 /**
  * A desk per bot key, in this order:
- * 1. the owner's pin (two pins on one desk: the first key wins, the other goes on);
- * 2. the place the bot took before (`memory`), if it is an office and still free;
- * 3. a free office, chosen with `random` (bots in key order), then remembered;
- * 4. no office left: the first free desk of a team room; none either: null (the bot stands).
+ * 1. the owner's pin (two pins on one desk: the first key wins, the other goes on): it beats everything;
+ * 2. a free place the map gives the bot's role (`roles[key]`, from its «[QA]» prefix: a desk's `role` or
+ *    its room's `forRole`): it beats the place the bot took by itself before;
+ * 3. the place the bot took before (`memory`), if it is a bot's place, still free and not another role's;
+ * 4. a free office, else a free place in a specialists' room, chosen with `random` (bots in key order),
+ *    then remembered; places for another role are left to it;
+ * 5. none left: the first free desk of a team room; none either: null (the bot stands).
  */
 export function assignBotSeats(
   keys: readonly string[],
   desks: readonly DeskSeat[],
   pins: Readonly<Record<string, string>>,
   memory: Readonly<Record<string, string>>,
-  random: () => number = Math.random
+  random: () => number = Math.random,
+  roles: Readonly<Record<string, string>> = {}
 ): BotSeating {
   const byId = new Map(desks.map((desk) => [desk.id, desk]))
   const sorted = [...new Set(keys)].sort()
@@ -72,14 +101,22 @@ export function assignBotSeats(
   }
   for (const key of sorted) take(key, byId.get(pins[key] ?? ''))
   for (const key of sorted) {
-    if (seats.has(key)) continue
-    const before = byId.get(memory[key] ?? '')
-    if (before && isBotPlace(before)) take(key, before)
+    if (seats.has(key) || !roles[key]) continue
+    take(key, desks.find((desk) => sameRole(desk.role, roles[key]) && !taken.has(desk.id)))
   }
-  const places = desks.filter(isBotPlace)
   for (const key of sorted) {
     if (seats.has(key)) continue
-    const free = places.filter((desk) => !taken.has(desk.id))
+    const before = byId.get(memory[key] ?? '')
+    if (before && isBotPlace(before) && fitsRole(before, roles[key])) take(key, before)
+  }
+  // Offices first; with no office free, a place in a specialists' room; then a desk of a team room.
+  const offices = desks.filter((desk) => desk.roomKind === 'clevel')
+  const benches = desks.filter((desk) => desk.roomKind === 'specialists')
+  for (const key of sorted) {
+    if (seats.has(key)) continue
+    const open = (desk: DeskSeat) => !taken.has(desk.id) && fitsRole(desk, roles[key])
+    const freeOffices = offices.filter(open)
+    const free = freeOffices.length ? freeOffices : benches.filter(open)
     if (free.length) {
       const i = Math.min(free.length - 1, Math.max(0, Math.floor(random() * free.length)))
       take(key, free[i])

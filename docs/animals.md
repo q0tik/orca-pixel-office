@@ -57,7 +57,7 @@ In «Оформление» the owner can switch each animal on or off and pick 
 | `moves` | `"walk"` (BFS over the floor, around furniture) or `"fly"` (straight lines, in an arc). |
 | `speed` | Tiles a second, up to 10. A bot walks about 6. |
 | `size` | `[width, height]` of every frame, 4 to 24 pixels. |
-| `rooms` | Room kinds it may go to: `owner`, `reception`, `clevel`, `team`, `lounge`, `corridor`, `other`. It may pass through others on the way. |
+| `rooms` | Room kinds it may go to: `owner`, `reception`, `clevel`, `specialists`, `team`, `lounge`, `corridor`, `other`. It may pass through others on the way. |
 | `coats` | At least one: an `id`, a `name` and a colour for every `$name` in the legend. |
 | `instances` | 1 to 6 animals of this species: `id`, `name`, starting `coat`. Their full id is `<species>-<id>`. |
 | `sprites` | The legend and the frames (below). |

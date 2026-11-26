@@ -102,7 +102,9 @@ export const FURNITURE = {
   /** A little night light on the floor (by the cat's bed). */
   'night-light': { w: 1, h: 1, mount: 'floor', blocking: 'none' },
   /** On a counter; it lights up and hums while a bot warms its lunch. */
-  microwave: { w: 1, h: 1, mount: 'floor', blocking: 'block' }
+  microwave: { w: 1, h: 1, mount: 'floor', blocking: 'block' },
+  /** A QA lab's device stand: phones and tablets on a rack (their screens glow at night). */
+  'device-stand': { w: 2, h: 1, mount: 'floor', blocking: 'block' }
 } as const satisfies Record<string, FurnitureSpec>
 
 export type FurnitureType = keyof typeof FURNITURE
@@ -112,8 +114,12 @@ export function isFurnitureType(value: unknown): value is FurnitureType {
 }
 
 /** What a room is for: seating and the status → place table read it. */
-/** `clevel`: a bot's own office (one desk each); `reception`: the anteroom in front of the owner's office. */
-export const ROOM_KINDS = ['owner', 'reception', 'clevel', 'team', 'lounge', 'corridor', 'other'] as const
+/**
+ * `clevel`: a bot's own office (one desk each); `specialists`: a room of several bots' places (a lawyer, a
+ * targetologist, QA…): bots' desks like an office's, not workers' desks; `reception`: the anteroom in
+ * front of the owner's office.
+ */
+export const ROOM_KINDS = ['owner', 'reception', 'clevel', 'specialists', 'team', 'lounge', 'corridor', 'other'] as const
 export type RoomKind = (typeof ROOM_KINDS)[number]
 
 /** Named places a bot can stand or sit that are not desks. Sofa spots come from sofas themselves. */

@@ -13,8 +13,11 @@ The interface is in Russian (the office was built for a Russian-speaking team); 
 
 ## What you get
 
-- **A whole building from JSON**: CEO office with a reception in front of it, four different C-level offices and a
-  mini office, an open space for workers, a corridor, a kitchen and a lounge (`plugin/office/map.json`).
+- **A whole building from JSON**: CEO office with a reception in front of it, C-level offices and a mini office, a QA
+  anteroom in front of the CTO's office (the only way to the CTO's chair, past a stand of test phones and tablets), an
+  open space of specialists' places for bots below C-level, an open space for workers, a corridor, a kitchen and a
+  lounge (`plugin/office/map.json`). Screenshots: [the anteroom](docs/screenshots/anteroom-day.png),
+  [the specialists' open space](docs/screenshots/specialists-day.png).
 - **Location = status**: working → own desk; waiting or blocked → the CEO's door with a «!»; items in *Needs you* →
   the door with a «?»; done or idle → the sofa or the kitchen. Bots walk there tile by tile (BFS).
 - **Employees** («сотрудники»: a bot's dispatched worktrees) sit at desks in the open space, labelled with their
@@ -22,8 +25,9 @@ The interface is in Russian (the office was built for a Russian-speaking team); 
   Agent tool) stand as small figures by its desk while they run — read from `orca worktree ps`.
 - **A panel per bot**: status and for how long, agent, current chat title and last answer (only while the panel is
   open, never stored), workers, items, and a button to open the bot in Orca.
-- **Seating**: bots take free offices at random once and keep them; you can pin anyone to an office (or a worker to a
-  desk) from the office itself, swap offices, or unpin.
+- **Seating**: bots take free offices at random once and keep them (no office left: a place among the specialists);
+  a room may be kept for a role (`"forRole": "QA"`), and a bot whose name starts with «[QA]» goes there by itself; you
+  can pin anyone to an office (or a worker to a desk) from the office itself, swap offices, or unpin.
 - **Animals**: cats, a dog and a parrot live in the office. Cats nap on sofas, desks and window sills, rub against a
   bot's legs, watch the fish; the dog follows a bot, lies by the CEO's door, goes to its bowl; the parrot sits in its
   cage, flies to a bookshelf or a bot's shoulder. Animals are **data** (`plugin/office/animals/*.json`): sprites,

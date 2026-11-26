@@ -41,7 +41,7 @@ const COLOR = /^#[0-9a-f]{6}$/i
 const ID = /^[a-z0-9][a-z0-9-]*$/
 type Obj = Record<string, unknown>
 const isObj = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v)
-const ROOM_KINDS: readonly RoomKind[] = ['owner', 'reception', 'clevel', 'team', 'lounge', 'corridor', 'other']
+const ROOM_KINDS: readonly RoomKind[] = ['owner', 'reception', 'clevel', 'specialists', 'team', 'lounge', 'corridor', 'other']
 
 /** One species file; every mistake is a line naming the file and the field. A broken file loads nothing. */
 export function parseSpecies(raw: unknown, file: string, paletteKeys: ReadonlySet<string>): { species: Species | null; errors: string[] } {
