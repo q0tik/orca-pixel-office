@@ -166,3 +166,70 @@ test('«Открыть бота в Orca» opens the bot home; unknown bots run n
   assert.deepEqual(await worker.request('office.chat', { key: '--all' }), { ok: false, reason: 'бот не найден' })
   assert.deepEqual(worker.refusals, [])
 })
+
+/** A host whose bots' chats the test changes as it goes (what `orca agent list` would show now). */
+function liveHost(chats: Record<string, { state: string; stateStartedAt: number; sessionId: string }[]>) {
+  return mockHost({
+    results: {
+      'workspace.list': () => ({ workspaces: rows(), truncated: false }),
+      'agents.list': (params: { workspaceId?: string }) => ({
+        agents: (chats[params.workspaceId ?? ''] ?? []).map((agent) => ({ terminalId: null, title: null, agent: 'claude', ...agent }))
+      }),
+      'workspace.readContext': () => null,
+      'statusBar.update': () => ({ ok: true })
+    }
+  })
+}
+
+test('a bot works only while one of its chats works: all done → free, one working → working, one blocked → blocked', async () => {
+  const chats: Record<string, { state: string; stateStartedAt: number; sessionId: string }[]> = {
+    [ADA]: [1, 2, 3, 4, 5, 6, 7].map((n) => ({ state: 'done', stateStartedAt: n, sessionId: `k${n}` })),
+    [LEO]: [
+      { state: 'done', stateStartedAt: 1, sessionId: 'v1' },
+      { state: 'working', stateStartedAt: 2, sessionId: 'v2' }
+    ],
+    [GRACE]: [
+      { state: 'done', stateStartedAt: 1, sessionId: 'r1' },
+      { state: 'blocked', stateStartedAt: 2, sessionId: 'r2' }
+    ],
+    // A worker the CTO dispatched works: that is its employee, not the CTO.
+    [WORKER]: [{ state: 'working', stateStartedAt: 1, sessionId: 'w1' }]
+  }
+  worker = await mountWorker(main, { host: liveHost(chats) })
+  assert.deepEqual(names(await worker.request('office.desks')), ['Ада:done', 'Грейс:blocked', 'Лео:working'])
+  // Its worker working does not make the CTO work either.
+  await worker.emit('agent.status.changed', { workspaceId: WORKER, paneKey: 'p', sessionId: 'w1', state: 'working', receivedAt: 10 })
+  assert.deepEqual(names(await worker.request('office.desks')), ['Ада:done', 'Грейс:blocked', 'Лео:working'])
+})
+
+test('a stale «working» event whose «done» never came does not keep the bot at work once a fresh list says done', async () => {
+  const chats: Record<string, { state: string; stateStartedAt: number; sessionId: string }[]> = {
+    [ADA]: [
+      { state: 'done', stateStartedAt: 1, sessionId: 'k1' },
+      { state: 'done', stateStartedAt: 2, sessionId: 'k2' }
+    ],
+    [LEO]: [{ state: 'done', stateStartedAt: 1, sessionId: 'v1' }],
+    [GRACE]: [{ state: 'done', stateStartedAt: 1, sessionId: 'r1' }]
+  }
+  worker = await mountWorker(main, { host: liveHost(chats) })
+  await worker.request('office.desks')
+  // A chat starts working: the event (keyed only by its pane, as Orca sometimes sends it) shows it at once.
+  chats[ADA][0] = { state: 'working', stateStartedAt: 50, sessionId: 'k1' }
+  await worker.emit('agent.status.changed', { workspaceId: ADA, paneKey: 'pane-k1', state: 'working', receivedAt: 50 })
+  assert.deepEqual(names(await worker.request('office.desks')), ['Ада:working', 'Грейс:done', 'Лео:done'])
+  // It finishes, but its «done» event never comes; Orca lists it as done. The next event of the bot (another chat)
+  // brings a fresh list: nothing stays «working».
+  chats[ADA][0] = { state: 'done', stateStartedAt: 90, sessionId: 'k1' }
+  await worker.emit('agent.status.changed', { workspaceId: ADA, paneKey: 'pane-k2', sessionId: 'k2', state: 'done', receivedAt: 100 })
+  const office = await worker.request('office.desks')
+  assert.deepEqual(names(office), ['Ада:done', 'Грейс:done', 'Лео:done'])
+  assert.equal(office.desks.find((d) => d.name === 'Ада')?.sessions, 2, 'as many chats as Orca lists, no ghosts')
+  // A working event keyed by a pane, then a «done» keyed by the session: one chat, not two.
+  chats[LEO][0] = { state: 'working', stateStartedAt: 120, sessionId: 'v1' }
+  await worker.emit('agent.status.changed', { workspaceId: LEO, paneKey: 'pane-v1', state: 'working', receivedAt: 120 })
+  chats[LEO][0] = { state: 'done', stateStartedAt: 130, sessionId: 'v1' }
+  await worker.emit('agent.status.changed', { workspaceId: LEO, paneKey: 'pane-v1', sessionId: 'v1', state: 'done', receivedAt: 130 })
+  const after = await worker.request('office.desks')
+  assert.deepEqual(names(after), ['Ада:done', 'Грейс:done', 'Лео:done'])
+  assert.equal(after.desks.find((d) => d.name === 'Лео')?.sessions, 1)
+})

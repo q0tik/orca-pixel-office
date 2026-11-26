@@ -14,6 +14,7 @@ declare module 'node:fs' {
   export function readFileSync(path: string, encoding: 'utf8'): string
   export function existsSync(path: string): boolean
   export function rmSync(path: string, options?: { recursive?: boolean; force?: boolean }): void
+  export function readdirSync(path: string): string[]
 }
 declare module 'node:os' {
   export function tmpdir(): string

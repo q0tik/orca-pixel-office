@@ -33,13 +33,14 @@ type StatusEvent = {
   workspaceId: string | null
   workspaceListId?: string
   paneKey: string
+  terminalId?: string
   sessionId?: string
   state: AgentState
   receivedAt: number
   mainAgent?: { state: AgentState; stateStartedAt: number; outcome?: string }
 }
 
-type ListedAgent = { state: string; stateStartedAt: number; sessionId?: string | null; agent?: string | null }
+type ListedAgent = { state: string; stateStartedAt: number; sessionId?: string | null; terminalId?: string | null; agent?: string | null }
 
 declare const process: { env: Record<string, string | undefined> }
 
@@ -67,7 +68,11 @@ export function createOffice(orca: OrcaWorkerApi, cli: OrcaCli = new OrcaCli(nod
     return { desks: desks(), at: Date.now() }
   }
 
-  async function readAgents(row: WorkspaceRow): Promise<Map<string, AgentEntry>> {
+  /**
+   * A bot's chats as Orca lists them now, by session id (else terminal id). This snapshot is the truth:
+   * a chat it does not list is gone, whatever an earlier event said. Null when the read failed.
+   */
+  async function readAgentsOrNull(row: WorkspaceRow): Promise<Map<string, AgentEntry> | null> {
     const entries = new Map<string, AgentEntry>()
     try {
       const answer = (await orca.host.call('agents.list', { workspaceId: row.id })) as {
@@ -75,16 +80,47 @@ export function createOffice(orca: OrcaWorkerApi, cli: OrcaCli = new OrcaCli(nod
       }
       answer.agents.forEach((agent, index) => {
         if (!isAgentState(agent.state)) return
-        entries.set(agent.sessionId ?? `#${index}`, {
+        entries.set(agent.sessionId ?? (agent.terminalId ? `t:${agent.terminalId}` : `#${index}`), {
           state: agent.state,
           since: agent.stateStartedAt,
           agent: agent.agent ?? null
         })
       })
+      return entries
     } catch (error) {
       orca.log(`agents.list ${row.id} failed: ${(error as Error).message}`)
+      return null
     }
-    return entries
+  }
+
+  async function readAgents(row: WorkspaceRow): Promise<Map<string, AgentEntry>> {
+    return (await readAgentsOrNull(row)) ?? new Map()
+  }
+
+  /** A fresh snapshot replaces what events built up; a turn that failed stays marked. */
+  function replaceAgents(id: string, fresh: Map<string, AgentEntry>): void {
+    const before = agents.get(id)
+    for (const [key, entry] of fresh) {
+      const old = before?.get(key)
+      if (old?.failed && old.state === entry.state) entry.failed = true
+    }
+    agents.set(id, fresh)
+  }
+
+  /**
+   * Every bot's chats read again (while an office tab is open, with its workers and items, every 30 s),
+   * so a stale «working» from an event whose «done» never came cannot stay. Posts only on a change.
+   */
+  async function refreshAgents(): Promise<void> {
+    if (!scanned) return
+    const before = JSON.stringify(desks().map((d) => [d.key, d.state, d.sessions]))
+    const rows = [...bots.values()]
+    const lists = await Promise.all(rows.map((row) => readAgentsOrNull(row)))
+    rows.forEach((row, i) => {
+      const fresh = lists[i]
+      if (fresh) replaceAgents(row.id, fresh)
+    })
+    if (JSON.stringify(desks().map((d) => [d.key, d.state, d.sessions])) !== before) await publish()
   }
 
   async function scanNow(): Promise<void> {
@@ -211,13 +247,17 @@ export function createOffice(orca: OrcaWorkerApi, cli: OrcaCli = new OrcaCli(nod
       await scan()
       if (!bots.has(id)) return
     }
+    // The bot's chats as Orca lists them now: chats that are gone or done drop out of «working».
+    const fresh = await readAgentsOrNull(bots.get(id)!)
+    if (fresh) replaceAgents(id, fresh)
     const sessions = agents.get(id) ?? new Map<string, AgentEntry>()
     agents.set(id, sessions)
-    let key = payload.sessionId ?? payload.paneKey
-    if (!sessions.has(key) && sessions.size === 1) {
-      // agents.list gave no session id to match: a bot with one session is that session.
-      key = [...sessions.keys()][0]
-    }
+    // The event's own chat: by session id, else terminal id, else the only chat the bot has.
+    let key: string | null = payload.sessionId && sessions.has(payload.sessionId) ? payload.sessionId : null
+    if (!key && payload.terminalId && sessions.has(`t:${payload.terminalId}`)) key = `t:${payload.terminalId}`
+    if (!key && sessions.size === 1) key = [...sessions.keys()][0]
+    // A chat the snapshot does not know yet (just started): shown now; the next snapshot keeps or drops it.
+    if (!key) key = payload.sessionId ?? payload.paneKey
     const before = sessions.get(key)
     const since =
       before && before.state === payload.state
@@ -294,6 +334,7 @@ export function createOffice(orca: OrcaWorkerApi, cli: OrcaCli = new OrcaCli(nod
     publish,
     office,
     onStatus,
+    refreshAgents,
     rescanAndPublish,
     open,
     debug,
@@ -316,7 +357,11 @@ export default function activate(orca: OrcaWorkerApi): void {
   orca.panels.handle('office.debug', () => office.debug())
   // The palette command's code path, callable with `orca plugin dev request . office.open`.
   orca.panels.handle('office.open', () => office.open())
-  orca.panels.handle('office.extras', () => office.extras.ask())
+  // The tab asks for workers and items every 30 s: the bots' chats are read again then too.
+  orca.panels.handle('office.extras', async () => {
+    await office.refreshAgents()
+    return office.extras.ask()
+  })
   orca.panels.handle('office.mail', async () => {
     await office.ready()
     return office.mail.ask()

@@ -2,7 +2,7 @@
   "manifestVersion": 2,
   "id": "pixel-office",
   "name": "Pixel Office",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "A big pixel-art office in an editor tab: departments, the owner's office and a lounge. Every Orca bot has a desk and walks where its real status puts it.",
   "icon": "assets/icon.png",
   "engines": {
